@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AttendancePro - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#003260",
+                        "on-surface": "#191c1e",
+                        "surface-container-highest": "#e0e3e6",
+                        "primary-fixed": "#d4e3ff",
+                        "surface-container-high": "#e6e8eb",
+                        "surface-variant": "#e0e3e6",
+                        "surface-dim": "#d8dadd",
+                        "surface-container-low": "#f2f4f7",
+                        "on-surface-variant": "#414751",
+                        "tertiary": "#575f69",
+                        "secondary-fixed": "#7cf8dd",
+                        "on-secondary-container": "#007261",
+                        "inverse-on-surface": "#eff1f4",
+                        "outline-variant": "#c1c6d3",
+                        "inverse-primary": "#a4c9ff",
+                        "surface-tint": "#075fab",
+                        "tertiary-container": "#939ba5",
+                        "on-primary-fixed-variant": "#004884",
+                        "surface": "#f7f9fc",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary-fixed-variant": "#005144",
+                        "tertiary-fixed": "#dbe3ef",
+                        "secondary-fixed-dim": "#5ddbc1",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "on-background": "#191c1e",
+                        "secondary": "#006b5b",
+                        "tertiary-fixed-dim": "#bfc7d2",
+                        "on-tertiary-fixed-variant": "#404851",
+                        "primary": "#075fab",
+                        "on-tertiary-container": "#2b333c",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "surface-bright": "#f7f9fc",
+                        "on-tertiary-fixed": "#141c24",
+                        "primary-container": "#5d9cec",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#7cf8dd",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001c39",
+                        "on-secondary-fixed": "#00201a",
+                        "outline": "#727782",
+                        "background": "#f7f9fc",
+                        "surface-container": "#eceef1",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "32px",
+                        "gutter-card": "16px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-main": "20px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "display-time": ["Plus Jakarta Sans"],
+                        "label-bold": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-time": ["48px", { "lineHeight": "56px", "letterSpacing": "-1px", "fontWeight": "700" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Ambient background */
+            background-color: #f7f9fc;
+            background-image: radial-gradient(at 0% 0%, hsla(211,100%,94%,1) 0px, transparent 50%),
+                              radial-gradient(at 100% 100%, hsla(211,100%,94%,1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .soft-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        .btn-press:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-margin-main text-on-surface">
+<main class="w-full max-w-md">
+<!-- Logo Header -->
+<div class="text-center mb-section-gap flex flex-col items-center">
+<div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mb-stack-md soft-shadow">
+<span class="material-symbols-outlined text-on-primary text-4xl" style="font-variation-settings: 'FILL' 1;">
+                    domain_verification
+                </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-stack-sm">AttendancePro</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Welcome back. Please sign in to continue.</p>
+</div>
+<!-- Login Card -->
+<div class="bg-surface-container-lowest rounded-xl p-stack-lg soft-shadow mb-stack-lg">
+<form action="#" class="space-y-stack-md" method="POST">
+<!-- Email Input -->
+<div>
+<label class="block font-label-bold text-label-bold text-on-surface-variant mb-stack-sm" for="email">Email Address</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">mail</span>
+</div>
+<input class="w-full pl-10 pr-3 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md focus:ring-2 focus:ring-primary focus:border-primary transition-colors" id="email" name="email" placeholder="name@company.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password Input -->
+<div>
+<div class="flex justify-between items-center mb-stack-sm">
+<label class="block font-label-bold text-label-bold text-on-surface-variant" for="password">Password</label>
+<a class="font-label-sm text-label-sm text-primary hover:underline" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">lock</span>
+</div>
+<input class="w-full pl-10 pr-10 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md focus:ring-2 focus:ring-primary focus:border-primary transition-colors" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full bg-gradient-to-r from-primary to-surface-tint text-on-primary font-headline-md text-headline-md py-4 rounded-lg soft-shadow btn-press transition-all mt-stack-lg flex items-center justify-center gap-2" type="submit">
+                    Sign In
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</form>
+</div>
+<!-- Security Note -->
+<div class="flex items-start gap-3 bg-surface-container-low p-gutter-card rounded-lg border border-surface-variant">
+<span class="material-symbols-outlined text-secondary mt-0.5" style="font-variation-settings: 'FILL' 1;">
+                verified_user
+            </span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">
+                Akun Anda akan terkunci pada perangkat ini demi keamanan.
+            </p>
+</div>
+</main>
+<script>
+        // Simple password toggle logic
+        document.querySelector('button[aria-label="Toggle password visibility"]').addEventListener('click', function() {
+            const input = document.getElementById('password');
+            const icon = this.querySelector('.material-symbols-outlined');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        });
+    </script>
+</body></html>

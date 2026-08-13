@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Attendance History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#003260",
+                        "on-surface": "#191c1e",
+                        "surface-container-highest": "#e0e3e6",
+                        "primary-fixed": "#d4e3ff",
+                        "surface-container-high": "#e6e8eb",
+                        "surface-variant": "#e0e3e6",
+                        "surface-dim": "#d8dadd",
+                        "surface-container-low": "#f2f4f7",
+                        "on-surface-variant": "#414751",
+                        "tertiary": "#575f69",
+                        "secondary-fixed": "#7cf8dd",
+                        "on-secondary-container": "#007261",
+                        "inverse-on-surface": "#eff1f4",
+                        "outline-variant": "#c1c6d3",
+                        "inverse-primary": "#a4c9ff",
+                        "surface-tint": "#075fab",
+                        "tertiary-container": "#939ba5",
+                        "on-primary-fixed-variant": "#004884",
+                        "surface": "#f7f9fc",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary-fixed-variant": "#005144",
+                        "tertiary-fixed": "#dbe3ef",
+                        "secondary-fixed-dim": "#5ddbc1",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "on-background": "#191c1e",
+                        "secondary": "#006b5b",
+                        "tertiary-fixed-dim": "#bfc7d2",
+                        "on-tertiary-fixed-variant": "#404851",
+                        "primary": "#075fab",
+                        "on-tertiary-container": "#2b333c",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "surface-bright": "#f7f9fc",
+                        "on-tertiary-fixed": "#141c24",
+                        "primary-container": "#5d9cec",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#7cf8dd",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001c39",
+                        "on-secondary-fixed": "#00201a",
+                        "outline": "#727782",
+                        "background": "#f7f9fc",
+                        "surface-container": "#eceef1",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "section-gap": "32px",
+                        "gutter-card": "16px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-main": "20px"
+                    },
+                    fontFamily: {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "display-time": ["Plus Jakarta Sans"],
+                        "label-bold": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    fontSize: {
+                        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "display-time": ["48px", { lineHeight: "56px", letterSpacing: "-1px", fontWeight: "700" }],
+                        "label-bold": ["12px", { lineHeight: "16px", letterSpacing: "0.5px", fontWeight: "700" }],
+                        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "headline-lg": ["24px", { lineHeight: "32px", fontWeight: "700" }],
+                        "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+                        "headline-md": ["20px", { lineHeight: "28px", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-[100px]">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim docked full-width top-0 z-40 sticky">
+<div class="flex justify-between items-center px-margin-main h-16 w-full max-w-screen-xl mx-auto">
+<button class="p-2 -ml-2 rounded-full hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors flex items-center justify-center text-on-surface-variant dark:text-outline active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed">AttendancePro</h1>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant flex-shrink-0">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A small, professional circular portrait photo of a corporate employee smiling gently against a bright, modern office background. High key lighting, clean corporate aesthetic, soft colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1O-jl4sIM9qJy_CYgYW3luugn8niz6cxiTiUVRZbMNRL0M_Kv3PcDreE4ePYT6uI1Z7SFf4kTyQ2WIbgbilGxLI3V9mOC22ZYWgxuM0H8Mfnv7Kb0LFK61ZhdNc2DTG0ZpWHHI-7odtQEDNVpmBEES2L_5yj-GDY_BrehOMTUp3cLVpXOggTkCgCa02IXEMxALf5hLuKRZeCnxZYVB5a6SdDxaDDq21-7v6xWw6SVVM4uYm4usS8HqA"/>
+</div>
+</div>
+</header>
+<main class="max-w-screen-md mx-auto px-margin-main pt-stack-lg pb-section-gap">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-stack-lg">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-stack-sm">History</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Your attendance records.</p>
+</div>
+<!-- Monthly Selector -->
+<button class="flex items-center gap-2 bg-surface-container-lowest px-4 py-2 rounded-lg border border-outline-variant shadow-sm hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]" data-icon="calendar_month">calendar_month</span>
+<span class="font-label-bold text-label-bold text-on-surface">October 2023</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]" data-icon="arrow_drop_down">arrow_drop_down</span>
+</button>
+</div>
+<!-- Summary Cards -->
+<div class="grid grid-cols-3 gap-gutter-card mb-section-gap">
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-l-4 border-secondary flex flex-col items-center justify-center text-center">
+<span class="font-display-time text-[24px] text-secondary leading-none mb-1">21</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Total Hadir</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-l-4 border-error flex flex-col items-center justify-center text-center">
+<span class="font-display-time text-[24px] text-error leading-none mb-1">2</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Terlambat</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-l-4 border-primary flex flex-col items-center justify-center text-center">
+<span class="font-display-time text-[24px] text-primary leading-none mb-1">0</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Izin</span>
+</div>
+</div>
+<!-- History List -->
+<div class="space-y-stack-sm">
+<!-- Item 1: On Time -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex items-center justify-between relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Wed, 25 Oct 2023</span>
+<div class="flex items-center gap-4 mt-1">
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wide block">In</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">08:55</span>
+</div>
+<div class="w-[1px] h-8 bg-surface-variant"></div>
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wide block">Out</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">17:05</span>
+</div>
+</div>
+</div>
+<div class="bg-secondary/10 px-3 py-1 rounded-full border border-secondary/20">
+<span class="font-label-bold text-label-bold text-secondary">ON TIME</span>
+</div>
+</div>
+<!-- Item 2: Late -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex items-center justify-between relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tue, 24 Oct 2023</span>
+<div class="flex items-center gap-4 mt-1">
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wide block">In</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">09:15</span>
+</div>
+<div class="w-[1px] h-8 bg-surface-variant"></div>
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wide block">Out</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">17:30</span>
+</div>
+</div>
+</div>
+<div class="bg-error/10 px-3 py-1 rounded-full border border-error/20">
+<span class="font-label-bold text-label-bold text-error">LATE</span>
+</div>
+</div>
+<!-- Item 3: On Time -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex items-center justify-between relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mon, 23 Oct 2023</span>
+<div class="flex items-center gap-4 mt-1">
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wide block">In</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">08:40</span>
+</div>
+<div class="w-[1px] h-8 bg-surface-variant"></div>
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wide block">Out</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">17:00</span>
+</div>
+</div>
+</div>
+<div class="bg-secondary/10 px-3 py-1 rounded-full border border-secondary/20">
+<span class="font-label-bold text-label-bold text-secondary">ON TIME</span>
+</div>
+</div>
+<!-- Item 4: Away/Leave -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.05)] flex items-center justify-between relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Fri, 20 Oct 2023</span>
+<div class="flex items-center gap-4 mt-1 opacity-50">
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wide block">In</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">--:--</span>
+</div>
+<div class="w-[1px] h-8 bg-surface-variant"></div>
+<div>
+<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wide block">Out</span>
+<span class="font-headline-md text-headline-md text-on-surface leading-none">--:--</span>
+</div>
+</div>
+</div>
+<div class="bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+<span class="font-label-bold text-label-bold text-primary">LEAVE</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full h-20 flex justify-around items-center px-4 pb-safe bg-surface-container-lowest dark:bg-inverse-surface shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-full px-4 py-1 scale-90 transition-all duration-150 ease-out hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="history" style="font-variation-settings: 'FILL' 1;">history</span>
+<span class="font-label-bold text-label-bold">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="description">description</span>
+<span class="font-label-sm text-label-sm">Request</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+</body></html>

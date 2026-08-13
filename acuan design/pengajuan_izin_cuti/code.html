@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Request Leave</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#003260",
+                        "on-surface": "#191c1e",
+                        "surface-container-highest": "#e0e3e6",
+                        "primary-fixed": "#d4e3ff",
+                        "surface-container-high": "#e6e8eb",
+                        "surface-variant": "#e0e3e6",
+                        "surface-dim": "#d8dadd",
+                        "surface-container-low": "#f2f4f7",
+                        "on-surface-variant": "#414751",
+                        "tertiary": "#575f69",
+                        "secondary-fixed": "#7cf8dd",
+                        "on-secondary-container": "#007261",
+                        "inverse-on-surface": "#eff1f4",
+                        "outline-variant": "#c1c6d3",
+                        "inverse-primary": "#a4c9ff",
+                        "surface-tint": "#075fab",
+                        "tertiary-container": "#939ba5",
+                        "on-primary-fixed-variant": "#004884",
+                        "surface": "#f7f9fc",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary-fixed-variant": "#005144",
+                        "tertiary-fixed": "#dbe3ef",
+                        "secondary-fixed-dim": "#5ddbc1",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "on-background": "#191c1e",
+                        "secondary": "#006b5b",
+                        "tertiary-fixed-dim": "#bfc7d2",
+                        "on-tertiary-fixed-variant": "#404851",
+                        "primary": "#075fab",
+                        "on-tertiary-container": "#2b333c",
+                        "primary-fixed-dim": "#a4c9ff",
+                        "surface-bright": "#f7f9fc",
+                        "on-tertiary-fixed": "#141c24",
+                        "primary-container": "#5d9cec",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#7cf8dd",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#001c39",
+                        "on-secondary-fixed": "#00201a",
+                        "outline": "#727782",
+                        "background": "#f7f9fc",
+                        "surface-container": "#eceef1",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "32px",
+                        "gutter-card": "16px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-main": "20px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "display-time": ["Plus Jakarta Sans"],
+                        "label-bold": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-time": ["48px", { "lineHeight": "56px", "letterSpacing": "-1px", "fontWeight": "700" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            background-color: theme('colors.background');
+        }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+        
+        /* Ambient shadow for surface level 1 */
+        .ambient-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Custom scrollbar hiding but keeping functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col">
+<!-- TopAppBar (From JSON) -->
+<header class="bg-surface dark:bg-surface-dim docked full-width top-0 bg-surface dark:bg-surface-dim flex justify-between items-center px-margin-main h-16 w-full max-w-screen-xl mx-auto pt-safe z-40 fixed">
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant dark:text-outline hover:bg-surface-container-low dark:hover:bg-surface-container-highest p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed">AttendancePro</h1>
+</div>
+<div class="flex items-center">
+<button class="hover:bg-surface-container-low dark:hover:bg-surface-container-highest rounded-full p-1 transition-colors">
+<img alt="User profile photo" class="w-8 h-8 rounded-full object-cover" data-alt="A small, circular profile picture of a professional looking individual smiling warmly in a bright, modern corporate office setting. The lighting is soft and natural, emphasizing approachability and competence within a sleek UI context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNUAJuO2v1tlbg6agrCR7U1jPOlIqurfebKUU_i8uRdoJTMDM9C70Q1TqdKLaxVebceTJxRJ-Xj7lJFzmoW4T9mtkwTgpeKMlaVI_OeuES0WVHdo8Rv5HgD52zfcDhWJYtKxi2H2owK7XBpRAYBJfE_rZLPqv0LM3KWMTx-ft4VfZ3WD4H3TkO1R6I4Cv58QAuFAHtJE9_r9pkSLfMqorV0RZGZAtfBlu53pLS9gkFe4NfQxI6rRD51A"/>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin-main pt-24 pb-28 max-w-screen-md mx-auto w-full">
+<div class="mb-stack-lg">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-stack-sm">New Request</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Submit a request for leave, permission, or sickness.</p>
+</div>
+<form class="space-y-stack-lg bg-surface-container-lowest ambient-shadow p-gutter-card rounded-xl border border-surface-container-low">
+<!-- Request Type -->
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-bold text-label-bold text-on-surface" for="request-type">Request Type</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface dark:bg-surface-dim border border-outline-variant rounded-lg py-3 pl-4 pr-10 font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="request-type">
+<option disabled="" selected="" value="">Select request type</option>
+<option value="cuti">Cuti (Annual Leave)</option>
+<option value="sakit">Sakit (Sick Leave)</option>
+<option value="izin">Izin (Permission)</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-on-surface-variant">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Date Range -->
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-bold text-label-bold text-on-surface">Date Range</label>
+<div class="grid grid-cols-2 gap-stack-md">
+<div class="relative">
+<input class="w-full bg-surface dark:bg-surface-dim border border-outline-variant rounded-lg py-3 px-4 font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="start-date" placeholder="Start Date" type="date"/>
+</div>
+<div class="relative">
+<input class="w-full bg-surface dark:bg-surface-dim border border-outline-variant rounded-lg py-3 px-4 font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="end-date" placeholder="End Date" type="date"/>
+</div>
+</div>
+</div>
+<!-- Reason -->
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-bold text-label-bold text-on-surface" for="reason">Reason</label>
+<textarea class="w-full bg-surface dark:bg-surface-dim border border-outline-variant rounded-lg py-3 px-4 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none" id="reason" placeholder="Provide details for your request..." rows="4"></textarea>
+</div>
+<!-- File Upload -->
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-bold text-label-bold text-on-surface">Supporting Documents (Optional)</label>
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-2">e.g. Surat Keterangan Dokter</p>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center bg-surface hover:bg-surface-container-low transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant group-hover:text-primary transition-colors mb-2">cloud_upload</span>
+<span class="font-label-bold text-label-bold text-primary group-hover:text-primary-fixed-dim transition-colors">Tap to upload file</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1">PDF, JPG, PNG up to 5MB</span>
+<input class="hidden" type="file"/>
+</div>
+</div>
+<!-- Submit Button -->
+<div class="pt-stack-md mt-section-gap border-t border-surface-container">
+<button class="w-full h-16 bg-gradient-to-r from-primary to-primary-container text-on-primary font-headline-md text-headline-md rounded-xl shadow-lg hover:shadow-md hover:scale-[0.98] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined" data-weight="fill">send</span>
+                    Submit Request
+                </button>
+</div>
+</form>
+</main>
+<!-- BottomNavBar (From JSON) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full h-20 flex justify-around items-center px-4 pb-safe bg-surface-container-lowest dark:bg-inverse-surface shadow-[0_-4px_20px_rgba(0,0,0,0.05)] rounded-t-xl z-50">
+<!-- Home (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<!-- History (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="history">history</span>
+<span class="font-label-sm text-label-sm">History</span>
+</a>
+<!-- Request (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-full px-4 py-1 scale-90 transition-all duration-150 ease-out shadow-sm" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="description" data-weight="fill" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="font-label-bold text-label-bold">Request</span>
+</a>
+<!-- Profile (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<!-- Desktop Side Navigation equivalent logic (Hidden on mobile) -->
+<aside class="hidden md:flex flex-col h-full bg-surface dark:bg-surface-dim py-stack-lg w-80 rounded-r-xl bg-surface dark:bg-surface-dim border-r border-outline-variant shadow-xl fixed left-0 top-16 bottom-0 z-30">
+<div class="px-6 mb-8 flex items-center gap-4">
+<img alt="User avatar" class="w-12 h-12 rounded-full object-cover" data-alt="A small, circular profile picture of a professional looking individual smiling warmly in a bright, modern corporate office setting. The lighting is soft and natural, emphasizing approachability and competence within a sleek UI context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxPSVaIt6PA42wMdZkgJyo3r6tFnsHeQmAf2dALaIeCc88v4753VUsjbiiGJbSOEo4dK1k70JI_8JFI5MjNb838mVUECJggYvycXFnnI2_zayJ7Kqo31rrD1g4qxiYKoH7qVmuavbG_P2vHiBKIpRolGaloBAC63P79SokBvzpaAibLWDzmHLFnhj6YeR3wOne5BknxiebMGkjrO4VadjmQGo211RQp9tsjtOi2V1rDu6ezIQr24EdPA"/>
+<div>
+<div class="font-headline-md text-headline-md text-on-surface">Employee Name</div>
+<div class="font-body-md text-body-md text-on-surface-variant">ID: EMP-88291</div>
+<div class="font-label-bold text-label-bold text-secondary mt-1">Device Bound: active</div>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto no-scrollbar space-y-2">
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-outline-variant mx-2 px-4 py-3 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-lg text-body-lg">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-outline-variant mx-2 px-4 py-3 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+<span class="font-body-lg text-body-lg">Attendance logs</span>
+</a>
+<a class="flex items-center gap-4 bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed font-bold rounded-lg mx-2 px-4 py-3" href="#">
+<span class="material-symbols-outlined" data-icon="event_busy" data-weight="fill" style="font-variation-settings: 'FILL' 1;">event_busy</span>
+<span class="font-body-lg text-body-lg">Leave requests</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-outline-variant mx-2 px-4 py-3 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="folder_shared">folder_shared</span>
+<span class="font-body-lg text-body-lg">My documents</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant dark:text-outline-variant mx-2 px-4 py-3 hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors rounded-lg mt-auto" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-lg text-body-lg">Settings</span>
+</a>
+</nav>
+</aside>
+</body></html>

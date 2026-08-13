@@ -1,26 +1,52 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f9fc;
+  --foreground: #191c1e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: #f7f9fc;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f7;
+  --color-surface-container: #eceef1;
+  --color-surface-container-high: #e6e8eb;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #414751;
+  --color-primary: #075fab;
+  --color-primary-container: #5d9cec;
+  --color-on-primary: #ffffff;
+  --color-secondary: #006b5b;
+  --color-secondary-container: #7cf8dd;
+  --color-outline: #727782;
+  --color-outline-variant: #c1c6d3;
+  --color-error: #ba1a1a;
+  --font-sans: "Plus Jakarta Sans", Arial, sans-serif;
+  --radius-card: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { box-sizing: border-box; }
+
+html { min-height: 100%; background: var(--background); }
 
 body {
+  min-height: 100vh;
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Plus Jakarta Sans", Arial, sans-serif;
+}
+
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+.soft-shadow { box-shadow: 0 4px 20px rgb(25 28 30 / 5%); }
+.pressable { transition: transform 150ms ease, box-shadow 150ms ease; }
+.pressable:active { transform: scale(0.98); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
