@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Bee Absensi",
-  description: "Aplikasi kehadiran karyawan Bee Absensi.",
+  title: {
+    default: "Bee Absensi",
+    template: "%s — Bee Absensi",
+  },
+  description: "Aplikasi kehadiran karyawan digital yang mudah dan aman.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
-      <body><AuthProvider>{children}</AuthProvider></body>
+      <body>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

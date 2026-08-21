@@ -20,7 +20,12 @@ export function TextInput({ className, ...props }: InputHTMLAttributes<HTMLInput
   return <input className={join("min-h-12 w-full rounded-2xl border border-outline-variant bg-surface-container-lowest px-4 text-sm text-on-surface outline-none transition placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20", className)} {...props} />;
 }
 
-export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "success" | "primary" | "neutral" }) {
-  const styles = { success: "bg-secondary-container text-secondary", primary: "bg-primary/10 text-primary", neutral: "bg-surface-container-high text-on-surface-variant" };
+export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "success" | "primary" | "neutral" | "error" }) {
+  const styles = {
+    success: "bg-secondary-container text-secondary",
+    primary: "bg-primary/10 text-primary",
+    neutral: "bg-surface-container-high text-on-surface-variant",
+    error: "bg-red-50 text-error",
+  };
   return <span className={join("inline-flex rounded-full px-2.5 py-1 text-xs font-bold", styles[tone])}>{children}</span>;
 }
