@@ -1,4 +1,4 @@
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://broken-setup-hours-less.trycloudflare.com/api").replace(/\/$/, "");
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://navigate-intent-cornwall-teaching.trycloudflare.com/api").replace(/\/$/, "");
 
 export type ApiResponse<T> = { status: "success" | "error"; message: string; data: T; errors?: Record<string, string[] | string> | null };
 
