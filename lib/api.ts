@@ -1,4 +1,4 @@
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://pub-outsourcing-willow-released.trycloudflare.com/api").replace(/\/$/, "");
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://kprdy-125-165-188-185.run.pinggy-free.link/api").replace(/\/$/, "");
 
 export type ApiResponse<T> = { status: "success" | "error"; message: string; data: T; errors?: Record<string, string[] | string> | null };
 
