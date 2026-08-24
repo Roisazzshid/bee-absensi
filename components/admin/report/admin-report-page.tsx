@@ -8,6 +8,12 @@ type AttendanceReportItem = {
   date: string;
   clock_in_time: string | null;
   clock_out_time: string | null;
+  clock_in_image_url?: string | null;
+  clock_out_image_url?: string | null;
+  clock_in_lat?: number | string | null;
+  clock_in_long?: number | string | null;
+  clock_out_lat?: number | string | null;
+  clock_out_long?: number | string | null;
   duration: string | null;
   status: "on_time" | "late" | "absent";
   user: {
@@ -91,6 +97,12 @@ export function AdminReportPage() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState("");
+
+  // Photo modal preview
+  const [photoModal, setPhotoModal] = useState<{
+    item: AttendanceReportItem;
+    type: "in" | "out";
+  } | null>(null);
 
   const buildQueryParams = useCallback(() => {
     const params = new URLSearchParams();
@@ -499,6 +511,7 @@ export function AdminReportPage() {
                     <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Departemen</th>
                     <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Masuk</th>
                     <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Pulang</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Foto Bukti</th>
                     <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Durasi</th>
                     <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Status</th>
                   </tr>
@@ -535,6 +548,31 @@ export function AdminReportPage() {
                         </td>
                         <td className="px-4 py-3.5 font-mono text-xs font-semibold text-on-surface">
                           {formatTime(item.clock_out_time)}
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center gap-1.5">
+                            {item.clock_in_image_url ? (
+                              <button
+                                type="button"
+                                onClick={() => setPhotoModal({ item, type: "in" })}
+                                className="inline-flex items-center gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest px-2 py-0.5 text-[11px] font-semibold text-primary hover:border-primary hover:bg-primary/5 transition-all"
+                              >
+                                📷 Masuk
+                              </button>
+                            ) : null}
+                            {item.clock_out_image_url ? (
+                              <button
+                                type="button"
+                                onClick={() => setPhotoModal({ item, type: "out" })}
+                                className="inline-flex items-center gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest px-2 py-0.5 text-[11px] font-semibold text-primary hover:border-primary hover:bg-primary/5 transition-all"
+                              >
+                                📷 Pulang
+                              </button>
+                            ) : null}
+                            {!item.clock_in_image_url && !item.clock_out_image_url && (
+                              <span className="text-[11px] text-on-surface-variant/40">—</span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-4 py-3.5 text-xs text-on-surface-variant">
                           {item.duration ?? "—"}
@@ -592,6 +630,30 @@ export function AdminReportPage() {
                         <p className="font-semibold text-on-surface">{item.duration ?? "—"}</p>
                       </div>
                     </div>
+
+                    {(item.clock_in_image_url || item.clock_out_image_url) && (
+                      <div className="mt-2.5 flex items-center gap-2 border-t border-outline-variant/10 pt-2">
+                        <span className="text-[10px] font-bold text-on-surface-variant">Foto:</span>
+                        {item.clock_in_image_url && (
+                          <button
+                            type="button"
+                            onClick={() => setPhotoModal({ item, type: "in" })}
+                            className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary"
+                          >
+                            📷 Masuk
+                          </button>
+                        )}
+                        {item.clock_out_image_url && (
+                          <button
+                            type="button"
+                            onClick={() => setPhotoModal({ item, type: "out" })}
+                            className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary"
+                          >
+                            📷 Pulang
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -624,6 +686,96 @@ export function AdminReportPage() {
               Next
               <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Photo Proof Modal ── */}
+      {photoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            <div className="flex items-center justify-between border-b border-outline-variant/30 px-5 py-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-on-surface">
+                    Foto Bukti Absen {photoModal.type === "in" ? "Masuk" : "Pulang"}
+                  </h2>
+                  <p className="text-xs text-on-surface-variant">
+                    {photoModal.item.user.full_name} ({photoModal.item.user.nip})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPhotoModal(null)}
+                className="flex size-8 items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low"
+              >
+                <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="bg-black flex items-center justify-center aspect-square w-full overflow-hidden">
+              <img
+                src={
+                  photoModal.type === "in"
+                    ? photoModal.item.clock_in_image_url ?? ""
+                    : photoModal.item.clock_out_image_url ?? ""
+                }
+                alt={`Bukti Selfie ${photoModal.item.user.full_name}`}
+                className="size-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    "https://placehold.co/600x600?text=Foto+Tidak+Tersedia";
+                }}
+              />
+            </div>
+
+            <div className="p-4 bg-surface-container-lowest space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-on-surface-variant">Waktu Absensi:</span>
+                <span className="font-mono font-bold text-on-surface">
+                  {formatDate(photoModal.item.date)} ·{" "}
+                  {formatTime(
+                    photoModal.type === "in"
+                      ? photoModal.item.clock_in_time
+                      : photoModal.item.clock_out_time
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-on-surface-variant">Departemen:</span>
+                <span className="font-semibold text-on-surface">
+                  {photoModal.item.user.department} — {photoModal.item.user.position}
+                </span>
+              </div>
+              {(photoModal.type === "in" ? photoModal.item.clock_in_lat : photoModal.item.clock_out_lat) && (
+                <div className="flex items-center justify-between">
+                  <span className="text-on-surface-variant">Koordinat GPS:</span>
+                  <span className="font-mono font-semibold text-primary">
+                    {photoModal.type === "in"
+                      ? `${photoModal.item.clock_in_lat}, ${photoModal.item.clock_in_long}`
+                      : `${photoModal.item.clock_out_lat}, ${photoModal.item.clock_out_long}`}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-outline-variant/30">
+              <button
+                type="button"
+                onClick={() => setPhotoModal(null)}
+                className="w-full rounded-2xl bg-primary py-2.5 text-xs font-bold text-white hover:opacity-90 transition-opacity"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}
