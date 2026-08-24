@@ -192,25 +192,6 @@ export function AdminDashboard() {
           })}
         </div>
       </div>
-
-      {/* Quick actions */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {[
-          { label: "Monitoring Absensi", icon: "📋", href: "/admin/absensi", color: "bg-blue-50 text-blue-700 ring-blue-200" },
-          { label: "Kelola Izin Pending", icon: "📝", href: "/admin/izin?status=pending", color: "bg-amber-50 text-amber-700 ring-amber-200" },
-          { label: "Daftar Karyawan", icon: "👥", href: "/admin/karyawan", color: "bg-purple-50 text-purple-700 ring-purple-200" },
-          { label: "Laporan Bulan Ini", icon: "📈", href: "/admin/absensi", color: "bg-green-50 text-green-700 ring-green-200" },
-        ].map((action) => (
-          <button
-            key={action.label}
-            onClick={() => router.push(action.href)}
-            className={["rounded-2xl p-4 text-left ring-1 transition-all hover:scale-[1.02] hover:shadow-md", action.color].join(" ")}
-          >
-            <span className="text-2xl">{action.icon}</span>
-            <p className="mt-2 text-sm font-bold">{action.label}</p>
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
