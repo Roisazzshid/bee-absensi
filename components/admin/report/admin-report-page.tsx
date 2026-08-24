@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { API_BASE_URL } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
 
 type AttendanceReportItem = {
@@ -172,8 +173,7 @@ export function AdminReportPage() {
       params.delete("page");
       params.delete("per_page");
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
-      const exportUrl = `${baseUrl}/admin/reports/export?${params.toString()}`;
+      const exportUrl = `${API_BASE_URL}/admin/reports/export?${params.toString()}`;
 
       const res = await fetch(exportUrl, {
         headers: {

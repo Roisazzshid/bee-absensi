@@ -17,6 +17,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  // Proxy / Rewrites untuk mengatasi masalah CORS di Localhost & Vercel
+  async rewrites() {
+    return [
+      {
+        source: "/api/proxy/:path*",
+        destination: "https://api-absensi.lebahkreatif.or.id/api/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
