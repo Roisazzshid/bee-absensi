@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 export function LoginForm() {
-  const { signIn, status } = useAuth();
+  const { signIn, status, isAdmin } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -17,7 +17,16 @@ export function LoginForm() {
   const [pending, setPending] = useState(false);
   const nextPath = searchParams.get("next");
 
-  useEffect(() => { if (status === "authenticated") router.replace(nextPath?.startsWith("/") ? nextPath : "/"); }, [nextPath, router, status]);
+  // Redirect setelah authenticated berdasarkan role
+  useEffect(() => {
+    if (status === "authenticated") {
+      if (isAdmin) {
+        router.replace("/admin");
+      } else {
+        router.replace(nextPath?.startsWith("/") && !nextPath.startsWith("/admin") ? nextPath : "/");
+      }
+    }
+  }, [isAdmin, nextPath, router, status]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,7 +34,6 @@ export function LoginForm() {
     setPending(true);
     try {
       await signIn(email.trim(), password);
-      router.replace(nextPath?.startsWith("/") ? nextPath : "/");
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Tidak dapat terhubung ke server. Coba lagi.");
     } finally { setPending(false); }

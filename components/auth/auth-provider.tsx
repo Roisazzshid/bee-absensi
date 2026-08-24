@@ -16,6 +16,7 @@ export type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null;
   status: "loading" | "authenticated" | "unauthenticated";
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   request: <T>(path: string, options?: RequestInit) => Promise<T>;
@@ -81,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [clearSession]);
 
-  const value = useMemo(() => ({ user, status, signIn, signOut, request }), [request, signIn, signOut, status, user]);
+  const isAdmin = user?.role === "admin" || user?.role === "superadmin";
+  const value = useMemo(() => ({ user, status, isAdmin, signIn, signOut, request }), [isAdmin, request, signIn, signOut, status, user]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
