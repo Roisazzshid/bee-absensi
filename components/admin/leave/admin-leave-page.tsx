@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiError } from "@/lib/api";
-import { useCallback, useEffect, useState } from "react";
 
 type LeaveItem = {
   id: number;
@@ -22,34 +21,31 @@ type LeaveItem = {
 type Pagination = { current_page: number; last_page: number; per_page: number; total: number };
 
 const TYPE_MAP: Record<string, string> = { sick: "Sakit", leave: "Cuti", permission: "Izin" };
-const STATUS_STYLE: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-700",
-  approved: "bg-green-100 text-green-700",
-  rejected: "bg-red-100 text-red-700",
+const TYPE_COLOR: Record<string, string> = {
+  sick: "bg-red-50 text-red-600 ring-red-200",
+  leave: "bg-blue-50 text-blue-600 ring-blue-200",
+  permission: "bg-purple-50 text-purple-600 ring-purple-200",
 };
-const STATUS_LABEL: Record<string, string> = {
-  pending: "Pending", approved: "Disetujui", rejected: "Ditolak",
+const STATUS_CONFIG: Record<string, { label: string; badge: string; dot: string }> = {
+  pending: { label: "Pending", badge: "bg-amber-50 text-amber-700 ring-amber-200", dot: "bg-amber-400" },
+  approved: { label: "Disetujui", badge: "bg-emerald-50 text-emerald-700 ring-emerald-200", dot: "bg-emerald-500" },
+  rejected: { label: "Ditolak", badge: "bg-red-50 text-red-600 ring-red-200", dot: "bg-red-400" },
 };
 
 export function AdminLeavePage() {
   const { request } = useAuth();
-
   const [items, setItems] = useState<LeaveItem[]>([]);
   const [summary, setSummary] = useState({ pending: 0, approved: 0, rejected: 0 });
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
 
-  // Modal reject
   const [rejectTarget, setRejectTarget] = useState<LeaveItem | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState("");
-
-  // Modal detail
   const [detailItem, setDetailItem] = useState<LeaveItem | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -105,230 +101,257 @@ export function AdminLeavePage() {
     }
   }
 
-  const formatDate = (d: string) =>
+  const fmtDate = (d: string) =>
     new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 
-  const daysDiff = (start: string, end: string) => {
-    const diff = Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    return `${diff} hari`;
-  };
+  const daysDiff = (s: string, e: string) =>
+    Math.ceil((new Date(e).getTime() - new Date(s).getTime()) / 86400000) + 1;
+
+  const initials = (name: string) =>
+    name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+
+  const tabs = [
+    { key: "", label: "Semua", count: summary.pending + summary.approved + summary.rejected },
+    { key: "pending", label: "Pending", count: summary.pending },
+    { key: "approved", label: "Disetujui", count: summary.approved },
+    { key: "rejected", label: "Ditolak", count: summary.rejected },
+  ];
 
   return (
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-on-surface">📝 Pengajuan Izin & Cuti</h1>
-        <p className="mt-1 text-sm text-on-surface-variant">Kelola dan proses pengajuan dari karyawan</p>
+        <h1 className="text-xl font-bold text-on-surface md:text-2xl">Pengajuan Izin & Cuti</h1>
+        <p className="mt-0.5 text-sm text-on-surface-variant">Kelola dan proses pengajuan dari karyawan</p>
       </div>
 
-      {/* Summary pills */}
-      <div className="flex flex-wrap gap-2">
-        {[
-          { key: "", label: "Semua", value: summary.pending + summary.approved + summary.rejected, cls: "bg-surface-container" },
-          { key: "pending", label: "Pending", value: summary.pending, cls: "bg-amber-50 text-amber-700 ring-1 ring-amber-200" },
-          { key: "approved", label: "Disetujui", value: summary.approved, cls: "bg-green-50 text-green-700 ring-1 ring-green-200" },
-          { key: "rejected", label: "Ditolak", value: summary.rejected, cls: "bg-red-50 text-red-700 ring-1 ring-red-200" },
-        ].map((s) => (
+      {/* Tabs */}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar rounded-xl bg-surface-container-low p-1">
+        {tabs.map((tab) => (
           <button
-            key={s.key}
-            onClick={() => { setStatusFilter(s.key); setPage(1); }}
+            key={tab.key}
+            onClick={() => { setStatusFilter(tab.key); setPage(1); }}
             className={[
-              "flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all",
-              s.cls,
-              statusFilter === s.key ? "ring-2 ring-primary scale-105" : "",
+              "flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all",
+              statusFilter === tab.key
+                ? "bg-white text-primary shadow-sm ring-1 ring-outline-variant/40"
+                : "text-on-surface-variant hover:text-on-surface",
             ].join(" ")}
           >
-            {s.label}
-            <span className="rounded-full bg-black/10 px-1.5 py-0.5 text-xs">{s.value}</span>
+            {tab.label}
+            {tab.count > 0 && (
+              <span className={["rounded-full px-1.5 py-0.5 text-[10px] font-bold", statusFilter === tab.key ? "bg-primary/10 text-primary" : "bg-surface-container text-on-surface-variant"].join(" ")}>
+                {tab.count}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
-      {error && <div className="rounded-2xl bg-red-50 p-4 text-sm text-error ring-1 ring-red-200">⚠️ {error}</div>}
-      {actionError && <div className="rounded-2xl bg-red-50 p-4 text-sm text-error ring-1 ring-red-200">⚠️ {actionError}</div>}
+      {(error || actionError) && (
+        <div className="rounded-2xl bg-red-50 p-4 text-sm text-error ring-1 ring-red-200">
+          {error || actionError}
+        </div>
+      )}
 
       {/* List */}
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map(i => <div key={i} className="h-28 animate-pulse rounded-2xl bg-surface-container" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-surface-container" />)}
         </div>
       ) : items.length === 0 ? (
-        <div className="rounded-2xl bg-surface p-10 text-center ring-1 ring-outline-variant/40">
-          <p className="text-4xl">📭</p>
-          <p className="mt-2 font-bold text-on-surface">Tidak ada pengajuan</p>
-          <p className="text-sm text-on-surface-variant">Belum ada pengajuan dengan filter ini</p>
+        <div className="flex flex-col items-center justify-center rounded-2xl bg-white py-14 ring-1 ring-outline-variant/40 shadow-sm">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-surface-container-low">
+            <svg className="size-7 text-on-surface-variant" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <p className="mt-3 font-bold text-on-surface">Tidak ada pengajuan</p>
+          <p className="mt-1 text-sm text-on-surface-variant">Belum ada pengajuan dengan filter ini</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-2xl bg-surface p-4 ring-1 ring-outline-variant/40 hover:ring-primary/30 transition-all"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  {/* User info */}
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="font-bold text-on-surface">{item.user.full_name}</span>
-                    <span className="text-xs text-on-surface-variant">{item.user.nip}</span>
-                    <span className="rounded-full bg-surface-container px-2 py-0.5 text-xs text-on-surface-variant">
-                      {item.user.department}
-                    </span>
+          {items.map((item) => {
+            const st = STATUS_CONFIG[item.status];
+            const tc = TYPE_COLOR[item.type] ?? "bg-surface-container text-on-surface-variant ring-outline-variant";
+            return (
+              <div
+                key={item.id}
+                className="rounded-2xl bg-white p-4 ring-1 ring-outline-variant/40 shadow-sm hover:ring-primary/20 transition-all"
+              >
+                <div className="flex items-start gap-3">
+                  {/* Avatar */}
+                  <div className="hidden sm:flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                    {initials(item.user.full_name)}
                   </div>
 
-                  {/* Leave info */}
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
-                      {TYPE_MAP[item.type] ?? item.type}
-                    </span>
-                    <span className="text-xs text-on-surface-variant">
-                      {formatDate(item.start_date)} – {formatDate(item.end_date)} ({daysDiff(item.start_date, item.end_date)})
-                    </span>
-                    <span className={["rounded-full px-2.5 py-0.5 text-xs font-bold", STATUS_STYLE[item.status]].join(" ")}>
-                      {STATUS_LABEL[item.status]}
-                    </span>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                      <span className="font-bold text-on-surface text-sm">{item.user.full_name}</span>
+                      <span className="text-[11px] text-on-surface-variant">{item.user.nip}</span>
+                      <span className="rounded-full bg-surface-container-low px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant">
+                        {item.user.department}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className={["inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ring-1", tc].join(" ")}>
+                        {TYPE_MAP[item.type] ?? item.type}
+                      </span>
+                      <span className="text-xs text-on-surface-variant">
+                        {fmtDate(item.start_date)} – {fmtDate(item.end_date)}
+                        <span className="ml-1 text-primary font-semibold">({daysDiff(item.start_date, item.end_date)} hari)</span>
+                      </span>
+                      <span className={["inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1", st.badge].join(" ")}>
+                        <span className={["size-1.5 rounded-full", st.dot].join(" ")} />{st.label}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-on-surface-variant line-clamp-2">{item.reason}</p>
+
+                    {item.rejection_reason && (
+                      <p className="mt-1 text-xs text-red-600 italic">Ditolak: {item.rejection_reason}</p>
+                    )}
+                    {item.approved_by && (
+                      <p className="mt-1 text-[10px] text-on-surface-variant">
+                        Diproses: <span className="font-semibold">{item.approved_by.full_name}</span>
+                      </p>
+                    )}
                   </div>
 
-                  <p className="text-sm text-on-surface-variant line-clamp-2">
-                    {item.reason}
-                  </p>
-
-                  {item.rejection_reason && (
-                    <p className="mt-1 text-xs text-red-600 italic">
-                      Alasan penolakan: {item.rejection_reason}
-                    </p>
-                  )}
-
-                  {item.approved_by && (
-                    <p className="mt-1 text-xs text-on-surface-variant">
-                      Diproses oleh: <span className="font-semibold">{item.approved_by.full_name}</span>
-                    </p>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-col gap-2 shrink-0">
-                  <button
-                    onClick={() => setDetailItem(item)}
-                    className="rounded-xl border border-outline-variant px-3 py-1.5 text-xs font-bold text-on-surface-variant hover:bg-surface-container-low transition-colors"
-                  >
-                    Detail
-                  </button>
-                  {item.status === "pending" && (
-                    <>
-                      <button
-                        onClick={() => void handleApprove(item)}
-                        disabled={actionLoading}
-                        className="rounded-xl bg-green-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-green-600 transition-colors disabled:opacity-50"
-                      >
-                        ✓ Setujui
-                      </button>
-                      <button
-                        onClick={() => { setRejectTarget(item); setRejectionReason(""); setActionError(""); }}
-                        disabled={actionLoading}
-                        className="rounded-xl bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
-                      >
-                        ✕ Tolak
-                      </button>
-                    </>
-                  )}
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2 shrink-0">
+                    <button
+                      onClick={() => setDetailItem(item)}
+                      className="rounded-xl border border-outline-variant px-3 py-1.5 text-xs font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
+                    >
+                      Detail
+                    </button>
+                    {item.status === "pending" && (
+                      <>
+                        <button
+                          onClick={() => void handleApprove(item)}
+                          disabled={actionLoading}
+                          className="rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                        >
+                          ✓ Setujui
+                        </button>
+                        <button
+                          onClick={() => { setRejectTarget(item); setRejectionReason(""); setActionError(""); }}
+                          disabled={actionLoading}
+                          className="rounded-xl bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+                        >
+                          ✕ Tolak
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {/* Pagination */}
       {pagination && pagination.last_page > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-on-surface-variant">
-            {pagination.total} data · Halaman {pagination.current_page} dari {pagination.last_page}
+          <p className="text-xs text-on-surface-variant">
+            Halaman <span className="font-bold text-on-surface">{pagination.current_page}</span> dari <span className="font-bold text-on-surface">{pagination.last_page}</span>
           </p>
           <div className="flex gap-2">
-            <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
-              className="rounded-xl border border-outline-variant px-4 py-2 text-sm font-bold disabled:opacity-40 hover:bg-surface-container-low">
-              ← Prev
+            <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
+              className="flex items-center gap-1 rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-surface-container-low">
+              <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg> Prev
             </button>
-            <button disabled={page >= pagination.last_page} onClick={() => setPage(p => p + 1)}
-              className="rounded-xl border border-outline-variant px-4 py-2 text-sm font-bold disabled:opacity-40 hover:bg-surface-container-low">
-              Next →
+            <button disabled={page >= pagination.last_page} onClick={() => setPage((p) => p + 1)}
+              className="flex items-center gap-1 rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-surface-container-low">
+              Next <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
             </button>
           </div>
         </div>
       )}
 
-      {/* ── Modal: Reject ── */}
+      {/* ── Modal Reject ── */}
       {rejectTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl">
-            <h2 className="text-lg font-bold text-on-surface">Tolak Pengajuan</h2>
-            <p className="mt-1 text-sm text-on-surface-variant">
-              Pengajuan dari <span className="font-semibold">{rejectTarget.user.full_name}</span>
-            </p>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-red-50">
+                <svg className="size-5 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="font-bold text-on-surface">Tolak Pengajuan</h2>
+                <p className="text-xs text-on-surface-variant mt-0.5">dari <span className="font-semibold">{rejectTarget.user.full_name}</span></p>
+              </div>
+            </div>
 
-            <div className="mt-4">
+            <div>
               <label className="block text-xs font-bold text-on-surface-variant mb-2">
-                Alasan penolakan <span className="font-normal text-on-surface-variant/60">(opsional)</span>
+                Alasan penolakan <span className="font-normal opacity-60">(opsional)</span>
               </label>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder="Tulis alasan penolakan…"
                 rows={3}
-                className="w-full resize-none rounded-xl border border-outline-variant bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full resize-none rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
-            {actionError && (
-              <p className="mt-2 text-xs text-error">{actionError}</p>
-            )}
+            {actionError && <p className="mt-2 text-xs text-error">{actionError}</p>}
 
-            <div className="mt-5 flex gap-3">
-              <button
-                onClick={() => setRejectTarget(null)}
-                className="flex-1 rounded-xl border border-outline-variant py-3 text-sm font-bold text-on-surface hover:bg-surface-container-low"
-              >
+            <div className="mt-4 flex gap-2">
+              <button onClick={() => setRejectTarget(null)}
+                className="flex-1 rounded-xl border border-outline-variant py-3 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors">
                 Batal
               </button>
-              <button
-                onClick={() => void handleRejectSubmit()}
-                disabled={actionLoading}
-                className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-60"
-              >
-                {actionLoading ? "Memproses…" : "Tolak Pengajuan"}
+              <button onClick={() => void handleRejectSubmit()} disabled={actionLoading}
+                className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-60 transition-colors">
+                {actionLoading ? "Memproses…" : "Tolak"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Modal: Detail ── */}
+      {/* ── Modal Detail ── */}
       {detailItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl">
-            <div className="flex items-start justify-between mb-4">
-              <h2 className="text-lg font-bold text-on-surface">Detail Pengajuan</h2>
-              <button onClick={() => setDetailItem(null)} className="text-on-surface-variant hover:text-on-surface text-xl">✕</button>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-bold text-on-surface">Detail Pengajuan</h2>
+              <button onClick={() => setDetailItem(null)}
+                className="flex size-8 items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low">
+                <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
             </div>
 
             <div className="space-y-3">
               <Row label="Karyawan" value={`${detailItem.user.full_name} (${detailItem.user.nip})`} />
               <Row label="Departemen" value={`${detailItem.user.department} — ${detailItem.user.position}`} />
-              <Row label="Jenis" value={TYPE_MAP[detailItem.type] ?? detailItem.type} />
-              <Row label="Tanggal" value={`${formatDate(detailItem.start_date)} s/d ${formatDate(detailItem.end_date)} (${daysDiff(detailItem.start_date, detailItem.end_date)})`} />
+              <Row label="Jenis">
+                <span className={["inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ring-1", TYPE_COLOR[detailItem.type]].join(" ")}>
+                  {TYPE_MAP[detailItem.type]}
+                </span>
+              </Row>
+              <Row label="Tanggal" value={`${fmtDate(detailItem.start_date)} – ${fmtDate(detailItem.end_date)} (${daysDiff(detailItem.start_date, detailItem.end_date)} hari)`} />
               <Row label="Status">
-                <span className={["rounded-full px-2.5 py-0.5 text-xs font-bold", STATUS_STYLE[detailItem.status]].join(" ")}>
-                  {STATUS_LABEL[detailItem.status]}
+                <span className={["inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1", STATUS_CONFIG[detailItem.status].badge].join(" ")}>
+                  <span className={["size-1.5 rounded-full", STATUS_CONFIG[detailItem.status].dot].join(" ")} />
+                  {STATUS_CONFIG[detailItem.status].label}
                 </span>
               </Row>
               <div className="rounded-xl bg-surface-container-low p-3">
-                <p className="text-xs font-bold text-on-surface-variant mb-1">Alasan Pengajuan</p>
+                <p className="text-[10px] font-bold text-on-surface-variant mb-1">Alasan</p>
                 <p className="text-sm text-on-surface">{detailItem.reason}</p>
               </div>
               {detailItem.rejection_reason && (
                 <div className="rounded-xl bg-red-50 p-3 ring-1 ring-red-200">
-                  <p className="text-xs font-bold text-red-600 mb-1">Alasan Penolakan</p>
+                  <p className="text-[10px] font-bold text-red-600 mb-1">Alasan Penolakan</p>
                   <p className="text-sm text-red-700">{detailItem.rejection_reason}</p>
                 </div>
               )}
@@ -339,30 +362,23 @@ export function AdminLeavePage() {
                   </a>
                 </Row>
               )}
-              {detailItem.approved_by && (
-                <Row label="Diproses oleh" value={detailItem.approved_by.full_name} />
-              )}
+              {detailItem.approved_by && <Row label="Diproses" value={detailItem.approved_by.full_name} />}
             </div>
 
             {detailItem.status === "pending" && (
-              <div className="mt-5 flex gap-3">
-                <button
-                  onClick={() => { void handleApprove(detailItem); setDetailItem(null); }}
-                  disabled={actionLoading}
-                  className="flex-1 rounded-xl bg-green-500 py-3 text-sm font-bold text-white hover:bg-green-600 disabled:opacity-60"
-                >
+              <div className="mt-5 flex gap-2">
+                <button onClick={() => { void handleApprove(detailItem); setDetailItem(null); }} disabled={actionLoading}
+                  className="flex-1 rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white hover:bg-emerald-600 disabled:opacity-60">
                   ✓ Setujui
                 </button>
-                <button
-                  onClick={() => { setRejectTarget(detailItem); setDetailItem(null); }}
-                  className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600"
-                >
+                <button onClick={() => { setRejectTarget(detailItem); setDetailItem(null); }}
+                  className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600">
                   ✕ Tolak
                 </button>
               </div>
             )}
-
-            <button onClick={() => setDetailItem(null)} className="mt-3 w-full rounded-xl border border-outline-variant py-3 text-sm font-bold text-on-surface hover:bg-surface-container-low">
+            <button onClick={() => setDetailItem(null)}
+              className="mt-2 w-full rounded-xl border border-outline-variant py-2.5 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors">
               Tutup
             </button>
           </div>
@@ -374,8 +390,8 @@ export function AdminLeavePage() {
 
 function Row({ label, value, children }: { label: string; value?: string; children?: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-2">
-      <span className="w-28 shrink-0 text-xs font-bold text-on-surface-variant">{label}</span>
+    <div className="flex items-start gap-3">
+      <span className="w-24 shrink-0 text-[11px] font-bold text-on-surface-variant">{label}</span>
       <span className="text-sm text-on-surface">{children ?? value}</span>
     </div>
   );

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bee Absensi - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#e4e2e4",
+                      "surface-container-low": "#f6f3f5",
+                      "surface-bright": "#fcf8fa",
+                      "secondary": "#515f74",
+                      "inverse-primary": "#bec6e0",
+                      "on-secondary-fixed": "#0d1c2f",
+                      "on-secondary": "#ffffff",
+                      "on-surface-variant": "#45464d",
+                      "secondary-container": "#d5e3fd",
+                      "primary-container": "#131b2e",
+                      "on-background": "#1b1b1d",
+                      "secondary-fixed-dim": "#b9c7e0",
+                      "inverse-surface": "#303032",
+                      "primary-fixed": "#dae2fd",
+                      "background": "#fcf8fa",
+                      "surface-container-high": "#eae7e9",
+                      "surface-container": "#f0edef",
+                      "surface-dim": "#dcd9db",
+                      "error": "#ba1a1a",
+                      "surface-container-highest": "#e4e2e4",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "on-tertiary-container": "#75859d",
+                      "tertiary-container": "#0b1c30",
+                      "on-tertiary": "#ffffff",
+                      "secondary-fixed": "#d5e3fd",
+                      "on-surface": "#1b1b1d",
+                      "surface": "#fcf8fa",
+                      "inverse-on-surface": "#f3f0f2",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-fixed-variant": "#3a485c",
+                      "on-secondary-container": "#57657b",
+                      "outline-variant": "#c6c6cd",
+                      "error-container": "#ffdad6",
+                      "primary-fixed-dim": "#bec6e0",
+                      "surface-tint": "#565e74",
+                      "on-primary-fixed": "#131b2e",
+                      "on-primary-container": "#7c839b",
+                      "on-primary": "#ffffff",
+                      "primary": "#000000",
+                      "on-error-container": "#93000a",
+                      "on-error": "#ffffff",
+                      "tertiary": "#000000",
+                      "tertiary-fixed-dim": "#b7c8e1",
+                      "outline": "#76777d",
+                      "on-tertiary-fixed": "#0b1c30",
+                      "on-tertiary-fixed-variant": "#38485d",
+                      "tertiary-fixed": "#d3e4fe"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-sm": "8px",
+                      "margin-desktop": "32px",
+                      "sidebar-width": "280px",
+                      "margin-mobile": "16px",
+                      "stack-lg": "24px",
+                      "container-max": "1440px",
+                      "stack-md": "16px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-md-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-sm": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "36px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md-mobile": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+          .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+          }
+          .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+          }
+      </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar (from JSON) -->
+<aside class="bg-primary-container dark:bg-primary-container fixed left-0 top-0 h-full w-sidebar-width border-r border-outline-variant dark:border-outline shadow-sm z-20 flex flex-col hidden md:flex">
+<!-- Brand -->
+<div class="px-margin-desktop pt-margin-desktop pb-stack-lg">
+<span class="font-headline-md text-headline-md font-bold text-on-primary-fixed dark:text-primary-fixed">Bee Absensi</span>
+</div>
+<!-- Main Navigation -->
+<nav class="flex-1 flex flex-col h-full space-y-stack-lg mt-stack-md">
+<div class="space-y-stack-sm px-stack-sm">
+<!-- Active Navigation: Dashboard -->
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm bg-secondary-container text-on-secondary-container rounded-lg font-bold transition-all duration-200 ease-in-out cursor-pointer font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined filled">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Inactive Navigation: Absensi -->
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span>Absensi</span>
+</a>
+<!-- Inactive Navigation: Pengajuan Izin -->
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">pending_actions</span>
+<span>Pengajuan Izin</span>
+</a>
+<!-- Inactive Navigation: Karyawan -->
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">badge</span>
+<span>Karyawan</span>
+</a>
+</div>
+</nav>
+<!-- Footer Navigation & Profile -->
+<div class="mt-auto border-t border-outline-variant/20 p-stack-md">
+<div class="space-y-stack-sm mb-stack-lg">
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer font-label-md text-label-md rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+</div>
+<div class="flex items-center gap-stack-md px-stack-md py-stack-sm">
+<img alt="Admin Profile Picture" class="w-10 h-10 rounded-full border border-outline-variant object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJAsKYuNBWkU0yqA4NET8TUxmfNeLhv1jcClGMxkz3fFyWF3xxFgc4qdwnnukkBkHUySI7nIBiMyKJVi5XmDosgYROWs2z5AT_my2hpc1ZWDuvKQ01WZoe1OMYvOuUqmyTomZuTCRRKJ2pjKGsRiftMEMUaj7y4Eqe0kLuMOOyu1bBBVGQoqMyekcSh-sNmY0GXDZ0PQvQWbWkCfE3l_jkrbJQmR9rVK5Jikfh9WuZfCCAQJusXZHQ"/>
+<div class="flex-1 min-w-0">
+<p class="font-label-md text-label-md text-on-primary-fixed dark:text-primary-fixed-dim truncate">Admin Name</p>
+<p class="font-body-md text-[11px] text-on-primary-container truncate">System Administrator</p>
+</div>
+<button class="text-on-primary-container hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-h-screen md:ml-sidebar-width w-full md:w-[calc(100%-280px)]">
+<!-- TopAppBar (from JSON) -->
+<header class="bg-surface-container-lowest dark:bg-surface-dim fixed top-0 right-0 w-full md:w-[calc(100%-280px)] h-16 border-b border-outline-variant dark:border-outline z-10 flex justify-between items-center px-margin-desktop max-w-container-max transition-all">
+<!-- Mobile Menu Toggle & Brand (Visible only on mobile) -->
+<div class="flex items-center gap-stack-md md:hidden">
+<button class="text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline-md-mobile text-headline-md-mobile font-black text-primary">Bee Absensi</span>
+</div>
+<!-- Page Title (Desktop) -->
+<div class="hidden md:block">
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Dashboard Overview</h1>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-stack-lg">
+<!-- Search (Placeholder for layout) -->
+<div class="hidden lg:flex items-center bg-surface-container-low border border-outline-variant rounded-lg px-3 py-1.5 focus-within:border-primary transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md font-body-md text-on-surface w-48 placeholder:text-on-surface-variant/50 h-7" placeholder="Search..." type="text"/>
+</div>
+<div class="flex items-center gap-stack-sm">
+<button class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 p-2 rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 p-2 rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-secondary-container overflow-hidden border border-outline-variant ml-2 cursor-pointer">
+<img alt="Administrator" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIFT0J7vHGn0-aCTVM6kylduPnvUrnhYHP_a8A8jo0NJ6F75LI9pPPrS9xekNrBIthDAMVY6s1pha3fHFSzfXARHV68dtUslbDDEYZaOFPx8jrfLqDiLhgGPOmZJPpir40oB92MQwcRSdupLRS7W47Um374gvTY9ews5FUR5C4RZcPyusp3Inr_X5Yp8qno4ZP8-22pKT8U2T5OrMCRHjgWX_p5Ivwlaa5RS0gb1Qq-4GKD2lui9m1"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="flex-1 mt-16 p-margin-mobile md:p-margin-desktop overflow-y-auto max-w-container-max mx-auto w-full">
+<!-- Header Section -->
+<div class="mb-stack-lg flex flex-col md:flex-row md:items-end justify-between gap-stack-md">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-background mb-1">Selamat siang, Administrator!</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                        Rabu, 25 Oktober 2023
+                    </p>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors flex items-center gap-2 w-fit shadow-sm">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                    Export Laporan
+                </button>
+</div>
+<!-- Summary Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-stack-lg">
+<!-- Card 1: Total Hadir -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg shadow-[0_4px_20px_rgba(15,23,42,0.02)] flex flex-col justify-between min-h-[120px]">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Hadir</span>
+<div class="p-2 bg-[#E6F4EA] text-[#137333] rounded-lg">
+<span class="material-symbols-outlined filled">group</span>
+</div>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-background block leading-none mt-2">0</span>
+</div>
+</div>
+<!-- Card 2: Tepat Waktu -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg shadow-[0_4px_20px_rgba(15,23,42,0.02)] flex flex-col justify-between min-h-[120px]">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Tepat Waktu</span>
+<div class="p-2 bg-[#E8F0FE] text-[#1967D2] rounded-lg">
+<span class="material-symbols-outlined filled">check_circle</span>
+</div>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-background block leading-none mt-2">0</span>
+</div>
+</div>
+<!-- Card 3: Terlambat -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg shadow-[0_4px_20px_rgba(15,23,42,0.02)] flex flex-col justify-between min-h-[120px]">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Terlambat</span>
+<div class="p-2 bg-[#FEF7E0] text-[#B06000] rounded-lg">
+<span class="material-symbols-outlined filled">schedule</span>
+</div>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-background block leading-none mt-2">0</span>
+</div>
+</div>
+<!-- Card 4: Belum Absen -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg shadow-[0_4px_20px_rgba(15,23,42,0.02)] flex flex-col justify-between min-h-[120px]">
+<div class="flex items-start justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Belum Absen</span>
+<div class="p-2 bg-[#FCE8E6] text-[#C5221F] rounded-lg">
+<span class="material-symbols-outlined filled">cancel</span>
+</div>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-background block leading-none mt-2">1</span>
+</div>
+</div>
+</div>
+<!-- Middle Section (Bento Grid Style) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-stack-lg">
+<!-- Main Chart Area (Spans 8 columns on desktop) -->
+<div class="lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg shadow-[0_4px_20px_rgba(15,23,42,0.02)] flex flex-col h-[400px]">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-sm text-headline-sm text-on-background">Persentase Kehadiran</h3>
+<div class="bg-surface-container-low px-3 py-1 rounded-md text-on-surface-variant font-label-md text-label-md border border-outline-variant">Hari Ini</div>
+</div>
+<div class="flex-1 flex items-center justify-center relative">
+<!-- Simulated Donut Chart using CSS -->
+<div class="relative w-48 h-48 rounded-full flex items-center justify-center border-[16px] border-surface-variant">
+<div class="absolute inset-0 rounded-full border-[16px] border-transparent border-t-[#C5221F] transform rotate-45" style="clip-path: polygon(50% 50%, 100% 0, 100% 100%, 0 100%, 0 0, 50% 0);"></div>
+<div class="text-center">
+<span class="font-display-lg text-display-lg block text-on-background leading-none mb-1">0%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Tingkat Hadir</span>
+</div>
+</div>
+</div>
+<!-- Chart Legend -->
+<div class="flex justify-center gap-6 mt-6 border-t border-outline-variant/30 pt-6">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-[#1967D2]"></div>
+<span class="font-body-md text-body-md text-on-surface-variant">Tepat Waktu (0)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-[#B06000]"></div>
+<span class="font-body-md text-body-md text-on-surface-variant">Terlambat (0)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-[#C5221F]"></div>
+<span class="font-body-md text-body-md text-on-surface-variant">Belum (1)</span>
+</div>
+</div>
+</div>
+<!-- Right Side Widgets (Spans 4 columns on desktop) -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<!-- Pengajuan Izin Widget -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg shadow-[0_4px_20px_rgba(15,23,42,0.02)] flex-1">
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-secondary-container text-on-secondary-container rounded-lg">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background">Pengajuan Izin</h3>
+</div>
+<div class="space-y-4">
+<!-- Widget Item 1 -->
+<div class="p-4 rounded-lg border border-outline-variant/50 bg-surface-container-low flex justify-between items-center hover:bg-surface-variant transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-[#B06000]"></div>
+<span class="font-body-md text-body-md text-on-background font-medium">Menunggu Persetujuan</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-background group-hover:text-primary">0</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">chevron_right</span>
+</div>
+</div>
+<!-- Widget Item 2 -->
+<div class="p-4 rounded-lg border border-outline-variant/50 bg-surface-container-low flex justify-between items-center hover:bg-surface-variant transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-[#137333]"></div>
+<span class="font-body-md text-body-md text-on-background font-medium">Disetujui Bulan Ini</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-background group-hover:text-primary">12</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions Widget -->
+<div class="bg-primary-container text-on-primary-container border border-outline-variant rounded-xl p-stack-lg shadow-[0_4px_20px_rgba(15,23,42,0.02)] relative overflow-hidden">
+<div class="absolute -right-4 -top-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]">add_task</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-primary-fixed mb-2 relative z-10">Tindakan Cepat</h3>
+<p class="font-body-md text-body-md mb-4 text-on-primary-container/80 relative z-10">Kelola pengaturan jadwal atau lihat log sistem.</p>
+<button class="w-full bg-secondary-container text-on-secondary-container py-2 rounded-lg font-label-md text-label-md hover:bg-secondary-fixed transition-colors relative z-10">
+                            Buka Pengaturan
+                        </button>
+</div>
+</div>
+</div>
+<!-- Bottom Section: Weekly Trend -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg shadow-[0_4px_20px_rgba(15,23,42,0.02)] mb-stack-lg">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background">Kehadiran 7 Hari Terakhir</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Tren tingkat kehadiran karyawan mingguan</p>
+</div>
+<button class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1">
+                        Lihat Detail <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<!-- Minimal Bar Chart Mockup -->
+<div class="h-48 w-full flex items-end gap-2 md:gap-4 lg:gap-8 justify-between pt-4 border-b border-outline-variant/30 pb-2">
+<!-- Day 1 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-full flex items-end justify-center relative">
+<div class="w-full bg-[#1967D2] rounded-t-sm h-[80%] opacity-80 group-hover:opacity-100 transition-opacity"></div>
+<div class="absolute -top-8 bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">80% Hadir</div>
+</div>
+<span class="font-label-md text-[10px] md:text-label-md text-on-surface-variant mt-2 text-center">19 Okt</span>
+</div>
+<!-- Day 2 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-full flex items-end justify-center relative">
+<div class="w-full bg-[#1967D2] rounded-t-sm h-[95%] opacity-80 group-hover:opacity-100 transition-opacity"></div>
+<div class="absolute -top-8 bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">95% Hadir</div>
+</div>
+<span class="font-label-md text-[10px] md:text-label-md text-on-surface-variant mt-2 text-center">20 Okt</span>
+</div>
+<!-- Day 3 (Weekend) -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-full flex items-end justify-center relative">
+<div class="w-full bg-outline-variant rounded-t-sm h-[5%] opacity-80 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<span class="font-label-md text-[10px] md:text-label-md text-on-surface-variant/50 mt-2 text-center">21 Okt</span>
+</div>
+<!-- Day 4 (Weekend) -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-full flex items-end justify-center relative">
+<div class="w-full bg-outline-variant rounded-t-sm h-[5%] opacity-80 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<span class="font-label-md text-[10px] md:text-label-md text-on-surface-variant/50 mt-2 text-center">22 Okt</span>
+</div>
+<!-- Day 5 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-full flex items-end justify-center relative">
+<div class="w-full bg-[#1967D2] rounded-t-sm h-[88%] opacity-80 group-hover:opacity-100 transition-opacity"></div>
+<div class="absolute -top-8 bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">88% Hadir</div>
+</div>
+<span class="font-label-md text-[10px] md:text-label-md text-on-surface-variant mt-2 text-center">23 Okt</span>
+</div>
+<!-- Day 6 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-full flex items-end justify-center relative">
+<div class="w-full bg-[#1967D2] rounded-t-sm h-[92%] opacity-80 group-hover:opacity-100 transition-opacity"></div>
+<div class="absolute -top-8 bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">92% Hadir</div>
+</div>
+<span class="font-label-md text-[10px] md:text-label-md text-on-surface-variant mt-2 text-center">24 Okt</span>
+</div>
+<!-- Day 7 (Today) -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full max-w-[40px] bg-surface-variant rounded-t-sm h-full flex items-end justify-center relative border border-dashed border-outline">
+<div class="w-full bg-[#C5221F] rounded-t-sm h-[0%] opacity-80 group-hover:opacity-100 transition-opacity"></div>
+<div class="absolute -top-8 bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">0% Hadir</div>
+</div>
+<span class="font-label-md text-[10px] md:text-label-md text-primary font-bold mt-2 text-center">25 Okt</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

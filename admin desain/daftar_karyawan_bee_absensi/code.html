@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Daftar Karyawan - Bee Absensi</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Plus+Jakarta+Sans:wght@600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e4e2e4",
+                        "surface-container-low": "#f6f3f5",
+                        "surface-bright": "#fcf8fa",
+                        "secondary": "#515f74",
+                        "inverse-primary": "#bec6e0",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "secondary-container": "#d5e3fd",
+                        "primary-container": "#131b2e",
+                        "on-background": "#1b1b1d",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "inverse-surface": "#303032",
+                        "primary-fixed": "#dae2fd",
+                        "background": "#fcf8fa",
+                        "surface-container-high": "#eae7e9",
+                        "surface-container": "#f0edef",
+                        "surface-dim": "#dcd9db",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e4e2e4",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-tertiary-container": "#75859d",
+                        "tertiary-container": "#0b1c30",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#d5e3fd",
+                        "on-surface": "#1b1b1d",
+                        "surface": "#fcf8fa",
+                        "inverse-on-surface": "#f3f0f2",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "on-secondary-container": "#57657b",
+                        "outline-variant": "#c6c6cd",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#bec6e0",
+                        "surface-tint": "#565e74",
+                        "on-primary-fixed": "#131b2e",
+                        "on-primary-container": "#7c839b",
+                        "on-primary": "#ffffff",
+                        "primary": "#000000",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "tertiary": "#000000",
+                        "tertiary-fixed-dim": "#b7c8e1",
+                        "outline": "#76777d",
+                        "on-tertiary-fixed": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#38485d",
+                        "tertiary-fixed": "#d3e4fe"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "margin-desktop": "32px",
+                        "sidebar-width": "280px",
+                        "margin-mobile": "16px",
+                        "stack-lg": "24px",
+                        "container-max": "1440px",
+                        "stack-md": "16px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md-mobile": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["36px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-md-mobile": ["20px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #F8FAFC; /* Level 0 Canvas */
+            color: #1b1b1d;
+        }
+        .card-level-1 {
+            background-color: #ffffff;
+            box-shadow: 0px 4px 20px rgba(15, 23, 42, 0.05);
+            border: 1px solid #E2E8F0;
+        }
+        .status-chip-active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-dim text-on-surface dark:text-on-surface-variant fixed top-0 right-0 w-full md:w-[calc(100%-280px)] h-16 flex justify-between items-center px-margin-desktop max-w-container-max z-20">
+<div class="font-headline-md text-headline-md font-black text-primary md:hidden">Bee Absensi</div>
+<div class="hidden md:flex flex-1 justify-end items-center gap-stack-md">
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-70 p-2 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-70 p-2 rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-variant ml-4 border border-outline-variant">
+<img alt="Administrator" class="w-full h-full object-cover" data-alt="A professional headshot of a system administrator in a brightly lit modern office setting. The lighting is soft and corporate. The individual is wearing smart casual business attire, smiling slightly. Clean corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCjLEIX3356sE87FTKJ99_dGUlHgIVy3maKw3U6QJm2skPbgAJBwz_1xX0iUybjxpkbObS12c3ThmNQDHsoDImiTGA_buMqlmaDpWvH-NLAMRGVYm-Ju4_AyYVeoJ1AyMsb8PN8PlxpQfQbgt6OOqnekDDRhNWDvDZ2CTUaLrK1h4fB5UONPUKdxWBs43ccdB6oTt2ICep-JTPJqo3CEYHpY_-LE9aD-wrcco_8oublAJ9ceaThLAi"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<nav class="hidden md:flex bg-primary-container dark:bg-primary-container text-on-primary-fixed dark:text-primary-fixed-dim fixed left-0 top-0 h-full w-sidebar-width border-r border-outline-variant dark:border-outline shadow-sm flex-col py-margin-desktop space-y-stack-lg z-30">
+<div class="px-margin-desktop mb-8">
+<div class="font-headline-md text-headline-md font-bold text-on-primary-fixed dark:text-primary-fixed mb-8">Bee Absensi</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-tint shrink-0">
+<img alt="Admin Profile Picture" class="w-full h-full object-cover" data-alt="A small, stylized avatar of a system administrator. Clean, minimalistic flat design vector illustration style. Deep navy and light gray colors. Professional corporate feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvUb3IjHM-eS84IV8rTjG2rF2TKwYDIcFDNnlovtR2fOcuKkpG4s7fbFiDVgGFwaejwv7DnpoOuCp0jm6hqw8KE8V1dd6aQj_X_AvljNZZSSUw_wZzWS63ENIKLwJ3XT3d81mb_fRkTOoyIQqJwLdeMmC_UGRPs1jX4LW5GKLsHYjWnyGwLeWCgdlPQu-K1bdKPdPSOukEdvk0PpB05AhA6R7Yk1f9O6LQqotHNRhCOSHuO61IvEmX"/>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-primary-fixed">Admin Name</div>
+<div class="font-label-md text-label-md text-on-primary-container mt-1">System Administrator</div>
+</div>
+</div>
+</div>
+<div class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-label-md text-label-md">Absensi</span>
+</a>
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="pending_actions">pending_actions</span>
+<span class="font-label-md text-label-md">Pengajuan Izin</span>
+</a>
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm bg-secondary-container text-on-secondary-container rounded-lg font-bold hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+<span class="font-label-md text-label-md">Karyawan</span>
+</a>
+</div>
+<div class="px-4 mt-auto space-y-2 pb-4">
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="flex items-center gap-stack-md px-stack-md py-stack-sm text-on-primary-container hover:bg-surface-variant hover:text-on-surface-variant transition-colors hover:bg-primary/10 dark:hover:bg-primary-fixed/10 transition-all duration-200 ease-in-out cursor-pointer rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+<button class="w-full mt-4 py-2 text-center text-error border border-error rounded-lg hover:bg-error-container transition-colors font-label-md text-label-md">
+                Logout
+            </button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="md:ml-[280px] pt-[80px] px-margin-mobile md:px-margin-desktop pb-24 min-h-screen max-w-container-max mx-auto">
+<!-- Page Header -->
+<div class="mb-stack-lg flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-2">Daftar Karyawan</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Seluruh karyawan yang terdaftar di sistem</p>
+</div>
+<button class="bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-on-surface transition-colors w-full md:w-auto justify-center">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                Tambah Karyawan
+            </button>
+</div>
+<!-- Filter & Search Bar -->
+<div class="card-level-1 rounded-xl p-6 mb-stack-lg flex flex-col md:flex-row gap-4 items-center">
+<div class="relative w-full md:w-96">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</div>
+<input class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md text-body-md text-on-surface placeholder-outline" placeholder="Cari nama atau NIP..." type="text"/>
+</div>
+<div class="w-full md:w-64">
+<select class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md text-body-md text-on-surface appearance-none cursor-pointer">
+<option value="">Semua Departemen</option>
+<option value="op">Operasional</option>
+<option value="hr">HR &amp; Admin</option>
+<option value="it">IT &amp; Engineering</option>
+</select>
+</div>
+<button class="bg-secondary text-on-secondary px-6 py-3 rounded-lg font-label-md text-label-md w-full md:w-auto hover:bg-on-secondary-fixed transition-colors">
+                Cari
+            </button>
+</div>
+<!-- Summary -->
+<div class="font-body-md text-body-md text-on-surface-variant mb-4">
+            Menampilkan 1 dari 1 karyawan
+        </div>
+<!-- Employee Grid (Bento/Card layout) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Employee Card -->
+<div class="card-level-1 rounded-xl p-6 relative group hover:shadow-md transition-shadow duration-300">
+<div class="absolute top-6 right-6">
+<span class="status-chip-active px-3 py-1 rounded-full font-label-md text-[10px] uppercase tracking-wider font-bold">
+                        Aktif
+                    </span>
+</div>
+<div class="flex items-start gap-4 mb-6">
+<div class="w-16 h-16 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden shrink-0">
+<img alt="Employee Photo" class="w-full h-full object-cover" data-alt="Professional corporate headshot of a staff member. Clean background, soft lighting, modern business attire. The person is looking slightly off-camera with a friendly expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCG_FWq0cmb_Yq7ip6UOJYZrCHf77e-kYGis4M8C_PJ2d9Uo2yfy441DOXdds6XxJfgrMVWL-9QixcA0-y-mwnVrZOdNVKm7ZbGGSWR5KZii_KHpFLvHH49PYNUJvxcKbyEsllocBuM5hT8RSGOVCar5-2S2XwBfnwdejHeuN9KMNLOpg-ZNCY09Pjt7eTS34gQWKfXhG9miUE2ZG6ew5YcMf_1XxjybjwZnB9o6V99CAGLW9Ag0C9c"/>
+</div>
+<div class="pt-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1 group-hover:text-primary transition-colors cursor-pointer">Test User</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-1">NIP: EMP-001</p>
+<p class="font-label-md text-label-md text-secondary">Operasional - Staff</p>
+</div>
+</div>
+<div class="border-t border-outline-variant pt-4 flex flex-col gap-3">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="calendar_month">calendar_month</span>
+</div>
+<div>
+<div class="font-label-md text-[10px] uppercase text-outline">Kehadiran Bulan Ini</div>
+<div class="font-body-md text-body-md font-semibold text-on-surface">12 Hari</div>
+</div>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="mail">mail</span>
+</div>
+<div class="truncate">
+<div class="font-label-md text-[10px] uppercase text-outline">Kontak</div>
+<div class="font-body-md text-body-md truncate hover:text-primary cursor-pointer transition-colors">test.user@company.com</div>
+</div>
+</div>
+</div>
+<div class="mt-6 flex gap-2">
+<button class="flex-1 py-2 border border-outline-variant rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-variant transition-colors">
+                        Lihat Detail
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>
