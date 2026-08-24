@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { JSX, useState, type ReactNode } from "react";
 
 const NAV_ITEMS: { label: string; href: string; icon: JSX.Element }[] = [
   {
