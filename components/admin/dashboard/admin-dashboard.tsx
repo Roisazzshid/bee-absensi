@@ -41,9 +41,20 @@ export function AdminDashboard() {
   };
 
   const todayLabel = data
-    ? new Date(data.today).toLocaleDateString("id-ID", {
-        weekday: "long", day: "numeric", month: "long", year: "numeric",
-      })
+    ? (() => {
+        const parts = data.today.split("-");
+        if (parts.length === 3) {
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const d = parseInt(parts[2], 10);
+          return new Date(y, m, d).toLocaleDateString("id-ID", {
+            weekday: "long", day: "numeric", month: "long", year: "numeric",
+          });
+        }
+        return new Date(data.today).toLocaleDateString("id-ID", {
+          weekday: "long", day: "numeric", month: "long", year: "numeric",
+        });
+      })()
     : "";
 
   if (loading) return <DashboardSkeleton />;

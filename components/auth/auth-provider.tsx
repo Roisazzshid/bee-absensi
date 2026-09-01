@@ -48,17 +48,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const savedToken = localStorage.getItem(TOKEN_KEY);
-    void (async () => {
-      if (!savedToken) {
-        await Promise.resolve();
-        setStatus("unauthenticated");
-        return;
+    const savedUserJson = localStorage.getItem(USER_KEY);
+
+    if (!savedToken) {
+      setStatus("unauthenticated");
+      return;
+    }
+
+    // Restore cached user immediately to avoid role flicker / layout shift
+    if (savedUserJson) {
+      try {
+        const parsed = JSON.parse(savedUserJson) as AuthUser;
+        setUser(parsed);
+        setToken(savedToken);
+        setStatus("authenticated");
+      } catch {
+        // Corrupted JSON, will be reloaded
       }
+    }
+
+    // Verify / sync latest user profile from server
+    void (async () => {
       try {
         setToken(savedToken);
         await loadUser(savedToken);
-      } catch {
-        clearSession();
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          clearSession();
+        } else if (!savedUserJson) {
+          clearSession();
+        }
       }
     })();
   }, [clearSession, loadUser]);
@@ -73,13 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(response.data.user);
     setToken(response.data.token);
     setStatus("authenticated");
-    try {
-      await loadUser(response.data.token);
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 401) clearSession();
-      throw error;
-    }
-  }, [clearSession, loadUser]);
+  }, []);
 
   const signOut = useCallback(async () => {
     const savedToken = localStorage.getItem(TOKEN_KEY);

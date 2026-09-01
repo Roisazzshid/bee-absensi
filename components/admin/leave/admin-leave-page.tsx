@@ -101,14 +101,43 @@ export function AdminLeavePage() {
     }
   }
 
-  const fmtDate = (d: string) =>
-    new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+  const fmtDate = (d: string) => {
+    if (!d) return "—";
+    const datePart = d.includes("T") ? d.split("T")[0] : d.split(" ")[0];
+    const parts = datePart.split("-");
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        const localD = new Date(year, month, day);
+        return localD.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      }
+    }
+    const parsed = new Date(d);
+    return Number.isNaN(parsed.getTime())
+      ? d
+      : parsed.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+  };
 
-  const daysDiff = (s: string, e: string) =>
-    Math.ceil((new Date(e).getTime() - new Date(s).getTime()) / 86400000) + 1;
+  const daysDiff = (s: string, e: string) => {
+    if (!s || !e) return 1;
+    const sPart = s.includes("T") ? s.split("T")[0] : s.split(" ")[0];
+    const ePart = e.includes("T") ? e.split("T")[0] : e.split(" ")[0];
+    const diff = Math.ceil((new Date(ePart + "T00:00:00").getTime() - new Date(sPart + "T00:00:00").getTime()) / 86400000) + 1;
+    return Number.isNaN(diff) ? 1 : Math.max(1, diff);
+  };
 
   const initials = (name: string) =>
-    name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+    (name || "K").split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 
   const tabs = [
     { key: "", label: "Semua", count: summary.pending + summary.approved + summary.rejected },

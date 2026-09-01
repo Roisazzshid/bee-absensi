@@ -58,8 +58,8 @@ export function AdminReportPage() {
   const now = new Date();
   const todayStr = now.toISOString().split("T")[0];
 
-  // Period mode: 'monthly' | 'weekly' | 'daily' | 'custom'
-  const [period, setPeriod] = useState<"monthly" | "weekly" | "daily" | "custom">("monthly");
+  // Period mode: 'yearly' | 'monthly' | 'weekly' | 'daily' | 'custom'
+  const [period, setPeriod] = useState<"yearly" | "monthly" | "weekly" | "daily" | "custom">("yearly");
 
   // Filter params
   const [month, setMonth] = useState<number>(now.getMonth() + 1);
@@ -87,6 +87,7 @@ export function AdminReportPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [perPage, setPerPage] = useState<number>(50);
   const [page, setPage] = useState(1);
 
   // Data states
@@ -109,10 +110,12 @@ export function AdminReportPage() {
     const params = new URLSearchParams();
     params.set("period", period);
     params.set("page", String(page));
-    params.set("per_page", "15");
+    params.set("per_page", String(perPage));
 
     if (period === "daily") {
       params.set("date", dailyDate);
+    } else if (period === "yearly") {
+      params.set("year", String(year));
     } else if (period === "monthly") {
       params.set("month", String(month));
       params.set("year", String(year));
@@ -126,7 +129,7 @@ export function AdminReportPage() {
     if (search) params.set("search", search);
 
     return params;
-  }, [period, page, dailyDate, month, year, startDate, endDate, deptFilter, statusFilter, search]);
+  }, [period, page, perPage, dailyDate, month, year, startDate, endDate, deptFilter, statusFilter, search]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -213,16 +216,55 @@ export function AdminReportPage() {
     }
   };
 
-  const formatTime = (t: string | null) =>
-    t ? new Date(t).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "—";
+  const formatTime = (t: string | null) => {
+    if (!t) return "—";
+    const safeStr = t.includes(" ") && !t.includes("T") ? t.replace(" ", "T") : t;
+    const d = new Date(safeStr);
+    return Number.isNaN(d.getTime())
+      ? t.slice(11, 16) || t
+      : d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  };
 
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  const formatDate = (d: string) => {
+    if (!d) return "—";
+    const datePart = d.includes("T") ? d.split("T")[0] : d.split(" ")[0];
+    const parts = datePart.split("-");
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        const localD = new Date(year, month, day);
+        return localD.toLocaleDateString("id-ID", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      }
+    }
+    const parsed = new Date(d);
+    return Number.isNaN(parsed.getTime())
+      ? d
+      : parsed.toLocaleDateString("id-ID", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+  };
 
   const initials = (name: string) =>
-    name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+    (name || "K").split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 
-  const yearsList = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
+  const yearsList = [
+    now.getFullYear() - 3,
+    now.getFullYear() - 2,
+    now.getFullYear() - 1,
+    now.getFullYear(),
+    now.getFullYear() + 1,
+    now.getFullYear() + 2,
+  ];
 
   return (
     <div className="space-y-6">
@@ -231,7 +273,7 @@ export function AdminReportPage() {
         <div>
           <h1 className="text-xl font-bold text-on-surface md:text-2xl">Laporan & Export Absensi</h1>
           <p className="mt-0.5 text-sm text-on-surface-variant">
-            Rekap dan unduh spreadsheet absensi harian, mingguan, maupun bulanan.
+            Rekap dan unduh spreadsheet absensi tahunan, bulanan, mingguan, maupun harian.
           </p>
         </div>
 
@@ -257,6 +299,7 @@ export function AdminReportPage() {
         {/* Period Tabs */}
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar rounded-xl bg-surface-container-low p-1">
           {[
+            { key: "yearly", label: "Tahunan" },
             { key: "monthly", label: "Bulanan" },
             { key: "weekly", label: "Mingguan" },
             { key: "daily", label: "Harian" },
@@ -269,7 +312,7 @@ export function AdminReportPage() {
                 setPage(1);
               }}
               className={[
-                "flex-1 min-w-24 rounded-lg py-2 text-xs md:text-sm font-semibold transition-all text-center",
+                "flex-1 min-w-20 sm:min-w-24 rounded-lg py-2 text-xs md:text-sm font-semibold transition-all text-center",
                 period === tab.key
                   ? "bg-white text-primary shadow-sm ring-1 ring-outline-variant/40"
                   : "text-on-surface-variant hover:text-on-surface",
@@ -282,6 +325,22 @@ export function AdminReportPage() {
 
         {/* Dynamic Period Inputs */}
         <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-outline-variant/20">
+          {/* Yearly Picker */}
+          {period === "yearly" && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-bold text-on-surface-variant">Pilih Tahun:</span>
+              <select
+                value={year}
+                onChange={(e) => { setYear(Number(e.target.value)); setPage(1); }}
+                className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-semibold text-primary"
+              >
+                {yearsList.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Monthly Picker */}
           {period === "monthly" && (
             <div className="flex flex-wrap items-center gap-2">
@@ -472,15 +531,30 @@ export function AdminReportPage() {
 
       {/* ── Table Preview ── */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-            Preview Data {periodLabel && <span>({periodLabel})</span>}
+            Preview Data {periodLabel && <span className="text-primary font-bold">({periodLabel.replace(/_/g, " ")})</span>}
           </p>
-          {pagination && (
-            <p className="text-xs text-on-surface-variant">
-              Total <span className="font-bold text-on-surface">{pagination.total}</span> baris data
-            </p>
-          )}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-on-surface-variant">
+              <span>Tampilkan:</span>
+              <select
+                value={perPage}
+                onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
+                className="h-8 rounded-lg border border-outline-variant bg-white px-2 text-xs font-semibold text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value={15}>15 baris</option>
+                <option value={25}>25 baris</option>
+                <option value={50}>50 baris</option>
+                <option value={100}>100 baris</option>
+              </select>
+            </div>
+            {pagination && (
+              <p className="text-xs text-on-surface-variant">
+                Total <span className="font-bold text-on-surface">{pagination.total}</span> data
+              </p>
+            )}
+          </div>
         </div>
 
         {loading ? (

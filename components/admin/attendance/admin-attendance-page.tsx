@@ -64,14 +64,46 @@ export function AdminAttendancePage() {
 
   useEffect(() => { void fetchData(); }, [fetchData]);
 
-  const formatTime = (t: string | null) =>
-    t ? new Date(t).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "—";
+  const formatTime = (t: string | null) => {
+    if (!t) return "—";
+    const safeStr = t.includes(" ") && !t.includes("T") ? t.replace(" ", "T") : t;
+    const d = new Date(safeStr);
+    return Number.isNaN(d.getTime())
+      ? t.slice(11, 16) || t
+      : d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  };
 
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const formatDate = (d: string) => {
+    if (!d) return "—";
+    const datePart = d.includes("T") ? d.split("T")[0] : d.split(" ")[0];
+    const parts = datePart.split("-");
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        const localD = new Date(year, month, day);
+        return localD.toLocaleDateString("id-ID", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+      }
+    }
+    const parsed = new Date(d);
+    return Number.isNaN(parsed.getTime())
+      ? d
+      : parsed.toLocaleDateString("id-ID", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+  };
 
   const initials = (name: string) =>
-    name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+    (name || "K").split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <div className="space-y-5">

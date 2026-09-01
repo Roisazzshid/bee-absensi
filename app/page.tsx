@@ -3,5 +3,5 @@ import { AttendanceDashboard } from "@/components/attendance/attendance-dashboar
 import { AppShell } from "@/components/layout/app-shell";
 
 export default function Home() {
-  return <AuthGuard><AppShell activeItem="Beranda"><AttendanceDashboard /></AppShell></AuthGuard>;
+  return <AuthGuard><AppShell activeItem="Beranda" noPadding><AttendanceDashboard /></AppShell></AuthGuard>;
 }

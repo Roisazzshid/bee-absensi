@@ -1,4 +1,4 @@
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api-absensi.lebahkreatif.or.id/api").replace(/\/$/, "");
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api").replace(/\/$/, "");
 
 export type ApiResponse<T> = { status: "success" | "error"; message: string; data: T; errors?: Record<string, string[] | string> | null };
 

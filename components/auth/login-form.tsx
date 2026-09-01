@@ -21,9 +21,14 @@ export function LoginForm() {
   useEffect(() => {
     if (status === "authenticated") {
       if (isAdmin) {
-        router.replace("/admin");
+        // Jika admin, hanya boleh lanjut ke sub-rute /admin jika ada di nextPath
+        const targetAdminPath = nextPath?.startsWith("/admin") ? nextPath : "/admin";
+        router.replace(targetAdminPath);
       } else {
-        router.replace(nextPath?.startsWith("/") && !nextPath.startsWith("/admin") ? nextPath : "/");
+        // Jika karyawan, hanya boleh lanjut ke rute karyawan (bukan /admin)
+        const targetUserPath =
+          nextPath?.startsWith("/") && !nextPath.startsWith("/admin") ? nextPath : "/";
+        router.replace(targetUserPath);
       }
     }
   }, [isAdmin, nextPath, router, status]);
