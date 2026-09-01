@@ -1,17 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // 1. TAMBAHKAN BARIS INI agar Next.js menghasilkan folder 'out'
+  output: 'export',
+
   // Matikan header X-Powered-By untuk keamanan
   poweredByHeader: false,
 
   // Abaikan error TypeScript saat build agar deploy selalu lancar
   typescript: {
     ignoreBuildErrors: true,
-  },
-
-  // Abaikan warning ESLint saat build
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 
   // Tambah security headers
