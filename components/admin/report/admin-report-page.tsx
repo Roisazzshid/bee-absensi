@@ -271,8 +271,8 @@ export function AdminReportPage() {
       {/* ── Page Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-on-surface md:text-2xl">Laporan & Export Absensi</h1>
-          <p className="mt-0.5 text-sm text-on-surface-variant">
+          <h1 className="text-xl font-bold text-foreground md:text-2xl">Laporan & Export Absensi</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Rekap dan unduh spreadsheet absensi tahunan, bulanan, mingguan, maupun harian.
           </p>
         </div>
@@ -295,9 +295,9 @@ export function AdminReportPage() {
       </div>
 
       {/* ── Period Selector Bar ── */}
-      <div className="rounded-2xl bg-white p-4 ring-1 ring-outline-variant/40 shadow-sm space-y-4">
+      <div className="rounded-3xl bg-card border border-border shadow-sm p-5 space-y-4">
         {/* Period Tabs */}
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar rounded-xl bg-surface-container-low p-1">
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar rounded-xl bg-muted p-1">
           {[
             { key: "yearly", label: "Tahunan" },
             { key: "monthly", label: "Bulanan" },
@@ -312,10 +312,10 @@ export function AdminReportPage() {
                 setPage(1);
               }}
               className={[
-                "flex-1 min-w-20 sm:min-w-24 rounded-lg py-2 text-xs md:text-sm font-semibold transition-all text-center",
+                "flex-1 rounded-xl py-3 text-sm font-semibold transition-all",
                 period === tab.key
-                  ? "bg-white text-primary shadow-sm ring-1 ring-outline-variant/40"
-                  : "text-on-surface-variant hover:text-on-surface",
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10",
               ].join(" ")}
             >
               {tab.label}
@@ -324,15 +324,15 @@ export function AdminReportPage() {
         </div>
 
         {/* Dynamic Period Inputs */}
-        <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-outline-variant/20">
+        <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-border">
           {/* Yearly Picker */}
           {period === "yearly" && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-on-surface-variant">Pilih Tahun:</span>
+              <span className="text-xs font-bold text-muted-foreground">Pilih Tahun:</span>
               <select
                 value={year}
                 onChange={(e) => { setYear(Number(e.target.value)); setPage(1); }}
-                className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-semibold text-primary"
+                className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-semibold text-primary"
               >
                 {yearsList.map((y) => (
                   <option key={y} value={y}>{y}</option>
@@ -344,11 +344,11 @@ export function AdminReportPage() {
           {/* Monthly Picker */}
           {period === "monthly" && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-on-surface-variant">Bulan & Tahun:</span>
+              <span className="text-xs font-bold text-muted-foreground">Bulan & Tahun:</span>
               <select
                 value={month}
                 onChange={(e) => { setMonth(Number(e.target.value)); setPage(1); }}
-                className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
               >
                 {MONTH_NAMES.map((name, idx) => (
                   <option key={idx + 1} value={idx + 1}>{name}</option>
@@ -357,7 +357,7 @@ export function AdminReportPage() {
               <select
                 value={year}
                 onChange={(e) => { setYear(Number(e.target.value)); setPage(1); }}
-                className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
               >
                 {yearsList.map((y) => (
                   <option key={y} value={y}>{y}</option>
@@ -369,12 +369,12 @@ export function AdminReportPage() {
           {/* Daily Picker */}
           {period === "daily" && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-on-surface-variant">Pilih Tanggal:</span>
+              <span className="text-xs font-bold text-muted-foreground">Pilih Tanggal:</span>
               <input
                 type="date"
                 value={dailyDate}
                 onChange={(e) => { setDailyDate(e.target.value); setPage(1); }}
-                className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
               />
             </div>
           )}
@@ -382,19 +382,19 @@ export function AdminReportPage() {
           {/* Weekly / Custom Range Picker */}
           {(period === "weekly" || period === "custom") && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-on-surface-variant">Dari:</span>
+              <span className="text-xs font-bold text-muted-foreground">Dari:</span>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
-                className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
               />
-              <span className="text-xs font-bold text-on-surface-variant">Sampai:</span>
+              <span className="text-xs font-bold text-muted-foreground">Sampai:</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
-                className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
               />
               {period === "weekly" && (
                 <button
@@ -418,7 +418,7 @@ export function AdminReportPage() {
             <select
               value={deptFilter}
               onChange={(e) => { setDeptFilter(e.target.value); setPage(1); }}
-              className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
             >
               <option value="">Semua Departemen</option>
               {departments.map((d) => (
@@ -430,7 +430,7 @@ export function AdminReportPage() {
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
             >
               <option value="">Semua Status</option>
               <option value="on_time">Tepat Waktu</option>
@@ -443,7 +443,7 @@ export function AdminReportPage() {
         {/* Search Bar */}
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <div className="relative flex-1">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-on-surface-variant" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
@@ -451,10 +451,10 @@ export function AdminReportPage() {
               placeholder="Cari nama atau NIP karyawan…"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="h-10 w-full rounded-xl border border-outline-variant bg-white pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="h-10 w-full rounded-xl border border-border bg-background pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
             />
           </div>
-          <button type="submit" className="h-10 rounded-xl bg-primary px-4 text-sm font-bold text-white hover:opacity-90 transition-opacity">
+          <button type="submit" className="h-10 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:opacity-90 transition-opacity">
             Cari
           </button>
         </form>
@@ -462,66 +462,70 @@ export function AdminReportPage() {
 
       {/* ── Summary Stats Cards ── */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <div className="rounded-2xl bg-primary/6 p-4 ring-1 ring-primary/20 shadow-sm">
+        <div className="relative overflow-hidden rounded-3xl bg-card border border-border p-5 shadow-sm">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 to-primary" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-primary">Total Kehadiran</span>
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/20 text-primary">
               <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
                 <rect x="9" y="3" width="6" height="4" rx="1" />
               </svg>
             </div>
           </div>
-          <p className="mt-2 text-3xl font-black text-primary">{summary.total}</p>
-          <p className="mt-0.5 text-[10px] text-on-surface-variant">Data absensi tercatat</p>
+          <p className="mt-2 text-3xl font-black text-foreground">{summary.total}</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">Data absensi tercatat</p>
         </div>
 
-        <div className="rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-200 shadow-sm">
+        <div className="relative overflow-hidden rounded-3xl bg-card border border-border p-5 shadow-sm">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-emerald-600" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-emerald-700">Tepat Waktu</span>
-            <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-500">Tepat Waktu</span>
+            <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-500">
               <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
               </svg>
             </div>
           </div>
-          <p className="mt-2 text-3xl font-black text-emerald-600">{summary.on_time}</p>
-          <p className="mt-0.5 text-[10px] text-emerald-700">
+          <p className="mt-2 text-3xl font-black text-foreground">{summary.on_time}</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">
             {summary.total > 0 ? Math.round((summary.on_time / summary.total) * 100) : 0}% dari total
           </p>
         </div>
 
-        <div className="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200 shadow-sm">
+        <div className="relative overflow-hidden rounded-3xl bg-card border border-border p-5 shadow-sm">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-700">Terlambat</span>
-            <div className="flex size-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+            <span className="text-xs font-bold text-amber-600 dark:text-amber-500">Terlambat</span>
+            <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-500">
               <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               </svg>
             </div>
           </div>
-          <p className="mt-2 text-3xl font-black text-amber-600">{summary.late}</p>
-          <p className="mt-0.5 text-[10px] text-amber-700">
+          <p className="mt-2 text-3xl font-black text-foreground">{summary.late}</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">
             {summary.total > 0 ? Math.round((summary.late / summary.total) * 100) : 0}% dari total
           </p>
         </div>
 
-        <div className="rounded-2xl bg-red-50 p-4 ring-1 ring-red-200 shadow-sm">
+        <div className="relative overflow-hidden rounded-3xl bg-card border border-border p-5 shadow-sm">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-400 to-red-600" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-red-600">Belum Hadir</span>
-            <div className="flex size-8 items-center justify-center rounded-lg bg-red-100 text-red-600">
+            <span className="text-xs font-bold text-red-600 dark:text-red-500">Belum Hadir</span>
+            <div className="flex size-8 items-center justify-center rounded-lg bg-red-500/20 text-red-600 dark:text-red-500">
               <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
             </div>
           </div>
-          <p className="mt-2 text-3xl font-black text-red-600">{summary.absent}</p>
-          <p className="mt-0.5 text-[10px] text-red-600">Perlu tindak lanjut</p>
+          <p className="mt-2 text-3xl font-black text-foreground">{summary.absent}</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">Perlu tindak lanjut</p>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-2xl bg-red-50 p-4 text-sm text-error ring-1 ring-red-200 flex items-center gap-2">
+        <div className="rounded-2xl bg-red-50 dark:bg-red-950/50 p-4 text-sm text-red-600 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/50 flex items-center gap-2">
           <svg className="size-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
@@ -532,16 +536,16 @@ export function AdminReportPage() {
       {/* ── Table Preview ── */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
             Preview Data {periodLabel && <span className="text-primary font-bold">({periodLabel.replace(/_/g, " ")})</span>}
           </p>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-on-surface-variant">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <span>Tampilkan:</span>
               <select
                 value={perPage}
                 onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
-                className="h-8 rounded-lg border border-outline-variant bg-white px-2 text-xs font-semibold text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                className="h-8 rounded-lg border border-border bg-background px-2 text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value={15}>15 baris</option>
                 <option value={25}>25 baris</option>
@@ -550,8 +554,8 @@ export function AdminReportPage() {
               </select>
             </div>
             {pagination && (
-              <p className="text-xs text-on-surface-variant">
-                Total <span className="font-bold text-on-surface">{pagination.total}</span> data
+              <p className="text-xs text-muted-foreground">
+                Total <span className="font-bold text-foreground">{pagination.total}</span> data
               </p>
             )}
           </div>
@@ -560,46 +564,46 @@ export function AdminReportPage() {
         {loading ? (
           <div className="space-y-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-16 animate-pulse rounded-2xl bg-surface-container" />
+              <div key={i} className="h-16 animate-pulse rounded-2xl bg-muted" />
             ))}
           </div>
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl bg-white py-16 ring-1 ring-outline-variant/40 shadow-sm">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-surface-container-low">
-              <svg className="size-7 text-on-surface-variant" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+          <div className="flex flex-col items-center justify-center rounded-3xl bg-card border border-border py-16 shadow-sm">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-muted">
+              <svg className="size-7 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                 <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <p className="mt-3 font-bold text-on-surface">Tidak ada data absensi</p>
-            <p className="mt-1 text-sm text-on-surface-variant">Tidak ada data untuk filter periode yang dipilih.</p>
+            <p className="mt-3 font-bold text-foreground">Tidak ada data absensi</p>
+            <p className="mt-1 text-sm text-muted-foreground">Tidak ada data untuk filter periode yang dipilih.</p>
           </div>
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-hidden rounded-2xl bg-white ring-1 ring-outline-variant/40 shadow-sm">
+            <div className="hidden md:block overflow-hidden rounded-3xl bg-card border border-border shadow-sm">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-outline-variant/30 bg-surface-container-low/60">
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Tanggal</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Karyawan</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Departemen</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Masuk</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Pulang</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Foto Bukti</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Durasi</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Status</th>
+                  <tr className="border-b border-border bg-muted/50">
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Tanggal</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Karyawan</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Departemen</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Masuk</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Pulang</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Foto Bukti</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Durasi</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-outline-variant/20">
+                <tbody className="divide-y divide-border">
                   {items.map((item) => {
                     const cfg = STATUS_CONFIG[item.status] ?? {
                       label: item.status,
-                      dot: "bg-surface-container",
-                      badge: "bg-surface-container text-on-surface-variant ring-outline-variant",
+                      dot: "bg-muted",
+                      badge: "bg-muted text-muted-foreground ring-border",
                     };
                     return (
-                      <tr key={item.id} className="hover:bg-surface-container-low/40 transition-colors">
-                        <td className="px-4 py-3.5 font-medium text-xs text-on-surface">
+                      <tr key={item.id} className="hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-3.5 font-medium text-xs text-foreground">
                           {formatDate(item.date)}
                         </td>
                         <td className="px-4 py-3.5">
@@ -608,19 +612,19 @@ export function AdminReportPage() {
                               {initials(item.user.full_name)}
                             </div>
                             <div>
-                              <p className="font-semibold text-on-surface text-xs">{item.user.full_name}</p>
-                              <p className="text-[10px] text-on-surface-variant">{item.user.nip}</p>
+                              <p className="font-semibold text-foreground text-xs">{item.user.full_name}</p>
+                              <p className="text-[10px] text-muted-foreground">{item.user.nip}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3.5 text-xs text-on-surface">
+                        <td className="px-4 py-3.5 text-xs text-foreground">
                           <p>{item.user.department}</p>
-                          <p className="text-[10px] text-on-surface-variant">{item.user.position}</p>
+                          <p className="text-[10px] text-muted-foreground">{item.user.position}</p>
                         </td>
-                        <td className="px-4 py-3.5 font-mono text-xs font-semibold text-on-surface">
+                        <td className="px-4 py-3.5 font-mono text-xs font-semibold text-foreground">
                           {formatTime(item.clock_in_time)}
                         </td>
-                        <td className="px-4 py-3.5 font-mono text-xs font-semibold text-on-surface">
+                        <td className="px-4 py-3.5 font-mono text-xs font-semibold text-foreground">
                           {formatTime(item.clock_out_time)}
                         </td>
                         <td className="px-4 py-3.5">
@@ -629,7 +633,7 @@ export function AdminReportPage() {
                               <button
                                 type="button"
                                 onClick={() => setPhotoModal({ item, type: "in" })}
-                                className="inline-flex items-center gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest px-2 py-0.5 text-[11px] font-semibold text-primary hover:border-primary hover:bg-primary/5 transition-all"
+                                className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-0.5 text-[11px] font-semibold text-primary hover:border-primary hover:bg-primary/5 transition-all"
                               >
                                 📷 Masuk
                               </button>
@@ -638,21 +642,21 @@ export function AdminReportPage() {
                               <button
                                 type="button"
                                 onClick={() => setPhotoModal({ item, type: "out" })}
-                                className="inline-flex items-center gap-1 rounded-lg border border-outline-variant bg-surface-container-lowest px-2 py-0.5 text-[11px] font-semibold text-primary hover:border-primary hover:bg-primary/5 transition-all"
+                                className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-0.5 text-[11px] font-semibold text-primary hover:border-primary hover:bg-primary/5 transition-all"
                               >
                                 📷 Pulang
                               </button>
                             ) : null}
                             {!item.clock_in_image_url && !item.clock_out_image_url && (
-                              <span className="text-[11px] text-on-surface-variant/40">—</span>
+                              <span className="text-[11px] text-muted-foreground/40">—</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3.5 text-xs text-on-surface-variant">
+                        <td className="px-4 py-3.5 text-xs text-muted-foreground">
                           {item.duration ?? "—"}
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className={["inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1", cfg.badge].join(" ")}>
+                          <span className={["inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 dark:ring-0", cfg.badge].join(" ")}>
                             <span className={["size-1.5 rounded-full", cfg.dot].join(" ")} />
                             {cfg.label}
                           </span>
@@ -669,45 +673,45 @@ export function AdminReportPage() {
               {items.map((item) => {
                 const cfg = STATUS_CONFIG[item.status] ?? {
                   label: item.status,
-                  dot: "bg-surface-container",
-                  badge: "bg-surface-container text-on-surface-variant ring-outline-variant",
+                  dot: "bg-muted",
+                  badge: "bg-muted text-muted-foreground ring-border",
                 };
                 return (
-                  <div key={item.id} className="rounded-2xl bg-white p-4 ring-1 ring-outline-variant/40 shadow-sm">
+                  <div key={item.id} className="rounded-3xl bg-card border border-border shadow-sm p-5">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                           {initials(item.user.full_name)}
                         </div>
                         <div>
-                          <p className="font-bold text-on-surface text-xs">{item.user.full_name}</p>
-                          <p className="text-[10px] text-on-surface-variant">{item.user.nip} · {item.user.department}</p>
+                          <p className="font-bold text-foreground text-xs">{item.user.full_name}</p>
+                          <p className="text-[10px] text-muted-foreground">{item.user.nip} · {item.user.department}</p>
                         </div>
                       </div>
-                      <span className={["shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1", cfg.badge].join(" ")}>
+                      <span className={["shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 dark:ring-0", cfg.badge].join(" ")}>
                         <span className={["size-1.5 rounded-full", cfg.dot].join(" ")} />
                         {cfg.label}
                       </span>
                     </div>
 
-                    <div className="mt-3 grid grid-cols-3 gap-2 border-t border-outline-variant/20 pt-2 text-[11px] text-on-surface-variant">
+                    <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-2 text-[11px] text-muted-foreground">
                       <div>
                         <p className="text-[10px] opacity-60">Tanggal</p>
-                        <p className="font-semibold text-on-surface">{formatDate(item.date)}</p>
+                        <p className="font-semibold text-foreground">{formatDate(item.date)}</p>
                       </div>
                       <div>
                         <p className="text-[10px] opacity-60">Masuk - Pulang</p>
-                        <p className="font-mono font-semibold text-on-surface">{formatTime(item.clock_in_time)} - {formatTime(item.clock_out_time)}</p>
+                        <p className="font-mono font-semibold text-foreground">{formatTime(item.clock_in_time)} - {formatTime(item.clock_out_time)}</p>
                       </div>
                       <div>
                         <p className="text-[10px] opacity-60">Durasi</p>
-                        <p className="font-semibold text-on-surface">{item.duration ?? "—"}</p>
+                        <p className="font-semibold text-foreground">{item.duration ?? "—"}</p>
                       </div>
                     </div>
 
                     {(item.clock_in_image_url || item.clock_out_image_url) && (
-                      <div className="mt-2.5 flex items-center gap-2 border-t border-outline-variant/10 pt-2">
-                        <span className="text-[10px] font-bold text-on-surface-variant">Foto:</span>
+                      <div className="mt-2.5 flex items-center gap-2 border-t border-border/50 pt-2">
+                        <span className="text-[10px] font-bold text-muted-foreground">Foto:</span>
                         {item.clock_in_image_url && (
                           <button
                             type="button"
@@ -739,15 +743,15 @@ export function AdminReportPage() {
       {/* ── Pagination ── */}
       {pagination && pagination.last_page > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-xs text-on-surface-variant">
-            Halaman <span className="font-bold text-on-surface">{pagination.current_page}</span> dari{" "}
-            <span className="font-bold text-on-surface">{pagination.last_page}</span>
+          <p className="text-xs text-muted-foreground">
+            Halaman <span className="font-bold text-foreground">{pagination.current_page}</span> dari{" "}
+            <span className="font-bold text-foreground">{pagination.last_page}</span>
           </p>
           <div className="flex gap-2">
             <button
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
-              className="flex items-center gap-1.5 rounded-xl border border-outline-variant bg-white px-3.5 py-2 text-xs font-semibold text-on-surface disabled:opacity-40 hover:bg-surface-container-low transition-colors"
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-3.5 py-2 text-xs font-semibold text-foreground disabled:opacity-40 hover:bg-muted transition-colors"
             >
               <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
               Prev
@@ -755,7 +759,7 @@ export function AdminReportPage() {
             <button
               disabled={page >= pagination.last_page}
               onClick={() => setPage((p) => p + 1)}
-              className="flex items-center gap-1.5 rounded-xl border border-outline-variant bg-white px-3.5 py-2 text-xs font-semibold text-on-surface disabled:opacity-40 hover:bg-surface-container-low transition-colors"
+              className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-3.5 py-2 text-xs font-semibold text-foreground disabled:opacity-40 hover:bg-muted transition-colors"
             >
               Next
               <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
@@ -767,8 +771,8 @@ export function AdminReportPage() {
       {/* ── Photo Proof Modal ── */}
       {photoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-            <div className="flex items-center justify-between border-b border-outline-variant/30 px-5 py-4">
+          <div className="w-full max-w-md rounded-3xl bg-background border border-border shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <div className="flex items-center gap-2.5">
                 <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -777,17 +781,17 @@ export function AdminReportPage() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-on-surface">
+                  <h2 className="text-base font-bold text-foreground">
                     Foto Bukti Absen {photoModal.type === "in" ? "Masuk" : "Pulang"}
                   </h2>
-                  <p className="text-xs text-on-surface-variant">
+                  <p className="text-xs text-muted-foreground">
                     {photoModal.item.user.full_name} ({photoModal.item.user.nip})
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setPhotoModal(null)}
-                className="flex size-8 items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low"
+                className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted"
               >
                 <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path d="M18 6L6 18M6 6l12 12" />
@@ -795,7 +799,7 @@ export function AdminReportPage() {
               </button>
             </div>
 
-            <div className="bg-black flex items-center justify-center aspect-square w-full overflow-hidden">
+            <div className="bg-black/90 flex items-center justify-center aspect-square w-full overflow-hidden">
               <img
                 src={
                   photoModal.type === "in"
@@ -811,10 +815,10 @@ export function AdminReportPage() {
               />
             </div>
 
-            <div className="p-4 bg-surface-container-lowest space-y-2 text-xs">
+            <div className="p-4 bg-muted/30 space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-on-surface-variant">Waktu Absensi:</span>
-                <span className="font-mono font-bold text-on-surface">
+                <span className="text-muted-foreground">Waktu Absensi:</span>
+                <span className="font-mono font-bold text-foreground">
                   {formatDate(photoModal.item.date)} ·{" "}
                   {formatTime(
                     photoModal.type === "in"
@@ -824,14 +828,14 @@ export function AdminReportPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-on-surface-variant">Departemen:</span>
-                <span className="font-semibold text-on-surface">
+                <span className="text-muted-foreground">Departemen:</span>
+                <span className="font-semibold text-foreground">
                   {photoModal.item.user.department} — {photoModal.item.user.position}
                 </span>
               </div>
               {(photoModal.type === "in" ? photoModal.item.clock_in_lat : photoModal.item.clock_out_lat) && (
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Koordinat GPS:</span>
+                  <span className="text-muted-foreground">Koordinat GPS:</span>
                   <span className="font-mono font-semibold text-primary">
                     {photoModal.type === "in"
                       ? `${photoModal.item.clock_in_lat}, ${photoModal.item.clock_in_long}`
@@ -841,11 +845,11 @@ export function AdminReportPage() {
               )}
             </div>
 
-            <div className="p-4 border-t border-outline-variant/30">
+            <div className="p-4 border-t border-border">
               <button
                 type="button"
                 onClick={() => setPhotoModal(null)}
-                className="w-full rounded-2xl bg-primary py-2.5 text-xs font-bold text-white hover:opacity-90 transition-opacity"
+                className="w-full rounded-2xl bg-primary py-2.5 text-xs font-bold text-primary-foreground hover:opacity-90 transition-opacity"
               >
                 Tutup
               </button>

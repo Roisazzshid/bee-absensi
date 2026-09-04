@@ -35,8 +35,8 @@ const TYPE_LABELS: Record<LeaveType, string> = {
 
 const STATUS_CFG: Record<LeaveStatus, { tone: "primary" | "success" | "error"; label: string; border: string }> = {
   pending:  { tone: "primary",  label: "Menunggu",  border: "border-l-primary" },
-  approved: { tone: "success",  label: "Disetujui", border: "border-l-secondary" },
-  rejected: { tone: "error",    label: "Ditolak",   border: "border-l-error" },
+  approved: { tone: "success",  label: "Disetujui", border: "border-l-emerald-500" },
+  rejected: { tone: "error",    label: "Ditolak",   border: "border-l-red-500" },
 };
 
 function fmtDate(d: string) {
@@ -59,7 +59,7 @@ function dayCount(start: string, end: string) {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <span className="mb-1.5 block text-xs font-bold text-on-surface-variant">{children}</span>;
+  return <span className="mb-1.5 block text-xs font-bold text-muted-foreground">{children}</span>;
 }
 
 function FormSelect({
@@ -82,11 +82,11 @@ function FormSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="min-h-12 w-full appearance-none rounded-2xl border border-outline-variant bg-surface-container-lowest px-4 pr-10 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+        className="min-h-12 w-full appearance-none rounded-2xl border border-border bg-card px-4 pr-10 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
       >
         {children}
       </select>
-      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-on-surface-variant">
+      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground">
         ▾
       </span>
     </div>
@@ -104,17 +104,17 @@ function FileUploadZone({
   return (
     <div
       onClick={() => inputRef.current?.click()}
-      className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-lowest p-8 transition hover:border-primary hover:bg-primary/5"
+      className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card p-8 transition hover:border-primary hover:bg-primary/5"
     >
       <span className="text-4xl">{file ? "📎" : "☁️"}</span>
       {file ? (
         <>
           <span className="text-sm font-bold text-primary">{file.name}</span>
-          <span className="text-xs text-on-surface-variant">{(file.size / 1024).toFixed(0)} KB</span>
+          <span className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(0)} KB</span>
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onFileChange(null); }}
-            className="mt-1 text-xs font-bold text-error"
+            className="mt-1 text-xs font-bold text-red-600 dark:text-red-500"
           >
             Hapus
           </button>
@@ -122,7 +122,7 @@ function FileUploadZone({
       ) : (
         <>
           <span className="text-sm font-bold text-primary">Ketuk untuk upload file</span>
-          <span className="text-xs text-on-surface-variant">PDF, JPG, PNG hingga 5 MB</span>
+          <span className="text-xs text-muted-foreground">PDF, JPG, PNG hingga 5 MB</span>
         </>
       )}
       <input
@@ -148,24 +148,24 @@ function LeaveRequestItem({
   const cfg = STATUS_CFG[item.status];
   const days = dayCount(item.start_date, item.end_date);
   return (
-    <div className={`soft-shadow relative overflow-hidden rounded-2xl border-l-4 bg-surface-container-lowest p-4 ${cfg.border}`}>
+    <div className={`shadow-sm relative overflow-hidden rounded-2xl border-l-4 bg-card border border-border p-4 ${cfg.border}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-bold text-on-surface">{TYPE_LABELS[item.type]}</span>
+            <span className="font-bold text-foreground">{TYPE_LABELS[item.type]}</span>
             <Badge tone={cfg.tone}>{cfg.label}</Badge>
           </div>
-          <p className="mt-1 text-sm text-on-surface-variant">
+          <p className="mt-1 text-sm text-muted-foreground">
             {fmtDate(item.start_date)} – {fmtDate(item.end_date)}
             <span className="ml-2 font-bold text-primary">({days} hari)</span>
           </p>
-          <p className="mt-1 line-clamp-2 text-xs text-on-surface-variant">{item.reason}</p>
+          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.reason}</p>
         </div>
         {item.status === "pending" && (
           <button
             onClick={() => onCancel(item.id)}
             disabled={cancelling === item.id}
-            className="shrink-0 rounded-xl border border-error/30 bg-red-50 px-3 py-1.5 text-xs font-bold text-error transition hover:bg-red-100 disabled:opacity-60"
+            className="shrink-0 rounded-xl border border-red-500/30 bg-red-50 dark:bg-red-950/50 px-3 py-1.5 text-xs font-bold text-red-600 dark:text-red-500 transition hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-60"
           >
             {cancelling === item.id ? "…" : "Batal"}
           </button>
@@ -177,9 +177,9 @@ function LeaveRequestItem({
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center gap-3 py-14 text-center text-on-surface-variant">
+    <div className="flex flex-col items-center gap-3 py-14 text-center text-muted-foreground">
       <span className="text-5xl">📋</span>
-      <p className="text-sm font-semibold">Belum ada pengajuan</p>
+      <p className="text-sm font-semibold text-foreground">Belum ada pengajuan</p>
       <p className="text-xs">Gunakan form di atas untuk mengajukan izin atau cuti.</p>
     </div>
   );
@@ -330,8 +330,8 @@ export function LeaveRequestPage() {
 
       {/* ── Form pengajuan ── */}
       <div>
-        <h1 className="text-xl font-bold text-on-surface">Pengajuan Izin / Cuti</h1>
-        <p className="mt-1 text-sm text-on-surface-variant">Ajukan izin, cuti, atau sakit kepada admin.</p>
+        <h1 className="text-xl font-bold text-foreground">Pengajuan Izin / Cuti</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Ajukan izin, cuti, atau sakit kepada admin.</p>
       </div>
 
       <Card className="p-5">
@@ -353,7 +353,7 @@ export function LeaveRequestPage() {
             <FieldLabel>Rentang Tanggal</FieldLabel>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="leave-start-date" className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Mulai</label>
+                <label htmlFor="leave-start-date" className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Mulai</label>
                 <TextInput
                   id="leave-start-date"
                   type="date"
@@ -364,7 +364,7 @@ export function LeaveRequestPage() {
                 />
               </div>
               <div>
-                <label htmlFor="leave-end-date" className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Selesai</label>
+                <label htmlFor="leave-end-date" className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Selesai</label>
                 <TextInput
                   id="leave-end-date"
                   type="date"
@@ -390,26 +390,26 @@ export function LeaveRequestPage() {
               onChange={(e) => setReason(e.target.value)}
               placeholder="Jelaskan alasan pengajuan Anda (min. 10 karakter)…"
               required
-              className="min-h-[96px] w-full resize-none rounded-2xl border border-outline-variant bg-surface-container-lowest px-4 py-3 text-sm text-on-surface outline-none transition placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="min-h-[96px] w-full resize-none rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
-            <p className="mt-1 text-right text-[10px] text-on-surface-variant">{reason.length}/1000</p>
+            <p className="mt-1 text-right text-[10px] text-muted-foreground">{reason.length}/1000</p>
           </div>
 
           {/* Lampiran */}
           <div>
-            <FieldLabel>Dokumen Pendukung <span className="font-normal text-on-surface-variant">(opsional)</span></FieldLabel>
-            <p className="mb-2 text-xs text-on-surface-variant">Mis. Surat Keterangan Dokter</p>
+            <FieldLabel>Dokumen Pendukung <span className="font-normal text-muted-foreground">(opsional)</span></FieldLabel>
+            <p className="mb-2 text-xs text-muted-foreground">Mis. Surat Keterangan Dokter</p>
             <FileUploadZone file={file} onFileChange={setFile} />
           </div>
 
           {/* Alert */}
           {formError && (
-            <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm leading-5 text-error">
+            <p role="alert" className="rounded-2xl bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm leading-5 text-red-600 dark:text-red-400">
               {formError}
             </p>
           )}
           {formSuccess && (
-            <p role="status" className="rounded-2xl bg-secondary-container px-4 py-3 text-sm leading-5 text-secondary">
+            <p role="status" className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 px-4 py-3 text-sm leading-5 text-emerald-600 dark:text-emerald-400">
               {formSuccess}
             </p>
           )}
@@ -430,10 +430,10 @@ export function LeaveRequestPage() {
       {/* ── Daftar pengajuan ── */}
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-bold text-on-surface">Riwayat Pengajuan</h2>
-          <div className="flex gap-3 text-xs text-on-surface-variant">
+          <h2 className="text-base font-bold text-foreground">Riwayat Pengajuan</h2>
+          <div className="flex gap-3 text-xs text-muted-foreground">
             <span className="font-bold text-primary">{summary.pending}</span> menunggu ·{" "}
-            <span className="font-bold text-secondary">{summary.approved}</span> disetujui
+            <span className="font-bold text-emerald-600 dark:text-emerald-500">{summary.approved}</span> disetujui
           </div>
         </div>
 
@@ -448,7 +448,7 @@ export function LeaveRequestPage() {
                 "pressable rounded-full border px-4 py-1.5 text-xs font-bold transition",
                 statusFilter === key
                   ? "border-primary bg-primary/10 text-primary"
-                  : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low",
+                  : "border-border bg-card text-muted-foreground hover:bg-muted",
               ].join(" ")}
             >
               {label}
@@ -458,7 +458,7 @@ export function LeaveRequestPage() {
 
         {/* Error */}
         {listError && (
-          <p role="alert" className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-error">
+          <p role="alert" className="mb-4 rounded-2xl bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm text-red-600 dark:text-red-400">
             {listError}
           </p>
         )}
@@ -467,7 +467,7 @@ export function LeaveRequestPage() {
         {loading && (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 animate-pulse rounded-2xl border-l-4 border-l-surface-container-high bg-surface-container-low" />
+              <div key={i} className="h-20 animate-pulse rounded-2xl border border-border bg-muted" />
             ))}
           </div>
         )}
@@ -504,7 +504,7 @@ export function LeaveRequestPage() {
             )}
 
             {items.length > 0 && pagination && pagination.current_page >= pagination.last_page && (
-              <p className="py-4 text-center text-xs text-on-surface-variant">
+              <p className="py-4 text-center text-xs text-muted-foreground">
                 Semua {pagination.total} pengajuan ditampilkan.
               </p>
             )}

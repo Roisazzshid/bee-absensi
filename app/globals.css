@@ -2,28 +2,42 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f9fc;
-  --foreground: #191c1e;
+  --background: #f9fafb; /* Soft white/gray background */
+  --foreground: #0a0a0a; /* Dark text */
+  --card: #ffffff; /* White cards */
+  --card-foreground: #0a0a0a;
+  --border: #e5e7eb; /* Light border */
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280; /* Gray text */
+}
+
+.dark {
+  --background: #000000; /* Pitch black background */
+  --foreground: #ffffff; /* White text */
+  --card: #0a0a0a; /* Dark cards */
+  --card-foreground: #ffffff;
+  --border: #27272a; /* Dark border */
+  --muted: #1a1a1a;
+  --muted-foreground: #a1a1aa;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-surface: #f7f9fc;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f2f4f7;
-  --color-surface-container: #eceef1;
-  --color-surface-container-high: #e6e8eb;
-  --color-on-surface: #191c1e;
-  --color-on-surface-variant: #414751;
-  --color-primary: #075fab;
-  --color-primary-container: #5d9cec;
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  
+  --color-primary: #d97706; /* orange */
+  --color-primary-container: #fef3c7; /* light yellow */
   --color-on-primary: #ffffff;
-  --color-secondary: #006b5b;
-  --color-secondary-container: #7cf8dd;
-  --color-outline: #727782;
-  --color-outline-variant: #c1c6d3;
-  --color-error: #ba1a1a;
+  --color-secondary: #f97316;
+  --color-secondary-container: #fed7aa;
+  --color-outline: #92400e;
+  --color-outline-variant: #fde68a;
+  --color-error: #dc2626;
   --font-sans: "Plus Jakarta Sans", Arial, sans-serif;
   --radius-card: 1rem;
 }
@@ -61,7 +75,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   outline-offset: 2px;
 }
 
-.soft-shadow { box-shadow: 0 4px 20px rgb(25 28 30 / 5%); }
+.soft-shadow { box-shadow: 0 4px 20px rgb(28 20 0 / 8%); }
 .pressable { transition: transform 150ms ease, box-shadow 150ms ease; }
 .pressable:active { transform: scale(0.98); }
 
@@ -70,19 +84,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   width: 100%;
   height: 2.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-outline-variant);
-  background: var(--color-surface-container-low);
+  border: 1px solid #27272a;
+  background: #0a0a0a;
   padding: 0 0.75rem;
   font-size: 0.875rem;
-  color: var(--color-on-surface);
+  color: #ffffff;
   transition: box-shadow 150ms ease, border-color 150ms ease;
 }
 .field-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(7 95 171 / 15%);
+  box-shadow: 0 0 0 3px rgb(217 119 6 / 20%);
 }
-.field-input::placeholder { color: var(--color-on-surface-variant); opacity: 0.5; }
+.field-input::placeholder { color: #a1a1aa; opacity: 0.5; }
 
 /* Sembunyikan scrollbar tapi tetap bisa scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }

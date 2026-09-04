@@ -2,7 +2,8 @@
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 
 type DashboardData = {
   today: string;
@@ -59,7 +60,7 @@ export function AdminDashboard() {
 
   if (loading) return <DashboardSkeleton />;
   if (error) return (
-    <div className="rounded-2xl bg-red-50 p-5 text-sm text-error ring-1 ring-red-200 flex items-center gap-3">
+    <div className="rounded-2xl p-5 text-sm flex items-center gap-3 bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900/50">
       <span className="text-xl">⚠️</span> {error}
     </div>
   );
@@ -69,267 +70,432 @@ export function AdminDashboard() {
     ? Math.round((data.attendance.present / data.total_employees) * 100)
     : 0;
 
-  const maxPresent = Math.max(...data.chart_last_7_days.map((d) => d.present), 1);
-
   return (
     <div className="space-y-5">
       {/* ── Header ── */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-on-surface md:text-2xl">
-            {greeting()}, {user?.profile?.full_name?.split(" ")[0] ?? "Admin"} 👋
+          <h1 className="text-2xl font-bold text-foreground">
+            {greeting()}, {user?.profile?.full_name ?? "Administrator"}!
           </h1>
-          <p className="mt-0.5 text-sm text-on-surface-variant">{todayLabel}</p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => router.push("/admin/laporan")}
-            className="flex items-center gap-1.5 rounded-xl bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
-          >
-            <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <div className="flex items-center gap-2 mt-1">
+            <svg className="size-4 text-primary" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            <span className="hidden sm:inline">Laporan & Export</span>
-            <span className="sm:hidden">Laporan</span>
-          </button>
-          {/* Live badge */}
-          <div className="flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1.5 ring-1 ring-green-200">
-            <span className="size-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[11px] font-bold text-green-700">Live</span>
+            <p className="text-sm text-primary">{todayLabel}</p>
           </div>
         </div>
+        <button
+          onClick={() => router.push("/admin/laporan")}
+          className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 active:scale-95 bg-foreground dark:bg-muted"
+        >
+          <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+          </svg>
+          <span className="hidden sm:inline">Export Laporan</span>
+        </button>
       </div>
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard
-          label="Total Hadir"
+          label="TOTAL HADIR"
           value={data.attendance.present}
-          sub={`dari ${data.total_employees} karyawan`}
-          colorBg="bg-primary/6"
-          colorText="text-primary"
+          iconBgClass="bg-green-500/15"
           icon={
-            <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
+            <svg className="size-6 text-green-600 dark:text-green-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
               <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
             </svg>
           }
         />
         <StatCard
-          label="Tepat Waktu"
+          label="TEPAT WAKTU"
           value={data.attendance.on_time}
-          sub={`${data.total_employees > 0 ? Math.round((data.attendance.on_time / data.total_employees) * 100) : 0}% dari total`}
-          colorBg="bg-emerald-50"
-          colorText="text-emerald-600"
+          iconBgClass="bg-primary/15"
           icon={
-            <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-            </svg>
-          }
-        />
-        <StatCard
-          label="Terlambat"
-          value={data.attendance.late}
-          sub="hari ini"
-          colorBg="bg-amber-50"
-          colorText="text-amber-600"
-          icon={
-            <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-          }
-        />
-        <StatCard
-          label="Belum Absen"
-          value={data.attendance.absent}
-          sub="perlu tindak lanjut"
-          colorBg="bg-red-50"
-          colorText="text-red-500"
-          icon={
-            <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <svg className="size-6 text-primary" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+          }
+        />
+        <StatCard
+          label="TERLAMBAT"
+          value={data.attendance.late}
+          iconBgClass="bg-orange-500/15"
+          icon={
+            <svg className="size-6 text-orange-600 dark:text-orange-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          }
+        />
+        <StatCard
+          label="BELUM ABSEN"
+          value={data.attendance.absent}
+          iconBgClass="bg-red-500/15"
+          icon={
+            <svg className="size-6 text-red-600 dark:text-red-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           }
         />
       </div>
 
-      {/* ── Row 2: Progress + Leave ── */}
-      <div className="grid gap-3 md:grid-cols-3">
-        {/* Attendance rate card */}
-        <div className="rounded-2xl bg-white p-5 ring-1 ring-outline-variant/40 shadow-sm md:col-span-2">
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <div>
-              <h2 className="font-bold text-on-surface">Tingkat Kehadiran</h2>
-              <p className="text-xs text-on-surface-variant mt-0.5">Persentase karyawan hadir hari ini</p>
-            </div>
-            <div className="text-right shrink-0">
-              <p className="text-3xl font-black text-primary">{attendanceRate}%</p>
-              <p className="text-[10px] text-on-surface-variant">dari target 100%</p>
-            </div>
+      {/* ── Row 2: Persentase Kehadiran + Pengajuan Izin ── */}
+      <div className="grid gap-3 lg:grid-cols-5">
+        {/* Donut chart card */}
+        <div className="relative overflow-hidden rounded-3xl p-5 lg:col-span-3 border border-border bg-card shadow-2xl">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#f5c518] to-[#d97706]" />
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-base text-foreground">Persentase Kehadiran</h2>
+            <span className="rounded-full px-3 py-1 text-xs font-semibold bg-primary/10 text-primary">Hari Ini</span>
           </div>
 
-          {/* Segmented progress bar */}
-          <div className="h-3 rounded-full bg-surface-container-high overflow-hidden">
-            <div className="flex h-full">
-              <div
-                className="h-full bg-emerald-500 transition-all duration-700"
-                style={{ width: `${data.total_employees > 0 ? (data.attendance.on_time / data.total_employees) * 100 : 0}%` }}
-              />
-              <div
-                className="h-full bg-amber-400 transition-all duration-700"
-                style={{ width: `${data.total_employees > 0 ? (data.attendance.late / data.total_employees) * 100 : 0}%` }}
-              />
-            </div>
+          {/* SVG Donut Chart */}
+          <div className="flex justify-center my-4">
+            <DonutChart
+              onTime={data.attendance.on_time}
+              late={data.attendance.late}
+              absent={data.attendance.absent}
+              total={data.total_employees}
+              rate={attendanceRate}
+            />
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
-            <Legend color="bg-emerald-500" label="Tepat Waktu" value={data.attendance.on_time} />
-            <Legend color="bg-amber-400" label="Terlambat" value={data.attendance.late} />
-            <Legend color="bg-surface-container-high" label="Belum Hadir" value={data.attendance.absent} />
+          {/* Legend */}
+          <div className="flex items-center justify-center gap-6 mt-4">
+            <div className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-[#f5c518]" />
+              <span className="text-xs text-muted-foreground">Tepat Waktu ({data.attendance.on_time})</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-[#f97316]" />
+              <span className="text-xs text-muted-foreground">Terlambat ({data.attendance.late})</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-[#ef4444]" />
+              <span className="text-xs text-muted-foreground">Belum ({data.attendance.absent})</span>
+            </div>
           </div>
         </div>
 
-        {/* Leave card */}
-        <div className="rounded-2xl bg-white p-5 ring-1 ring-outline-variant/40 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="font-bold text-on-surface">Pengajuan Izin</h2>
+        {/* Right column */}
+        <div className="lg:col-span-2 flex flex-col">
+          {/* Pengajuan Izin Card — full height */}
+          <div className="relative overflow-hidden flex-1 rounded-3xl p-4 border border-border bg-card shadow-2xl">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#f5c518] to-[#d97706]" />
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#f5c518] to-[#d97706]">
+                <svg className="size-4 text-white dark:text-black" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M9 12h6M9 16h4M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <path d="M14 3l5 5h-5V3z" />
+                </svg>
+              </div>
+              <h2 className="font-bold text-sm text-foreground">Pengajuan Izin</h2>
+            </div>
+
+            {/* Menunggu Persetujuan */}
             <button
-              onClick={() => router.push("/admin/izin")}
-              className="text-xs font-bold text-primary hover:underline"
+              onClick={() => router.push("/admin/izin?status=pending")}
+              className="flex w-full items-center justify-between py-3 px-1 transition-colors rounded-lg hover:bg-muted border-b border-border"
             >
-              Lihat →
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-[#f97316]" />
+                <span className="text-sm text-muted-foreground">Menunggu Persetujuan</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm text-foreground">{data.leave_requests.pending}</span>
+                <svg className="size-4 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </div>
             </button>
-          </div>
 
-          <button
-            onClick={() => router.push("/admin/izin?status=pending")}
-            className="flex w-full items-center justify-between rounded-xl bg-amber-50 p-3.5 ring-1 ring-amber-200 hover:ring-amber-400 transition-all text-left"
-          >
-            <div>
-              <p className="text-[11px] font-semibold text-amber-700">Menunggu Persetujuan</p>
-              <p className="text-2xl font-black text-amber-600 mt-0.5">{data.leave_requests.pending}</p>
-            </div>
-            <div className="flex size-10 items-center justify-center rounded-xl bg-amber-100">
-              <svg className="size-5 text-amber-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </button>
-
-          <div className="flex items-center justify-between rounded-xl bg-emerald-50 p-3.5 ring-1 ring-emerald-200">
-            <div>
-              <p className="text-[11px] font-semibold text-emerald-700">Disetujui Bulan Ini</p>
-              <p className="text-2xl font-black text-emerald-600 mt-0.5">{data.leave_requests.approved_this_month}</p>
-            </div>
-            <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-100">
-              <svg className="size-5 text-emerald-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
+            {/* Disetujui Bulan Ini */}
+            <button
+              onClick={() => router.push("/admin/izin?status=approved")}
+              className="flex w-full items-center justify-between py-3 px-1 transition-colors rounded-lg hover:bg-muted mt-1"
+            >
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-[#22c55e]" />
+                <span className="text-sm text-muted-foreground">Disetujui Bulan Ini</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm text-foreground">{data.leave_requests.approved_this_month}</span>
+                <svg className="size-4 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </div>
+            </button>
           </div>
         </div>
       </div>
 
       {/* ── Bar Chart 7 hari ── */}
-      <div className="rounded-2xl bg-white p-5 ring-1 ring-outline-variant/40 shadow-sm">
-        <div className="flex items-center justify-between mb-5">
+      <div className="relative overflow-hidden rounded-3xl p-5 border border-border bg-card shadow-2xl mt-3">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#f5c518] to-[#d97706]" />
+        <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="font-bold text-on-surface">Kehadiran 7 Hari Terakhir</h2>
-            <p className="text-xs text-on-surface-variant mt-0.5">Jumlah karyawan hadir per hari</p>
+            <h2 className="font-bold text-base text-foreground">Kehadiran 7 Hari Terakhir</h2>
+            <p className="text-xs mt-0.5 text-primary">Tren tingkat kehadiran karyawan mingguan</p>
           </div>
           <button
             onClick={() => router.push("/admin/absensi")}
-            className="text-xs font-bold text-primary hover:underline shrink-0"
+            className="flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-80 text-primary"
           >
-            Lihat semua →
+            Lihat Detail
+            <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
           </button>
         </div>
 
-        <div className="flex items-end justify-between gap-1.5" style={{ height: "120px" }}>
-          {data.chart_last_7_days.map((d) => {
-            const heightPct = (d.present / maxPresent) * 100;
-            const isToday = d.date === data.today;
-            return (
-              <div key={d.date} className="flex flex-1 flex-col items-center gap-1.5">
-                <span className={["text-[10px] font-bold", isToday ? "text-primary" : "text-on-surface-variant"].join(" ")}>
-                  {d.present}
-                </span>
-                <div className="relative w-full flex flex-col justify-end rounded-t-md overflow-hidden bg-primary/8" style={{ height: "80px" }}>
-                  <div
-                    className={["w-full rounded-t-md transition-all duration-700", isToday ? "bg-primary" : "bg-primary/40"].join(" ")}
-                    style={{ height: `${Math.max(heightPct, 6)}%` }}
-                  />
-                  {isToday && (
-                    <div className="absolute bottom-full left-0 right-0 flex justify-center mb-0.5">
-                      <div className="size-1.5 rounded-full bg-primary" />
-                    </div>
-                  )}
-                </div>
-                <span className={["text-[10px] font-semibold", isToday ? "text-primary" : "text-on-surface-variant"].join(" ")}>
-                  {d.day}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Chart legend */}
-        <div className="mt-4 flex gap-4 text-[11px] text-on-surface-variant">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block size-3 rounded-sm bg-primary" />Hari ini
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block size-3 rounded-sm bg-primary/40" />Hari lain
-          </span>
-        </div>
+        <LineChart data={data.chart_last_7_days} today={data.today} total={data.total_employees} />
       </div>
     </div>
   );
 }
 
-/* ── Sub-components ── */
+/* ── Donut Chart ── */
+function DonutChart({ onTime, late, absent, total, rate }: {
+  onTime: number; late: number; absent: number; total: number; rate: number;
+}) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  
+  const size = 160;
+  const strokeWidth = 16;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
 
-function StatCard({
-  label, value, sub, colorBg, colorText, icon,
-}: {
-  label: string; value: number; sub: string;
-  colorBg: string; colorText: string; icon: React.ReactNode;
+  const safeTotal = total || 1;
+  const onTimePct = onTime / safeTotal;
+  const latePct = late / safeTotal;
+  const absentPct = absent / safeTotal;
+  const emptyPct = Math.max(0, 1 - onTimePct - latePct - absentPct);
+
+  const gap = 0.01;
+  const onTimeEnd = onTimePct;
+  const lateEnd = onTimeEnd + latePct;
+  const absentEnd = lateEnd + absentPct;
+
+  function Segment({ pct, offset, color }: { pct: number; offset: number; color: string }) {
+    const dashLen = Math.max(0, pct - gap) * circumference;
+    const dashOff = (1 - offset) * circumference;
+    return (
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeDasharray={`${dashLen} ${circumference}`}
+        strokeDashoffset={dashOff}
+        strokeLinecap="round"
+        style={{ transition: "stroke-dasharray 0.7s ease" }}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+    );
+  }
+
+  const emptyColor = isDark ? "#1a1a1a" : "#f1f5f9";
+  const trackColor = isDark ? "#1a1a1a" : "#f1f5f9";
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size}>
+        {/* Background track */}
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke={trackColor} strokeWidth={strokeWidth}
+        />
+        {/* Segments */}
+        <Segment pct={onTimePct} offset={0} color="#f5c518" />
+        <Segment pct={latePct} offset={onTimeEnd} color="#f97316" />
+        <Segment pct={absentPct} offset={lateEnd} color="#ef4444" />
+        {/* Empty if < 100% */}
+        {emptyPct > 0.01 && (
+          <Segment pct={emptyPct} offset={absentEnd} color={emptyColor} />
+        )}
+      </svg>
+      {/* Center text */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-2xl font-black text-foreground">{rate}%</span>
+        <span className="text-xs text-muted-foreground">Tingkat Hadir</span>
+      </div>
+    </div>
+  );
+}
+
+/* ── Line/Area Chart ── */
+function LineChart({ data, today, total }: {
+  data: DashboardData["chart_last_7_days"];
+  today: string;
+  total: number;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    const isDark = theme === "dark";
+    const gridColor = isDark ? "#27272a" : "#e2e8f0";
+    
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container || data.length === 0) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const w = container.clientWidth;
+    const h = 140;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+
+    const padL = 30, padR = 20, padT = 20, padB = 30;
+    const chartW = w - padL - padR;
+    const chartH = h - padT - padB;
+
+    const maxVal = Math.max(...data.map((d) => d.present), total, 1);
+
+    const xPos = (i: number) => padL + (i / (data.length - 1)) * chartW;
+    const yPos = (v: number) => padT + chartH - (v / maxVal) * chartH;
+
+    // Draw horizontal grid lines
+    const gridLines = 4;
+    for (let i = 0; i <= gridLines; i++) {
+      const y = padT + (i / gridLines) * chartH;
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(w - padR, y);
+      ctx.strokeStyle = gridColor;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Y-axis labels
+      const val = Math.round(maxVal - (i / gridLines) * maxVal);
+      ctx.fillStyle = isDark ? "#c9a84c" : "#92400e";
+      ctx.font = "10px system-ui, sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText(String(val), padL - 4, y + 3);
+    }
+
+    // Draw area gradient
+    const gradient = ctx.createLinearGradient(0, padT, 0, padT + chartH);
+    gradient.addColorStop(0, "rgba(245,197,24,0.25)");
+    gradient.addColorStop(1, "rgba(245,197,24,0.02)");
+
+    ctx.beginPath();
+    data.forEach((d, i) => {
+      const x = xPos(i);
+      const y = yPos(d.present);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    // Close to bottom
+    ctx.lineTo(xPos(data.length - 1), padT + chartH);
+    ctx.lineTo(xPos(0), padT + chartH);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Draw line
+    ctx.beginPath();
+    data.forEach((d, i) => {
+      const x = xPos(i);
+      const y = yPos(d.present);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = "#d97706";
+    ctx.lineWidth = 2;
+    ctx.lineJoin = "round";
+    ctx.stroke();
+
+    // Draw dots and x-labels
+    data.forEach((d, i) => {
+      const x = xPos(i);
+      const y = yPos(d.present);
+      const isToday = d.date === today;
+
+      // Dot
+      ctx.beginPath();
+      ctx.arc(x, y, isToday ? 5 : 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = isToday ? "#d97706" : "#fcd34d";
+      ctx.fill();
+      if (isToday) {
+        ctx.strokeStyle = isDark ? "#000000" : "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // X-label (shortened date)
+      const label = d.date ? d.date.slice(5).replace("-", " ").replace(/^0/, "") : d.day;
+      const months = ["","Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+      const [mm, dd] = d.date.split("-").slice(1);
+      const shortLabel = `${parseInt(dd)} ${months[parseInt(mm)] ?? ""}`;
+
+      ctx.fillStyle = isToday ? "#d97706" : (isDark ? "#c9a84c" : "#92400e");
+      ctx.font = `${isToday ? "bold " : ""}10px system-ui, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.fillText(shortLabel, x, h - 6);
+    });
+
+  }, [data, today, total, theme]);
+
+  return (
+    <div ref={containerRef} className="w-full">
+      <canvas ref={canvasRef} style={{ display: "block", width: "100%" }} />
+    </div>
+  );
+}
+
+function StatCard({ label, value, icon, iconBgClass }: {
+  label: string; value: number; icon: React.ReactNode; iconBgClass: string;
 }) {
   return (
-    <div className={["rounded-2xl p-4 ring-1 ring-outline-variant/30 shadow-sm", colorBg].join(" ")}>
-      <div className={["flex size-9 items-center justify-center rounded-xl mb-3", colorBg, "ring-1 ring-black/5"].join(" ")}>
-        <span className={colorText}>{icon}</span>
+    <div className="relative overflow-hidden rounded-3xl p-5 border border-border bg-card shadow-2xl">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#f5c518] to-[#d97706]" />
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-[10px] font-bold tracking-wider mb-2 text-muted-foreground">{label}</p>
+          <p className="text-3xl font-black leading-none text-foreground">{value}</p>
+        </div>
+        <div className={`flex size-10 items-center justify-center rounded-xl ${iconBgClass}`}>
+          {icon}
+        </div>
       </div>
-      <p className={["text-3xl font-black leading-none", colorText].join(" ")}>{value}</p>
-      <p className="mt-1.5 text-xs font-bold text-on-surface">{label}</p>
-      <p className="mt-0.5 text-[10px] text-on-surface-variant">{sub}</p>
     </div>
   );
 }
 
-function Legend({ color, label, value }: { color: string; label: string; value: number }) {
-  return (
-    <span className="flex items-center gap-1.5 text-xs text-on-surface-variant">
-      <span className={["inline-block size-2.5 rounded-full", color].join(" ")} />
-      {label}: <span className="font-bold text-on-surface">{value}</span>
-    </span>
-  );
-}
-
+/* ── Skeleton ── */
 function DashboardSkeleton() {
   return (
     <div className="space-y-5 animate-pulse">
-      <div className="h-10 w-56 rounded-xl bg-surface-container" />
+      <div className="h-10 w-72 rounded-xl bg-muted" />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => <div key={i} className="h-28 rounded-2xl bg-surface-container" />)}
+        {[1, 2, 3, 4].map((i) => <div key={i} className="h-24 rounded-2xl bg-muted" />)}
       </div>
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="md:col-span-2 h-36 rounded-2xl bg-surface-container" />
-        <div className="h-36 rounded-2xl bg-surface-container" />
+      <div className="grid gap-3 lg:grid-cols-5">
+        <div className="lg:col-span-3 h-64 rounded-2xl bg-muted" />
+        <div className="lg:col-span-2 h-64 rounded-2xl bg-muted" />
       </div>
-      <div className="h-44 rounded-2xl bg-surface-container" />
+      <div className="h-52 rounded-2xl bg-muted" />
     </div>
   );
 }

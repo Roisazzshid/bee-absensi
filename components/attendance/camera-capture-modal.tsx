@@ -149,9 +149,9 @@ export function CameraCaptureModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="w-full max-w-md rounded-3xl bg-card border border-border shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-outline-variant/30 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -160,14 +160,14 @@ export function CameraCaptureModal({
               </svg>
             </div>
             <div>
-              <h2 className="text-base font-bold text-on-surface leading-tight">{title}</h2>
-              <p className="text-[11px] text-on-surface-variant">{subTitle}</p>
+              <h2 className="text-base font-bold text-foreground leading-tight">{title}</h2>
+              <p className="text-[11px] text-muted-foreground">{subTitle}</p>
             </div>
           </div>
           <button
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex size-8 items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors"
+            className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted transition-colors"
           >
             <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -216,14 +216,14 @@ export function CameraCaptureModal({
 
               {/* Camera Error or Permission prompt */}
               {cameraError && (
-                <div className="absolute inset-0 bg-surface-container-high/95 p-6 flex flex-col items-center justify-center text-center">
-                  <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 mb-3">
+                <div className="absolute inset-0 bg-background/95 p-6 flex flex-col items-center justify-center text-center">
+                  <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-500 mb-3">
                     <svg className="size-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-bold text-on-surface">Kamera Tidak Dapat Diakses</p>
-                  <p className="text-xs text-on-surface-variant mt-1 max-w-xs">{cameraError}</p>
+                  <p className="text-sm font-bold text-foreground">Kamera Tidak Dapat Diakses</p>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-xs">{cameraError}</p>
 
                   <div className="mt-4 flex flex-col gap-2 w-full max-w-xs">
                     <button
@@ -233,7 +233,7 @@ export function CameraCaptureModal({
                     >
                       Coba Lagi
                     </button>
-                    <label className="rounded-xl border border-outline-variant bg-white px-4 py-2 text-xs font-bold text-on-surface text-center cursor-pointer hover:bg-surface-container-low">
+                    <label className="rounded-xl border border-border bg-card px-4 py-2 text-xs font-bold text-foreground text-center cursor-pointer hover:bg-muted">
                       <span>Pilih Foto dari Galeri / Kamera</span>
                       <input
                         type="file"
@@ -270,14 +270,14 @@ export function CameraCaptureModal({
         <canvas ref={canvasRef} className="hidden" />
 
         {/* Controls Footer */}
-        <div className="p-4 sm:p-5 bg-white border-t border-outline-variant/30">
+        <div className="p-4 sm:p-5 bg-card border-t border-border">
           {!capturedImage ? (
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="flex-1 rounded-2xl border border-outline-variant py-3 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors"
+                className="flex-1 rounded-2xl border border-border py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
               >
                 Batal
               </button>
@@ -300,7 +300,7 @@ export function CameraCaptureModal({
                 type="button"
                 onClick={handleRetake}
                 disabled={isSubmitting}
-                className="flex-1 flex items-center justify-center gap-1.5 rounded-2xl border border-outline-variant py-3 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-2xl border border-border py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
               >
                 <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

@@ -91,15 +91,15 @@ const STATUS_CONFIG: Record<
 > = {
   on_time: {
     label: "Tepat Waktu",
-    border: "border-l-secondary",
-    badge: "bg-secondary/10 border border-secondary/20",
-    text: "text-secondary",
+    border: "border-l-emerald-500",
+    badge: "bg-emerald-500/10 border border-emerald-500/20",
+    text: "text-emerald-600 dark:text-emerald-500",
   },
   late: {
     label: "Terlambat",
-    border: "border-l-error",
-    badge: "bg-error/10 border border-error/20",
-    text: "text-error",
+    border: "border-l-red-500",
+    badge: "bg-red-500/10 border border-red-500/20",
+    text: "text-red-600 dark:text-red-500",
   },
   absent: {
     label: "Tidak Hadir",
@@ -124,10 +124,10 @@ function SummaryCard({
 }) {
   return (
     <div
-      className={`soft-shadow flex flex-col items-center justify-center rounded-2xl border-l-4 bg-surface-container-lowest p-4 text-center ${borderClass}`}
+      className={`shadow-sm flex flex-col items-center justify-center rounded-2xl border-l-4 bg-card border border-border p-4 text-center ${borderClass}`}
     >
       <span className={`text-3xl font-bold leading-none ${colorClass}`}>{value}</span>
-      <span className="mt-1 text-xs font-medium text-on-surface-variant">{label}</span>
+      <span className="mt-1 text-xs font-medium text-muted-foreground">{label}</span>
     </div>
   );
 }
@@ -138,25 +138,25 @@ function AttendanceItem({ record }: { record: AttendanceRecord }) {
 
   return (
     <div
-      className={`soft-shadow relative flex items-center justify-between overflow-hidden rounded-2xl border-l-4 bg-surface-container-lowest p-4 ${cfg.border}`}
+      className={`shadow-sm relative flex items-center justify-between overflow-hidden rounded-2xl border-l-4 bg-card border border-border p-4 ${cfg.border}`}
     >
       <div className="flex flex-col gap-1">
-        <span className="text-xs text-on-surface-variant">{fmtDate(record.date)}</span>
+        <span className="text-xs text-muted-foreground">{fmtDate(record.date)}</span>
         <div className={`mt-1 flex items-center gap-4 ${noData ? "opacity-50" : ""}`}>
           <div>
-            <span className="block text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
+            <span className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
               Masuk
             </span>
-            <span className="text-xl font-bold leading-none text-on-surface">
+            <span className="text-xl font-bold leading-none text-foreground">
               {fmtTime(record.clock_in_time)}
             </span>
           </div>
-          <div className="h-8 w-px bg-surface-container-high" />
+          <div className="h-8 w-px bg-border" />
           <div>
-            <span className="block text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">
+            <span className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
               Pulang
             </span>
-            <span className="text-xl font-bold leading-none text-on-surface">
+            <span className="text-xl font-bold leading-none text-foreground">
               {fmtTime(record.clock_out_time)}
             </span>
           </div>
@@ -174,9 +174,9 @@ function AttendanceItem({ record }: { record: AttendanceRecord }) {
 
 function EmptyState({ month }: { month: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 py-16 text-center text-on-surface-variant">
+    <div className="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
       <span className="text-5xl">📅</span>
-      <p className="text-sm font-semibold">Tidak ada data untuk {monthLabel(month)}</p>
+      <p className="text-sm font-semibold text-foreground">Tidak ada data untuk {monthLabel(month)}</p>
       <p className="text-xs">Coba pilih bulan lain atau hapus filter status.</p>
     </div>
   );
@@ -260,8 +260,8 @@ export function AttendanceHistory() {
     <section className="mx-auto flex max-w-md flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-on-surface">Riwayat Kehadiran</h1>
-        <p className="mt-1 text-sm text-on-surface-variant">Rekap absensi Anda per bulan.</p>
+        <h1 className="text-xl font-bold text-foreground">Riwayat Kehadiran</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Rekap absensi Anda per bulan.</p>
       </div>
 
       {/* Month navigator */}
@@ -269,19 +269,19 @@ export function AttendanceHistory() {
         <button
           id="btn-prev-month"
           onClick={() => setMonth((m) => addMonth(m, -1))}
-          className="pressable flex size-10 shrink-0 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest text-lg text-on-surface-variant transition hover:bg-surface-container-low"
+          className="pressable flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-lg text-muted-foreground transition hover:bg-muted"
           aria-label="Bulan sebelumnya"
         >
           ‹
         </button>
-        <span className="flex-1 text-center text-sm font-bold text-on-surface">
+        <span className="flex-1 text-center text-sm font-bold text-foreground">
           {monthLabel(month)}
         </span>
         <button
           id="btn-next-month"
           onClick={() => setMonth((m) => addMonth(m, 1))}
           disabled={!canGoNext}
-          className="pressable flex size-10 shrink-0 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest text-lg text-on-surface-variant transition hover:bg-surface-container-low disabled:cursor-not-allowed disabled:opacity-40"
+          className="pressable flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-lg text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           aria-label="Bulan berikutnya"
         >
           ›
@@ -293,14 +293,14 @@ export function AttendanceHistory() {
         <SummaryCard
           value={summary.total}
           label="Total Hadir"
-          colorClass="text-secondary"
-          borderClass="border-l-secondary"
+          colorClass="text-emerald-600 dark:text-emerald-500"
+          borderClass="border-l-emerald-500"
         />
         <SummaryCard
           value={summary.late}
           label="Terlambat"
-          colorClass="text-error"
-          borderClass="border-l-error"
+          colorClass="text-red-600 dark:text-red-500"
+          borderClass="border-l-red-500"
         />
         <SummaryCard
           value={summary.absent}
@@ -321,7 +321,7 @@ export function AttendanceHistory() {
               "pressable rounded-full border px-4 py-1.5 text-xs font-bold transition",
               statusFilter === key
                 ? "border-primary bg-primary/10 text-primary"
-                : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low",
+                : "border-border bg-card text-muted-foreground hover:bg-muted",
             ].join(" ")}
           >
             {label}
@@ -331,7 +331,7 @@ export function AttendanceHistory() {
 
       {/* Error banner */}
       {error && (
-        <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm leading-5 text-error">
+        <p role="alert" className="rounded-2xl bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm leading-5 text-red-600 dark:text-red-400">
           {error}
         </p>
       )}
@@ -342,7 +342,7 @@ export function AttendanceHistory() {
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="h-20 animate-pulse rounded-2xl border-l-4 border-l-surface-container-high bg-surface-container-low"
+              className="h-20 animate-pulse rounded-2xl border border-border bg-muted"
             />
           ))}
         </div>
@@ -378,7 +378,7 @@ export function AttendanceHistory() {
           )}
 
           {records.length > 0 && pagination && pagination.current_page >= pagination.last_page && (
-            <p className="py-4 text-center text-xs text-on-surface-variant">
+            <p className="py-4 text-center text-xs text-muted-foreground">
               Semua {pagination.total} data telah ditampilkan.
             </p>
           )}

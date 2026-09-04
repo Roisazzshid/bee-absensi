@@ -9,7 +9,7 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { fullWidth?: boolean; variant?: "primary" | "secondary" | "ghost" };
 export function Button({ className, fullWidth, variant = "primary", type = "button", ...props }: ButtonProps) {
   const styles = {
-    primary: "bg-linear-to-r from-primary to-[#0a6dbd] text-on-primary shadow-[0_6px_18px_rgba(7,95,171,0.25)] hover:brightness-105",
+    primary: "bg-primary text-on-primary shadow-[0_6px_18px_rgba(217,119,6,0.25)] hover:brightness-110",
     secondary: "border border-outline-variant bg-surface-container-lowest text-primary hover:bg-surface-container-low",
     ghost: "text-primary hover:bg-primary/10",
   };

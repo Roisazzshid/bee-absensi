@@ -40,9 +40,12 @@ const EMPTY_FORM: EmployeeForm = {
 };
 
 const AVATAR_COLORS = [
-  "bg-blue-100 text-blue-600", "bg-violet-100 text-violet-600",
-  "bg-emerald-100 text-emerald-600", "bg-rose-100 text-rose-600",
-  "bg-amber-100 text-amber-600", "bg-cyan-100 text-cyan-600",
+  "bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-500", 
+  "bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-500",
+  "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-500", 
+  "bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-500",
+  "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-500", 
+  "bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-500",
 ];
 
 function avatarColor(name: string) {
@@ -227,16 +230,16 @@ export function AdminEmployeePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-on-surface md:text-2xl">Daftar Karyawan</h1>
-          <p className="mt-0.5 text-sm text-on-surface-variant">
+          <h1 className="text-xl font-bold text-foreground md:text-2xl">Daftar Karyawan</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             {pagination
-              ? <><span className="font-semibold text-on-surface">{pagination.total}</span> karyawan terdaftar</>
+              ? <><span className="font-semibold text-foreground">{pagination.total}</span> karyawan terdaftar</>
               : "Seluruh karyawan yang terdaftar di sistem"}
           </p>
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
         >
           <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -250,7 +253,7 @@ export function AdminEmployeePage() {
       <div className="flex flex-col gap-2 sm:flex-row">
         <form onSubmit={handleSearch} className="flex flex-1 gap-2">
           <div className="relative flex-1">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-on-surface-variant" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
@@ -258,41 +261,41 @@ export function AdminEmployeePage() {
               placeholder="Cari nama atau NIP…"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="h-10 w-full rounded-xl border border-outline-variant bg-white pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="h-10 w-full rounded-xl border border-border bg-background pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
-          <button type="submit" className="h-10 rounded-xl bg-primary px-4 text-sm font-bold text-white hover:opacity-90 transition-opacity">
+          <button type="submit" className="h-10 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:opacity-90 transition-opacity">
             Cari
           </button>
         </form>
         <select
           value={deptFilter}
           onChange={(e) => { setDeptFilter(e.target.value); setPage(1); }}
-          className="h-10 rounded-xl border border-outline-variant bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option value="">Semua Departemen</option>
           {departments.map((d) => <option key={d} value={d}>{d}</option>)}
         </select>
       </div>
 
-      {error && <div className="rounded-2xl bg-red-50 p-4 text-sm text-error ring-1 ring-red-200">{error}</div>}
+      {error && <div className="rounded-2xl bg-red-50 dark:bg-red-950/50 p-4 text-sm text-red-600 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/50">{error}</div>}
 
       {/* Grid */}
       {loading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="h-32 animate-pulse rounded-2xl bg-surface-container" />)}
+          {[1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="h-32 animate-pulse rounded-2xl bg-muted" />)}
         </div>
       ) : employees.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl bg-white py-14 ring-1 ring-outline-variant/40 shadow-sm">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-surface-container-low">
-            <svg className="size-7 text-on-surface-variant" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+        <div className="flex flex-col items-center justify-center rounded-3xl bg-card py-14 border border-border shadow-sm">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/50">
+            <svg className="size-7 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
               <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
               <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
             </svg>
           </div>
-          <p className="mt-3 font-bold text-on-surface">Karyawan tidak ditemukan</p>
-          <p className="mt-1 text-sm text-on-surface-variant">Coba ubah kata kunci atau tambah karyawan baru</p>
-          <button onClick={openCreate} className="mt-4 rounded-xl bg-primary px-5 py-2 text-sm font-bold text-white hover:opacity-90">
+          <p className="mt-3 font-bold text-foreground">Karyawan tidak ditemukan</p>
+          <p className="mt-1 text-sm text-muted-foreground">Coba ubah kata kunci atau tambah karyawan baru</p>
+          <button onClick={openCreate} className="mt-4 rounded-xl bg-primary px-5 py-2 text-sm font-bold text-primary-foreground hover:opacity-90">
             + Tambah Karyawan
           </button>
         </div>
@@ -302,7 +305,8 @@ export function AdminEmployeePage() {
             const name = emp.profile?.full_name ?? emp.email;
             const color = avatarColor(name);
             return (
-              <div key={emp.id} className="group rounded-2xl bg-white p-4 ring-1 ring-outline-variant/40 shadow-sm hover:ring-primary/30 hover:shadow-md transition-all duration-200">
+              <div key={emp.id} className="relative overflow-hidden group rounded-3xl bg-card p-5 border border-border shadow-sm hover:border-yellow-500/50 transition-all duration-200">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 to-primary" />
                 <div className="flex items-start gap-3">
                   {/* Avatar */}
                   <div className={["flex size-11 shrink-0 items-center justify-center rounded-2xl text-sm font-bold", color].join(" ")}>
@@ -311,44 +315,44 @@ export function AdminEmployeePage() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
-                      <p className="truncate font-bold text-on-surface text-sm">{name}</p>
+                      <p className="truncate font-bold text-foreground text-sm">{name}</p>
                       <span className={[
                         "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-                        emp.is_active ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600",
+                        emp.is_active ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-500" : "bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-500",
                       ].join(" ")}>
                         {emp.is_active ? "Aktif" : "Nonaktif"}
                       </span>
                     </div>
-                    <p className="text-[11px] text-on-surface-variant mt-0.5">{emp.profile?.nip ?? "—"}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{emp.profile?.nip ?? "—"}</p>
                     <div className="mt-1 flex items-center gap-1 flex-wrap">
                       {emp.profile?.department && (
-                        <span className="rounded-md bg-surface-container-low px-1.5 py-0.5 text-[10px] font-semibold text-on-surface-variant">
+                        <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
                           {emp.profile.department}
                         </span>
                       )}
                       {emp.profile?.position && (
-                        <span className="text-[10px] text-on-surface-variant">· {emp.profile.position}</span>
+                        <span className="text-[10px] text-muted-foreground">· {emp.profile.position}</span>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Footer info */}
-                <div className="mt-3 flex items-center gap-3 border-t border-outline-variant/20 pt-3 text-[11px] text-on-surface-variant">
+                <div className="mt-3 flex items-center gap-3 border-t border-border pt-3 text-[11px] text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <svg className="size-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
                     </svg>
-                    Cuti: <span className="font-bold text-on-surface ml-0.5">{emp.profile?.leave_quota ?? 0}</span>
+                    Cuti: <span className="font-bold text-foreground ml-0.5">{emp.profile?.leave_quota ?? 0}</span>
                   </span>
                   <span className="flex-1 truncate">{emp.email}</span>
                 </div>
 
-                {/* Action buttons — show on hover on desktop, always on mobile */}
-                <div className="mt-3 grid grid-cols-3 gap-1.5 md:hidden md:group-hover:grid">
+                {/* Action buttons */}
+                <div className="mt-3 grid grid-cols-3 gap-1.5">
                   <button
                     onClick={() => openEdit(emp)}
-                    className="flex items-center justify-center gap-1 rounded-xl bg-primary/8 py-2 text-xs font-bold text-primary hover:bg-primary/15 transition-colors"
+                    className="flex items-center justify-center gap-1 rounded-xl bg-primary/10 py-2 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
                   >
                     <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
@@ -361,8 +365,8 @@ export function AdminEmployeePage() {
                     className={[
                       "flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-bold transition-colors",
                       emp.is_active
-                        ? "bg-amber-50 text-amber-600 hover:bg-amber-100"
-                        : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100",
+                        ? "bg-amber-100 text-amber-600 hover:bg-amber-200 dark:bg-amber-950/30 dark:text-amber-500 dark:hover:bg-amber-950/50"
+                        : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-500 dark:hover:bg-emerald-950/50",
                     ].join(" ")}
                   >
                     <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -372,39 +376,11 @@ export function AdminEmployeePage() {
                   </button>
                   <button
                     onClick={() => openDelete(emp)}
-                    className="flex items-center justify-center gap-1 rounded-xl bg-red-50 py-2 text-xs font-bold text-red-600 hover:bg-red-100 transition-colors"
+                    className="flex items-center justify-center gap-1 rounded-xl bg-red-100 py-2 text-xs font-bold text-red-600 hover:bg-red-200 dark:bg-red-950/30 dark:text-red-500 dark:hover:bg-red-950/50 transition-colors"
                   >
                     <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
                       <path d="M10 11v6M14 11v6" /><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-                    </svg>
-                    Hapus
-                  </button>
-                </div>
-
-                {/* Desktop hover actions */}
-                <div className="mt-3 hidden gap-1.5 md:group-hover:grid grid-cols-3">
-                  <button onClick={() => openEdit(emp)}
-                    className="flex items-center justify-center gap-1 rounded-xl bg-primary/8 py-2 text-xs font-bold text-primary hover:bg-primary/15 transition-colors">
-                    <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                    Edit
-                  </button>
-                  <button onClick={() => void handleToggleActive(emp)}
-                    className={["flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-bold transition-colors",
-                      emp.is_active ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"].join(" ")}>
-                    <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" />
-                    </svg>
-                    {emp.is_active ? "Nonaktif" : "Aktifkan"}
-                  </button>
-                  <button onClick={() => openDelete(emp)}
-                    className="flex items-center justify-center gap-1 rounded-xl bg-red-50 py-2 text-xs font-bold text-red-600 hover:bg-red-100 transition-colors">
-                    <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                      <path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                     </svg>
                     Hapus
                   </button>
@@ -418,17 +394,17 @@ export function AdminEmployeePage() {
       {/* Pagination */}
       {pagination && pagination.last_page > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-xs text-on-surface-variant">
-            Halaman <span className="font-bold text-on-surface">{pagination.current_page}</span> dari{" "}
-            <span className="font-bold text-on-surface">{pagination.last_page}</span>
+          <p className="text-xs text-muted-foreground">
+            Halaman <span className="font-bold text-foreground">{pagination.current_page}</span> dari{" "}
+            <span className="font-bold text-foreground">{pagination.last_page}</span>
           </p>
           <div className="flex gap-2">
             <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
-              className="flex items-center gap-1 rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-surface-container-low">
+              className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
               <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg> Prev
             </button>
             <button disabled={page >= pagination.last_page} onClick={() => setPage((p) => p + 1)}
-              className="flex items-center gap-1 rounded-xl border border-outline-variant bg-white px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-surface-container-low">
+              className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
               Next <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
             </button>
           </div>
@@ -440,9 +416,9 @@ export function AdminEmployeePage() {
       {/* Create / Edit Modal */}
       {(modalMode === "create" || modalMode === "edit") && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-3xl bg-white shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg rounded-3xl bg-background border border-border shadow-2xl max-h-[90vh] overflow-y-auto">
             {/* Modal header */}
-            <div className="sticky top-0 flex items-center justify-between bg-white px-6 pt-6 pb-4 border-b border-outline-variant/30">
+            <div className="sticky top-0 flex items-center justify-between bg-background px-6 pt-6 pb-4 border-b border-border z-10">
               <div className="flex items-center gap-3">
                 <div className="flex size-10 items-center justify-center rounded-2xl bg-primary/10">
                   <svg className="size-5 text-primary" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -452,13 +428,13 @@ export function AdminEmployeePage() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="font-bold text-on-surface">{modalMode === "create" ? "Tambah Karyawan" : "Edit Karyawan"}</h2>
-                  <p className="text-xs text-on-surface-variant mt-0.5">
+                  <h2 className="font-bold text-foreground">{modalMode === "create" ? "Tambah Karyawan" : "Edit Karyawan"}</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {modalMode === "create" ? "Isi data untuk membuat akun karyawan baru" : `Edit data ${selectedEmployee?.profile?.full_name ?? selectedEmployee?.email}`}
                   </p>
                 </div>
               </div>
-              <button onClick={closeModal} className="flex size-8 items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low">
+              <button onClick={closeModal} className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted">
                 <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
@@ -471,27 +447,27 @@ export function AdminEmployeePage() {
                 <FormField label="Email" required>
                   <input type="email" value={form.email} onChange={(e) => setField("email", e.target.value)}
                     placeholder="nama@perusahaan.com"
-                    className="field-input" />
+                    className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
                 <FormField label={modalMode === "edit" ? "Password Baru (opsional)" : "Password"} required={modalMode === "create"}>
                   <input type="password" value={form.password} onChange={(e) => setField("password", e.target.value)}
                     placeholder={modalMode === "edit" ? "Kosongkan jika tidak diubah" : "Min. 6 karakter"}
-                    className="field-input" />
+                    className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
               </div>
 
               {/* Status */}
-              <div className="flex items-center justify-between rounded-xl bg-surface-container-low p-3">
+              <div className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
                 <div>
-                  <p className="text-sm font-semibold text-on-surface">Status Akun</p>
-                  <p className="text-xs text-on-surface-variant">Karyawan bisa login jika aktif</p>
+                  <p className="text-sm font-semibold text-foreground">Status Akun</p>
+                  <p className="text-xs text-muted-foreground">Karyawan bisa login jika aktif</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setField("is_active", !form.is_active)}
                   className={[
                     "relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200",
-                    form.is_active ? "bg-primary" : "bg-outline-variant",
+                    form.is_active ? "bg-primary" : "bg-muted-foreground",
                   ].join(" ")}
                 >
                   <span className={[
@@ -506,47 +482,47 @@ export function AdminEmployeePage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <FormField label="Nama Lengkap" required className="sm:col-span-2">
                   <input type="text" value={form.full_name} onChange={(e) => setField("full_name", e.target.value)}
-                    placeholder="Masukkan nama lengkap" className="field-input" />
+                    placeholder="Masukkan nama lengkap" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
                 <FormField label="NIP">
                   <input type="text" value={form.nip} onChange={(e) => setField("nip", e.target.value)}
-                    placeholder="Nomor Induk Pegawai" className="field-input" />
+                    placeholder="Nomor Induk Pegawai" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
                 <FormField label="No. Telepon">
                   <input type="tel" value={form.phone} onChange={(e) => setField("phone", e.target.value)}
-                    placeholder="08xxxxxxxxxx" className="field-input" />
+                    placeholder="08xxxxxxxxxx" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
                 <FormField label="Departemen">
                   <input type="text" value={form.department} onChange={(e) => setField("department", e.target.value)}
-                    placeholder="Contoh: Engineering" list="dept-list" className="field-input" />
+                    placeholder="Contoh: Engineering" list="dept-list" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                   <datalist id="dept-list">
                     {departments.map((d) => <option key={d} value={d} />)}
                   </datalist>
                 </FormField>
                 <FormField label="Jabatan">
                   <input type="text" value={form.position} onChange={(e) => setField("position", e.target.value)}
-                    placeholder="Contoh: Backend Developer" className="field-input" />
+                    placeholder="Contoh: Backend Developer" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
                 <FormField label="Kuota Cuti (hari/tahun)">
                   <input type="number" min={0} max={365} value={form.leave_quota}
                     onChange={(e) => setField("leave_quota", e.target.value)}
-                    className="field-input" />
+                    className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
               </div>
 
               {formError && (
-                <div className="rounded-xl bg-red-50 p-3 text-sm text-error ring-1 ring-red-200">{formError}</div>
+                <div className="rounded-xl bg-red-50 dark:bg-red-950/50 p-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/50">{formError}</div>
               )}
 
               <div className="flex gap-2 pt-1">
                 <button onClick={closeModal}
-                  className="flex-1 rounded-xl border border-outline-variant py-3 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors">
+                  className="flex-1 rounded-xl border border-border py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors">
                   Batal
                 </button>
                 <button
                   onClick={() => void (modalMode === "create" ? handleCreate() : handleUpdate())}
                   disabled={formLoading}
-                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-white hover:opacity-90 disabled:opacity-60 transition-opacity"
+                  className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground hover:opacity-90 disabled:opacity-60 transition-opacity"
                 >
                   {formLoading ? "Menyimpan…" : modalMode === "create" ? "Buat Karyawan" : "Simpan Perubahan"}
                 </button>
@@ -559,30 +535,30 @@ export function AdminEmployeePage() {
       {/* Delete Modal */}
       {modalMode === "delete" && selectedEmployee && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-sm rounded-3xl bg-background border border-border p-6 shadow-2xl">
             <div className="flex flex-col items-center text-center">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-red-50">
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/50">
                 <svg className="size-7 text-red-500" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                   <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
                   <path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                 </svg>
               </div>
-              <h2 className="mt-3 font-bold text-on-surface">Hapus Karyawan</h2>
-              <p className="mt-1.5 text-sm text-on-surface-variant">
-                Karyawan <span className="font-semibold text-on-surface">
+              <h2 className="mt-3 font-bold text-foreground">Hapus Karyawan</h2>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Karyawan <span className="font-semibold text-foreground">
                   {selectedEmployee.profile?.full_name ?? selectedEmployee.email}
                 </span> akan dihapus dari sistem.
               </p>
-              <div className="mt-3 rounded-xl bg-red-50 px-4 py-2.5 text-xs text-red-700 ring-1 ring-red-200">
+              <div className="mt-3 rounded-xl bg-red-50 dark:bg-red-950/50 px-4 py-2.5 text-xs text-red-700 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/50">
                 ⚠️ Data yang dihapus tidak dapat dikembalikan.
               </div>
             </div>
 
-            {formError && <p className="mt-3 text-center text-xs text-error">{formError}</p>}
+            {formError && <p className="mt-3 text-center text-xs text-red-600 dark:text-red-400">{formError}</p>}
 
             <div className="mt-5 flex gap-2">
               <button onClick={closeModal}
-                className="flex-1 rounded-xl border border-outline-variant py-3 text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors">
+                className="flex-1 rounded-xl border border-border py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors">
                 Batal
               </button>
               <button onClick={() => void handleDelete()} disabled={formLoading}
@@ -601,7 +577,7 @@ export function AdminEmployeePage() {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant/60">{children}</p>
+    <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">{children}</p>
   );
 }
 
@@ -612,8 +588,8 @@ function FormField({
 }) {
   return (
     <label className={["block", className].join(" ")}>
-      <span className="mb-1.5 block text-xs font-bold text-on-surface-variant">
-        {label}{required && <span className="ml-0.5 text-error">*</span>}
+      <span className="mb-1.5 block text-xs font-bold text-muted-foreground">
+        {label}{required && <span className="ml-0.5 text-red-500">*</span>}
       </span>
       {children}
     </label>

@@ -36,7 +36,7 @@ type ProfileData = {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="mb-3 px-1 text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+    <h3 className="mb-3 px-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
       {children}
     </h3>
   );
@@ -57,11 +57,11 @@ function DashCard({
 }) {
   return (
     <div
-      className={`soft-shadow flex flex-col justify-between rounded-2xl border-l-4 bg-surface-container-lowest p-4 ${borderClass ?? ""}`}
+      className={`shadow-sm flex flex-col justify-between rounded-2xl border-l-4 border border-border bg-card p-4 ${borderClass ?? ""}`}
     >
-      <p className="text-xs text-on-surface-variant">{label}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
       <p className={`mt-2 text-2xl font-bold ${colorClass}`}>
-        {value} <span className="text-sm font-normal text-outline">{unit}</span>
+        {value} <span className="text-sm font-normal text-muted-foreground">{unit}</span>
       </p>
     </div>
   );
@@ -86,8 +86,8 @@ function InfoRow({
         <span className={iconColor}>{icon}</span>
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-on-surface-variant">{label}</p>
-        <p className="truncate text-sm font-semibold text-on-surface">{value || "—"}</p>
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <p className="truncate text-sm font-semibold text-foreground">{value || "—"}</p>
       </div>
     </div>
   );
@@ -111,7 +111,7 @@ function Toggle({
         onChange={(e) => onChange(e.target.checked)}
         className="peer sr-only"
       />
-      <div className="h-6 w-11 rounded-full bg-surface-container-high after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-surface-container-high after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none" />
+      <div className="h-6 w-11 rounded-full bg-muted-foreground/30 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-border after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none" />
     </label>
   );
 }
@@ -146,20 +146,20 @@ function EditProfileModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center">
-      <div className="w-full max-w-md rounded-t-3xl bg-surface-container-lowest p-6 sm:rounded-3xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center">
+      <div className="w-full max-w-md rounded-t-3xl bg-card border border-border p-6 sm:rounded-3xl">
         <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-base font-bold text-on-surface">Edit Informasi Kontak</h3>
+          <h3 className="text-base font-bold text-foreground">Edit Informasi Kontak</h3>
           <button
             onClick={onClose}
-            className="flex size-8 items-center justify-center rounded-full bg-surface-container-low text-on-surface-variant"
+            className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted/80"
           >
             ✕
           </button>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4">
           <div>
-            <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">Nama Lengkap</label>
+            <label className="mb-1.5 block text-xs font-bold text-muted-foreground">Nama Lengkap</label>
             <TextInput
               id="edit-full-name"
               value={form.full_name}
@@ -169,7 +169,7 @@ function EditProfileModal({
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">Nomor WhatsApp / Telepon</label>
+            <label className="mb-1.5 block text-xs font-bold text-muted-foreground">Nomor WhatsApp / Telepon</label>
             <TextInput
               id="edit-phone"
               type="tel"
@@ -180,7 +180,7 @@ function EditProfileModal({
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">Kontak Darurat</label>
+            <label className="mb-1.5 block text-xs font-bold text-muted-foreground">Kontak Darurat</label>
             <TextInput
               id="edit-emergency"
               value={form.emergency_contact}
@@ -189,7 +189,7 @@ function EditProfileModal({
             />
           </div>
           {error && (
-            <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-error">
+            <p role="alert" className="rounded-2xl bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm text-red-600 dark:text-red-400">
               {error}
             </p>
           )}
@@ -237,13 +237,13 @@ function ChangePasswordModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center">
-      <div className="w-full max-w-md rounded-t-3xl bg-surface-container-lowest p-6 sm:rounded-3xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center">
+      <div className="w-full max-w-md rounded-t-3xl bg-card border border-border p-6 sm:rounded-3xl">
         <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-base font-bold text-on-surface">Ubah Kata Sandi</h3>
+          <h3 className="text-base font-bold text-foreground">Ubah Kata Sandi</h3>
           <button
             onClick={onClose}
-            className="flex size-8 items-center justify-center rounded-full bg-surface-container-low text-on-surface-variant"
+            className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted/80"
           >
             ✕
           </button>
@@ -251,14 +251,14 @@ function ChangePasswordModal({
         {success ? (
           <div className="flex flex-col items-center gap-4 py-6 text-center">
             <span className="text-5xl">🔐</span>
-            <p className="font-semibold text-on-surface">Kata sandi berhasil diubah!</p>
-            <p className="text-sm text-on-surface-variant">Semua sesi aktif telah diakhiri. Silakan masuk kembali.</p>
+            <p className="font-semibold text-foreground">Kata sandi berhasil diubah!</p>
+            <p className="text-sm text-muted-foreground">Semua sesi aktif telah diakhiri. Silakan masuk kembali.</p>
             <Button fullWidth onClick={onClose}>Oke</Button>
           </div>
         ) : (
           <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4">
             <div>
-              <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">Kata Sandi Saat Ini</label>
+              <label className="mb-1.5 block text-xs font-bold text-muted-foreground">Kata Sandi Saat Ini</label>
               <TextInput
                 id="pw-current"
                 type="password"
@@ -269,7 +269,7 @@ function ChangePasswordModal({
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">Kata Sandi Baru</label>
+              <label className="mb-1.5 block text-xs font-bold text-muted-foreground">Kata Sandi Baru</label>
               <TextInput
                 id="pw-new"
                 type="password"
@@ -280,7 +280,7 @@ function ChangePasswordModal({
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-bold text-on-surface-variant">Konfirmasi Kata Sandi Baru</label>
+              <label className="mb-1.5 block text-xs font-bold text-muted-foreground">Konfirmasi Kata Sandi Baru</label>
               <TextInput
                 id="pw-confirm"
                 type="password"
@@ -291,7 +291,7 @@ function ChangePasswordModal({
               />
             </div>
             {error && (
-              <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-error">
+              <p role="alert" className="rounded-2xl bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm text-red-600 dark:text-red-400">
                 {error}
               </p>
             )}
@@ -368,13 +368,13 @@ export function ProfilePage() {
     return (
       <div className="mx-auto flex max-w-md flex-col gap-8">
         <div className="flex flex-col items-center gap-4">
-          <div className="size-24 animate-pulse rounded-full bg-surface-container-low" />
-          <div className="h-5 w-40 animate-pulse rounded-lg bg-surface-container-low" />
-          <div className="h-4 w-24 animate-pulse rounded-lg bg-surface-container-low" />
+          <div className="size-24 animate-pulse rounded-full bg-muted" />
+          <div className="h-5 w-40 animate-pulse rounded-lg bg-muted" />
+          <div className="h-4 w-24 animate-pulse rounded-lg bg-muted" />
         </div>
         <div className="grid grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-2xl bg-surface-container-low" />
+            <div key={i} className="h-20 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       </div>
@@ -385,7 +385,7 @@ export function ProfilePage() {
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center">
         <span className="text-5xl">⚠️</span>
-        <p className="text-sm text-error">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-500">{error}</p>
         <Button variant="secondary" onClick={() => void loadProfile()}>Coba Lagi</Button>
       </div>
     );
@@ -422,12 +422,12 @@ export function ProfilePage() {
         <div className="flex flex-col items-center text-center">
           {/* Avatar */}
           <div className="relative mb-4">
-            <div className="flex size-24 items-center justify-center rounded-full border-4 border-surface bg-primary shadow-md text-3xl font-bold text-on-primary">
+            <div className="flex size-24 items-center justify-center rounded-full border-4 border-background bg-primary shadow-md text-3xl font-bold text-on-primary">
               {initials}
             </div>
           </div>
-          <h1 className="text-xl font-bold text-on-surface">{name}</h1>
-          <p className="mt-0.5 text-sm text-on-surface-variant">{profile?.nip ?? data?.user?.email}</p>
+          <h1 className="text-xl font-bold text-foreground">{name}</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">{profile?.nip ?? data?.user?.email}</p>
           {(profile?.position || profile?.department) && (
             <div className="mt-2 flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               <span>💼</span>
@@ -453,22 +453,22 @@ export function ProfilePage() {
               value={dashboard?.hadir ?? 0}
               unit="Hari"
               label="Hadir"
-              colorClass="text-secondary"
-              borderClass="border-l-secondary"
+              colorClass="text-emerald-600 dark:text-emerald-500"
+              borderClass="border-l-emerald-500"
             />
             <DashCard
               value={dashboard?.terlambat ?? 0}
               unit="Kali"
               label="Terlambat"
-              colorClass="text-error"
-              borderClass="border-l-error"
+              colorClass="text-red-600 dark:text-red-500"
+              borderClass="border-l-red-500"
             />
             <DashCard
               value={dashboard?.sakit_izin ?? 0}
               unit="Hari"
               label="Sakit / Izin"
-              colorClass="text-on-surface-variant"
-              borderClass="border-l-outline-variant"
+              colorClass="text-muted-foreground"
+              borderClass="border-l-border"
             />
           </div>
         </div>
@@ -485,16 +485,16 @@ export function ProfilePage() {
               ✏️ Edit
             </button>
           </div>
-          <Card className="overflow-hidden p-0">
-            <div className="divide-y divide-surface-container">
+          <Card className="overflow-hidden p-0 border border-border">
+            <div className="divide-y divide-border">
               <InfoRow icon="📧" label="Email" value={data?.user?.email ?? ""} />
               <InfoRow icon="📱" label="WhatsApp / Telepon" value={profile?.phone ?? ""} />
               <InfoRow
                 icon="🚨"
                 label="Kontak Darurat"
                 value={profile?.emergency_contact ?? "Belum diisi"}
-                iconBg="bg-red-50"
-                iconColor="text-error"
+                iconBg="bg-red-50 dark:bg-red-950/50"
+                iconColor="text-red-600 dark:text-red-500"
               />
               <InfoRow icon="🏢" label="Departemen" value={profile?.department ?? ""} />
               <InfoRow icon="💼" label="Jabatan" value={profile?.position ?? ""} />
@@ -505,29 +505,29 @@ export function ProfilePage() {
         {/* ── 4. Keamanan & Akun ── */}
         <div>
           <SectionLabel>Keamanan &amp; Akun</SectionLabel>
-          <Card className="overflow-hidden p-0">
-            <div className="divide-y divide-surface-container">
+          <Card className="overflow-hidden p-0 border border-border">
+            <div className="divide-y divide-border">
               <button
                 id="btn-change-password"
                 onClick={() => setShowChangePassword(true)}
-                className="flex w-full items-center gap-4 px-4 py-3 text-left transition hover:bg-surface-container-low"
+                className="flex w-full items-center gap-4 px-4 py-3 text-left transition hover:bg-muted"
               >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-on-surface">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
                   🔒
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-on-surface">Ubah Kata Sandi</p>
-                  <p className="text-xs text-on-surface-variant">Ganti kata sandi akun Anda</p>
+                  <p className="text-sm font-semibold text-foreground">Ubah Kata Sandi</p>
+                  <p className="text-xs text-muted-foreground">Ganti kata sandi akun Anda</p>
                 </div>
-                <span className="text-on-surface-variant">›</span>
+                <span className="text-muted-foreground">›</span>
               </button>
               <div className="flex items-center gap-4 px-4 py-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-on-surface">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
                   👆
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-on-surface">Biometrik</p>
-                  <p className="text-xs text-on-surface-variant">Sidik jari atau Face ID</p>
+                  <p className="text-sm font-semibold text-foreground">Biometrik</p>
+                  <p className="text-xs text-muted-foreground">Sidik jari atau Face ID</p>
                 </div>
                 <Toggle id="toggle-biometric" checked={false} onChange={() => {}} />
               </div>
@@ -538,13 +538,13 @@ export function ProfilePage() {
         {/* ── 5. Pengaturan Aplikasi ── */}
         <div>
           <SectionLabel>Pengaturan Aplikasi</SectionLabel>
-          <Card className="overflow-hidden p-0">
-            <div className="divide-y divide-surface-container">
+          <Card className="overflow-hidden p-0 border border-border">
+            <div className="divide-y divide-border">
               <div className="flex items-center gap-4 px-4 py-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-on-surface">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
                   🔔
                 </div>
-                <p className="flex-1 text-sm font-semibold text-on-surface">Notifikasi</p>
+                <p className="flex-1 text-sm font-semibold text-foreground">Notifikasi</p>
                 <Toggle
                   id="toggle-notif"
                   checked={notifEnabled}
@@ -552,10 +552,10 @@ export function ProfilePage() {
                 />
               </div>
               <div className="flex items-center gap-4 px-4 py-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-on-surface">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
                   🌐
                 </div>
-                <p className="flex-1 text-sm font-semibold text-on-surface">Pilih Bahasa</p>
+                <p className="flex-1 text-sm font-semibold text-foreground">Pilih Bahasa</p>
                 <span className="text-xs font-semibold text-primary">Bahasa Indonesia ›</span>
               </div>
             </div>
@@ -567,7 +567,7 @@ export function ProfilePage() {
           <button
             id="btn-logout"
             onClick={() => void signOut()}
-            className="pressable flex w-full items-center justify-center gap-2 rounded-2xl border border-error py-4 text-base font-bold text-error transition hover:bg-red-50"
+            className="pressable flex w-full items-center justify-center gap-2 rounded-2xl border border-red-600/30 py-4 text-base font-bold text-red-600 transition hover:bg-red-50 dark:border-red-500/30 dark:text-red-500 dark:hover:bg-red-950/50"
           >
             <span>🚪</span> Keluar
           </button>
