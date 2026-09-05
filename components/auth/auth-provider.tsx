@@ -21,6 +21,8 @@ type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   request: <T>(path: string, options?: RequestInit) => Promise<T>;
+  updateUser: (updatedUser: AuthUser) => void;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -98,6 +100,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedToken = localStorage.getItem(TOKEN_KEY);
     try {
       if (savedToken) await apiFetch<null>("/logout", { method: "POST" }, savedToken);
+    } catch {
+      // Abaikan error (misal token sudah expired/unauthenticated di server)
     } finally {
       clearSession();
     }
@@ -117,10 +121,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [clearSession]);
 
+  const updateUser = useCallback((updatedUser: AuthUser) => {
+    setUser(updatedUser);
+    localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    const savedToken = localStorage.getItem(TOKEN_KEY);
+    if (savedToken) {
+      await loadUser(savedToken);
+    }
+  }, [loadUser]);
+
   const isAdmin = user?.role === "admin" || user?.role === "superadmin";
   const value = useMemo(
-    () => ({ user, token, status, isAdmin, signIn, signOut, request }),
-    [isAdmin, request, signIn, signOut, status, token, user]
+    () => ({ user, token, status, isAdmin, signIn, signOut, request, updateUser, refreshUser }),
+    [isAdmin, refreshUser, request, signIn, signOut, status, token, updateUser, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

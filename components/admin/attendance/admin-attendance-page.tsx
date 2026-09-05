@@ -316,18 +316,26 @@ export function AdminAttendancePage() {
                         <button
                           type="button"
                           onClick={() => setPhotoModal({ item, type: "in" })}
-                          className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary"
+                          className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary hover:bg-primary/20 transition-colors"
                         >
-                          📷 Foto Masuk
+                          <svg className="size-3.5 fill-current" viewBox="0 0 24 24">
+                            <path d="M12 9a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>
+                            <path fillRule="evenodd" clipRule="evenodd" d="M9.344 3.071a2.25 2.25 0 012.112-1.321h1.088a2.25 2.25 0 012.112 1.321l.666 1.679h3.54a2.25 2.25 0 012.25 2.25v12a2.25 2.25 0 01-2.25 2.25H3.75a2.25 2.25 0 01-2.25-2.25v-12a2.25 2.25 0 012.25-2.25h3.54l.666-1.679h1.138zM12 7.5a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5z"/>
+                          </svg>
+                          Foto Masuk
                         </button>
                       )}
                       {item.clock_out_image_url && (
                         <button
                           type="button"
                           onClick={() => setPhotoModal({ item, type: "out" })}
-                          className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary"
+                          className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-2 py-1 text-[11px] font-bold text-primary hover:bg-primary/20 transition-colors"
                         >
-                          📷 Foto Pulang
+                          <svg className="size-3.5 fill-current" viewBox="0 0 24 24">
+                            <path d="M12 9a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>
+                            <path fillRule="evenodd" clipRule="evenodd" d="M9.344 3.071a2.25 2.25 0 012.112-1.321h1.088a2.25 2.25 0 012.112 1.321l.666 1.679h3.54a2.25 2.25 0 012.25 2.25v12a2.25 2.25 0 01-2.25 2.25H3.75a2.25 2.25 0 01-2.25-2.25v-12a2.25 2.25 0 012.25-2.25h3.54l.666-1.679h1.138zM12 7.5a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5z"/>
+                          </svg>
+                          Foto Pulang
                         </button>
                       )}
                     </div>

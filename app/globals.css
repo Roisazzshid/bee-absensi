@@ -82,13 +82,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Input utility untuk form admin */
 .field-input {
   width: 100%;
-  height: 2.5rem;
+  height: 2.625rem;
   border-radius: 0.75rem;
-  border: 1px solid #27272a;
-  background: #0a0a0a;
-  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 0 0.875rem;
   font-size: 0.875rem;
-  color: #ffffff;
+  color: var(--foreground);
   transition: box-shadow 150ms ease, border-color 150ms ease;
 }
 .field-input:focus {
@@ -96,7 +96,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgb(217 119 6 / 20%);
 }
-.field-input::placeholder { color: #a1a1aa; opacity: 0.5; }
+.field-input::placeholder { color: var(--muted-foreground); opacity: 0.6; }
 
 /* Sembunyikan scrollbar tapi tetap bisa scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }

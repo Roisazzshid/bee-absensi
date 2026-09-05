@@ -13,9 +13,26 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const nextPath = searchParams.get("next");
+
+  // Muat kredensial yang tersimpan jika pengguna mengaktifkan "Ingat saya"
+  useEffect(() => {
+    try {
+      const isRemembered = localStorage.getItem("bee_remember_me") === "true";
+      if (isRemembered) {
+        setRememberMe(true);
+        const savedEmail = localStorage.getItem("bee_remembered_email") ?? "";
+        const savedPassword = localStorage.getItem("bee_remembered_password") ?? "";
+        if (savedEmail) setEmail(savedEmail);
+        if (savedPassword) setPassword(savedPassword);
+      }
+    } catch {
+      // Abaikan jika localStorage tidak dapat diakses
+    }
+  }, []);
 
   // Redirect setelah authenticated berdasarkan role
   useEffect(() => {
@@ -39,6 +56,21 @@ export function LoginForm() {
     setPending(true);
     try {
       await signIn(email.trim(), password);
+
+      // Simpan atau bersihkan data "Ingat saya"
+      try {
+        if (rememberMe) {
+          localStorage.setItem("bee_remember_me", "true");
+          localStorage.setItem("bee_remembered_email", email.trim());
+          localStorage.setItem("bee_remembered_password", password);
+        } else {
+          localStorage.removeItem("bee_remember_me");
+          localStorage.removeItem("bee_remembered_email");
+          localStorage.removeItem("bee_remembered_password");
+        }
+      } catch {
+        // Abaikan jika localStorage error
+      }
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Tidak dapat terhubung ke server. Coba lagi.");
     } finally { setPending(false); }
@@ -46,13 +78,13 @@ export function LoginForm() {
 
   return <section className="w-full max-w-md relative z-10">
     <div className="mb-8 flex flex-col items-center text-center">
-      <span className="mb-4 flex size-20 items-center justify-center rounded-2xl overflow-hidden bg-white shadow-[0_0_30px_rgba(217,119,6,0.15)] ring-1 ring-white/10">
+      <div className="mb-4 flex size-20 items-center justify-center rounded-3xl p-2.5 bg-white/95 dark:bg-white shadow-[0_4px_30px_rgba(245,197,24,0.3)] ring-1 ring-amber-500/20">
         <img
-          src="/images/logo%20lebah%20kreatif.jpeg"
+          src="/images/logo_lebah_kreatif-removebg.png"
           alt="Bee Absensi"
-          className="size-20 object-cover"
+          className="size-full object-contain drop-shadow-sm"
         />
-      </span>
+      </div>
       <h1 className="text-3xl font-black tracking-tight text-foreground">Bee Absensi</h1>
       <p className="mt-2 text-sm text-muted-foreground">Masuk untuk melanjutkan ke akun Anda.</p>
     </div>
@@ -72,6 +104,21 @@ export function LoginForm() {
           </div>
         </label>
         
+        <div className="flex items-center justify-between pt-1">
+          <label htmlFor="remember-me" className="flex items-center gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              id="remember-me"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+              className="size-4 rounded border-border text-primary accent-primary focus:ring-primary/20 cursor-pointer"
+            />
+            <span className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
+              Ingat saya
+            </span>
+          </label>
+        </div>
+
         {error && <p role="alert" className="rounded-xl bg-red-950/50 border border-red-900/50 px-4 py-3 text-sm text-red-400">{error}</p>}
         
         <Button type="submit" fullWidth disabled={pending || status === "loading"} className="mt-4 h-14 disabled:cursor-not-allowed disabled:opacity-60">{pending ? "Memproses…" : "Masuk"}</Button>

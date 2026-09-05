@@ -312,16 +312,15 @@ export function AttendanceDashboard() {
             <div className="size-12 animate-spin rounded-full border-4 border-white/30 border-t-white" />
           ) : action === "done" ? (
             <>
-              <svg className="size-12 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path d="M20 6L9 17L4 12" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg className="size-12 text-white fill-current" viewBox="0 0 24 24">
+                <path fillRule="evenodd" clipRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"/>
               </svg>
               <p className="mt-2 text-sm font-bold tracking-widest text-white">SELESAI</p>
             </>
           ) : (
             <>
-              {/* Finger touch icon */}
-              <svg className="size-12 text-white" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                <path d="M9 11V6a3 3 0 016 0v5M9 11a3 3 0 003 3h0a3 3 0 003-3M9 11H6a2 2 0 00-2 2v3a8 8 0 008 8h0a8 8 0 008-8v-3a2 2 0 00-2-2h-3" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg className="size-12 text-white fill-current" viewBox="0 0 24 24">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 1.5a9.75 9.75 0 00-9.75 9.75.75.75 0 001.5 0 8.25 8.25 0 0116.5 0 .75.75 0 001.5 0A9.75 9.75 0 0012 1.5zm-6.75 9.75a6.75 6.75 0 0113.5 0v1.5a.75.75 0 001.5 0v-1.5a8.25 8.25 0 00-16.5 0v2.25a.75.75 0 001.5 0v-2.25zm9.75 0a3 3 0 00-6 0v5.25a.75.75 0 001.5 0v-5.25a1.5 1.5 0 013 0v4.5a.75.75 0 001.5 0v-4.5zm-3 7.5a.75.75 0 00-.75.75v1.5a.75.75 0 001.5 0v-1.5a.75.75 0 00-.75-.75zm3.75-2.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0v-3.75a.75.75 0 01.75-.75z"/>
               </svg>
               <p className="mt-2 text-sm font-bold tracking-widest text-white">
                 {action === "in" ? "CLOCK IN" : "CLOCK OUT"}
@@ -332,7 +331,7 @@ export function AttendanceDashboard() {
 
         <p className="mt-4 text-center text-xs leading-5 text-muted-foreground">
           {action === "done"
-            ? "Absensi hari ini sudah lengkap. Sampai jumpa besok! 👋"
+            ? "Absensi hari ini sudah lengkap. Sampai jumpa besok!"
             : action === "in"
             ? "Pastikan Anda berada di dalam area kantor untuk clock in."
             : "Selfie & konfirmasi sebelum pulang."}
@@ -340,13 +339,19 @@ export function AttendanceDashboard() {
 
         {/* Alert messages */}
         {error && (
-          <div className="mt-3 w-full rounded-2xl bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/50">
-            ⚠️ {error}
+          <div className="mt-3 flex items-center gap-2.5 w-full rounded-2xl bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm text-red-600 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/50">
+            <svg className="size-5 shrink-0 fill-current" viewBox="0 0 24 24">
+              <path fillRule="evenodd" clipRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
+            </svg>
+            <span>{error}</span>
           </div>
         )}
         {message && (
-          <div className="mt-3 w-full rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-900/50">
-            {message}
+          <div className="mt-3 flex items-center gap-2.5 w-full rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-900/50">
+            <svg className="size-5 shrink-0 fill-current" viewBox="0 0 24 24">
+              <path fillRule="evenodd" clipRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"/>
+            </svg>
+            <span>{message}</span>
           </div>
         )}
       </div>
@@ -428,7 +433,7 @@ export function AttendanceDashboard() {
               }
             </svg>
             <p className={`text-xs font-bold ${attendance.status === "on_time" ? "text-emerald-700 dark:text-emerald-500" : "text-red-700 dark:text-red-500"}`}>
-              {attendance.status === "on_time" ? "✓ Tepat Waktu" : "⚠ Terlambat"}
+              {attendance.status === "on_time" ? "Tepat Waktu" : "Terlambat"}
             </p>
           </div>
         </div>

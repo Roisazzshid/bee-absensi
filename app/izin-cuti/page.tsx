@@ -10,7 +10,7 @@ export const metadata = {
 export default function IzinCutiPage() {
   return (
     <AuthGuard>
-      <AppShell activeItem="Izin & cuti">
+      <AppShell activeItem="Izin & Cuti">
         <LeaveRequestPage />
       </AppShell>
     </AuthGuard>

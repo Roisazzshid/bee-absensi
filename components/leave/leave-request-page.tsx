@@ -104,9 +104,19 @@ function FileUploadZone({
   return (
     <div
       onClick={() => inputRef.current?.click()}
-      className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card p-8 transition hover:border-primary hover:bg-primary/5"
+      className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-card p-8 transition hover:border-primary hover:bg-primary/5"
     >
-      <span className="text-4xl">{file ? "📎" : "☁️"}</span>
+      <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        {file ? (
+          <svg className="size-7 fill-current" viewBox="0 0 24 24">
+            <path fillRule="evenodd" clipRule="evenodd" d="M18.97 3.659a2.25 2.25 0 00-3.182 0l-10.5 10.5a3.75 3.75 0 105.304 5.303l7.5-7.5a.75.75 0 10-1.06-1.06l-7.5 7.5a2.25 2.25 0 11-3.182-3.182l10.5-10.5a.75.75 0 011.06 1.06l-9 9a.75.75 0 001.06 1.061l9-9a2.25 2.25 0 000-3.182z"/>
+          </svg>
+        ) : (
+          <svg className="size-7 fill-current" viewBox="0 0 24 24">
+            <path fillRule="evenodd" clipRule="evenodd" d="M11.47 2.47a.75.75 0 011.06 0l4.5 4.5a.75.75 0 01-1.06 1.06l-3.22-3.22V16.5a.75.75 0 01-1.5 0V4.81L8.03 8.03a.75.75 0 01-1.06-1.06l4.5-4.5zM3 15.75a.75.75 0 01.75.75v2.25a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5V16.5a.75.75 0 011.5 0v2.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V16.5a.75.75 0 01.75-.75z"/>
+          </svg>
+        )}
+      </div>
       {file ? (
         <>
           <span className="text-sm font-bold text-primary">{file.name}</span>
@@ -178,7 +188,11 @@ function LeaveRequestItem({
 function EmptyState() {
   return (
     <div className="flex flex-col items-center gap-3 py-14 text-center text-muted-foreground">
-      <span className="text-5xl">📋</span>
+      <div className="flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground/80">
+        <svg className="size-8 fill-current" viewBox="0 0 24 24">
+          <path fillRule="evenodd" clipRule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 013.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 013.75 3.75v7.875c0 2.071-1.679 3.75-3.75 3.75H5.625a3.75 3.75 0 01-3.75-3.75V5.25c0-2.071 1.679-3.75 3.75-3.75zm8.25 1.625v3.375c0 .207.168.375.375.375h3.375l-3.75-3.75zM7.5 12a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 12zm0 3.75a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zm0 3.75a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z"/>
+        </svg>
+      </div>
       <p className="text-sm font-semibold text-foreground">Belum ada pengajuan</p>
       <p className="text-xs">Gunakan form di atas untuk mengajukan izin atau cuti.</p>
     </div>

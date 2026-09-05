@@ -175,7 +175,11 @@ function AttendanceItem({ record }: { record: AttendanceRecord }) {
 function EmptyState({ month }: { month: string }) {
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
-      <span className="text-5xl">📅</span>
+      <div className="flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground/80">
+        <svg className="size-8 fill-current" viewBox="0 0 24 24">
+          <path fillRule="evenodd" clipRule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75A3.75 3.75 0 0122.5 8.25v10.5A3.75 3.75 0 0118.75 22.5H5.25A3.75 3.75 0 011.5 18.75V8.25A3.75 3.75 0 015.25 4.5H6V3a.75.75 0 01.75-.75zm14.25 7.5H3v9a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 19.5v-9z"/>
+        </svg>
+      </div>
       <p className="text-sm font-semibold text-foreground">Tidak ada data untuk {monthLabel(month)}</p>
       <p className="text-xs">Coba pilih bulan lain atau hapus filter status.</p>
     </div>

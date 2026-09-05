@@ -241,8 +241,8 @@ export function AdminEmployeePage() {
           onClick={openCreate}
           className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
         >
-          <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+            <path fillRule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
           </svg>
           <span className="hidden sm:inline">Tambah Karyawan</span>
           <span className="sm:hidden">Tambah</span>
@@ -253,8 +253,8 @@ export function AdminEmployeePage() {
       <div className="flex flex-col gap-2 sm:flex-row">
         <form onSubmit={handleSearch} className="flex flex-1 gap-2">
           <div className="relative flex-1">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+              <path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z" clipRule="evenodd" />
             </svg>
             <input
               type="text"
@@ -288,15 +288,17 @@ export function AdminEmployeePage() {
       ) : employees.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-3xl bg-card py-14 border border-border shadow-sm">
           <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/50">
-            <svg className="size-7 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+            <svg className="size-7 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.604.75.75 0 00.364-.63 7.125 7.125 0 00-5.19-6.837c.758.91 1.22 2.073 1.22 3.342 0 1.637-.775 3.1-1.22 4.625z" />
             </svg>
           </div>
           <p className="mt-3 font-bold text-foreground">Karyawan tidak ditemukan</p>
           <p className="mt-1 text-sm text-muted-foreground">Coba ubah kata kunci atau tambah karyawan baru</p>
-          <button onClick={openCreate} className="mt-4 rounded-xl bg-primary px-5 py-2 text-sm font-bold text-primary-foreground hover:opacity-90">
-            + Tambah Karyawan
+          <button onClick={openCreate} className="mt-4 flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2 text-sm font-bold text-primary-foreground hover:opacity-90">
+            <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+              <path fillRule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
+            </svg>
+            Tambah Karyawan
           </button>
         </div>
       ) : (
@@ -340,8 +342,8 @@ export function AdminEmployeePage() {
                 {/* Footer info */}
                 <div className="mt-3 flex items-center gap-3 border-t border-border pt-3 text-[11px] text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <svg className="size-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
+                    <svg className="size-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path fillRule="evenodd" d="M7.5 5.25a3 3 0 013-3h3a3 3 0 013 3v.205c.933.085 1.857.197 2.774.334 1.454.218 2.476 1.483 2.476 2.917v3.033a48.86 48.86 0 01-7.003.57 49.02 49.02 0 01-7.494-.57V8.706c0-1.434 1.022-2.7 2.476-2.917A48.814 48.814 0 017.5 5.455V5.25zm7.5 0v.09a49.488 49.488 0 00-6 0v-.09a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5zm-9.75 8.87v4.63c0 1.434 1.022 2.7 2.476 2.917.92.138 1.845.249 2.774.334v-3.75a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5v3.75c.93-.085 1.853-.196 2.774-.334 1.454-.218 2.476-1.483 2.476-2.917v-4.63a50.36 50.36 0 01-8.25.68 50.364 50.364 0 01-8.25-.68z" clipRule="evenodd" />
                     </svg>
                     Cuti: <span className="font-bold text-foreground ml-0.5">{emp.profile?.leave_quota ?? 0}</span>
                   </span>
@@ -352,35 +354,34 @@ export function AdminEmployeePage() {
                 <div className="mt-3 grid grid-cols-3 gap-1.5">
                   <button
                     onClick={() => openEdit(emp)}
-                    className="flex items-center justify-center gap-1 rounded-xl bg-primary/10 py-2 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card py-2 text-xs font-bold text-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/40 transition-all shadow-xs"
                   >
-                    <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
+                      <path d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
                     </svg>
                     Edit
                   </button>
                   <button
                     onClick={() => void handleToggleActive(emp)}
                     className={[
-                      "flex items-center justify-center gap-1 rounded-xl py-2 text-xs font-bold transition-colors",
+                      "flex items-center justify-center gap-1.5 rounded-xl border py-2 text-xs font-bold transition-all shadow-xs",
                       emp.is_active
-                        ? "bg-amber-100 text-amber-600 hover:bg-amber-200 dark:bg-amber-950/30 dark:text-amber-500 dark:hover:bg-amber-950/50"
-                        : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-500 dark:hover:bg-emerald-950/50",
+                        ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-500"
+                        : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white hover:border-emerald-600",
                     ].join(" ")}
                   >
-                    <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" />
+                    <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path fillRule="evenodd" d="M12 2.25a.75.75 0 01.75.75v8.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM6.166 5.106a.75.75 0 01.188 1.043A8.963 8.963 0 004.5 12c0 4.97 4.03 9 9 9s9-4.03 9-9a8.963 8.963 0 00-1.854-5.851.75.75 0 111.188-.918A10.463 10.463 0 0124 12c0 5.799-4.701 10.5-10.5 10.5S3 17.799 3 12c0-2.316.75-4.462 2.016-6.194a.75.75 0 011.15.3z" clipRule="evenodd" />
                     </svg>
                     {emp.is_active ? "Nonaktif" : "Aktifkan"}
                   </button>
                   <button
                     onClick={() => openDelete(emp)}
-                    className="flex items-center justify-center gap-1 rounded-xl bg-red-100 py-2 text-xs font-bold text-red-600 hover:bg-red-200 dark:bg-red-950/30 dark:text-red-500 dark:hover:bg-red-950/50 transition-colors"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 py-2 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shadow-xs"
                   >
-                    <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                      <path d="M10 11v6M14 11v6" /><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                    <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.09 3.05 14.5 3.553 14.5 4.167v.34a49.19 49.19 0 00-5 0v-.34c0-.614.41-1.117.864-1.141zM9.75 8.25a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm4.5 0a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
                     </svg>
                     Hapus
                   </button>
@@ -401,11 +402,11 @@ export function AdminEmployeePage() {
           <div className="flex gap-2">
             <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
               className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
-              <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg> Prev
+              <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg> Prev
             </button>
             <button disabled={page >= pagination.last_page} onClick={() => setPage((p) => p + 1)}
               className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
-              Next <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
+              Next <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" /></svg>
             </button>
           </div>
         </div>
@@ -421,10 +422,10 @@ export function AdminEmployeePage() {
             <div className="sticky top-0 flex items-center justify-between bg-background px-6 pt-6 pb-4 border-b border-border z-10">
               <div className="flex items-center gap-3">
                 <div className="flex size-10 items-center justify-center rounded-2xl bg-primary/10">
-                  <svg className="size-5 text-primary" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <svg className="size-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
                     {modalMode === "create"
-                      ? <><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></>
-                      : <><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" /></>}
+                      ? <path fillRule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
+                      : <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />}
                   </svg>
                 </div>
                 <div>
@@ -435,7 +436,9 @@ export function AdminEmployeePage() {
                 </div>
               </div>
               <button onClick={closeModal} className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted">
-                <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+                </svg>
               </button>
             </div>
 
@@ -538,9 +541,8 @@ export function AdminEmployeePage() {
           <div className="w-full max-w-sm rounded-3xl bg-background border border-border p-6 shadow-2xl">
             <div className="flex flex-col items-center text-center">
               <div className="flex size-14 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/50">
-                <svg className="size-7 text-red-500" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                  <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                  <path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                <svg className="size-7 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.09 3.05 14.5 3.553 14.5 4.167v.34a49.19 49.19 0 00-5 0v-.34c0-.614.41-1.117.864-1.141zM9.75 8.25a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm4.5 0a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
                 </svg>
               </div>
               <h2 className="mt-3 font-bold text-foreground">Hapus Karyawan</h2>
@@ -549,8 +551,11 @@ export function AdminEmployeePage() {
                   {selectedEmployee.profile?.full_name ?? selectedEmployee.email}
                 </span> akan dihapus dari sistem.
               </p>
-              <div className="mt-3 rounded-xl bg-red-50 dark:bg-red-950/50 px-4 py-2.5 text-xs text-red-700 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/50">
-                ⚠️ Data yang dihapus tidak dapat dikembalikan.
+              <div className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-red-50 dark:bg-red-950/50 px-4 py-2.5 text-xs font-semibold text-red-700 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/50">
+                <svg className="size-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+                </svg>
+                <span>Data yang dihapus tidak dapat dikembalikan.</span>
               </div>
             </div>
 

@@ -191,8 +191,9 @@ export function AdminLeavePage() {
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-3xl bg-card border border-border py-14 shadow-sm">
           <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/50">
-            <svg className="size-7 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg className="size-7 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+              <path fillRule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 013.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 013.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 01-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875zM12.75 12a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5zm0 3a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-4.5zm-6-3a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5h-1.5z" clipRule="evenodd" />
+              <path d="M14.25 5.25a5.23 5.23 0 00-1.279-3.434 9.768 9.768 0 016.963 6.963A5.23 5.23 0 0016.5 7.5h-1.875a.375.375 0 01-.375-.375V5.25z" />
             </svg>
           </div>
           <p className="mt-3 font-bold text-foreground">Tidak ada pengajuan</p>
@@ -263,16 +264,22 @@ export function AdminLeavePage() {
                         <button
                           onClick={() => void handleApprove(item)}
                           disabled={actionLoading}
-                          className="rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                          className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 transition-colors disabled:opacity-50"
                         >
-                          ✓ Setujui
+                          <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+                          </svg>
+                          Setujui
                         </button>
                         <button
                           onClick={() => { setRejectTarget(item); setRejectionReason(""); setActionError(""); }}
                           disabled={actionLoading}
-                          className="rounded-xl bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+                          className="flex items-center justify-center gap-1.5 rounded-xl bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
                         >
-                          ✕ Tolak
+                          <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+                          </svg>
+                          Tolak
                         </button>
                       </>
                     )}
@@ -293,11 +300,11 @@ export function AdminLeavePage() {
           <div className="flex gap-2">
             <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
               className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
-              <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg> Prev
+              <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg> Prev
             </button>
             <button disabled={page >= pagination.last_page} onClick={() => setPage((p) => p + 1)}
               className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
-              Next <svg className="size-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
+              Next <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" /></svg>
             </button>
           </div>
         </div>
@@ -309,8 +316,8 @@ export function AdminLeavePage() {
           <div className="w-full max-w-md rounded-3xl bg-background border border-border p-6 shadow-2xl">
             <div className="flex items-start gap-3 mb-4">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/50">
-                <svg className="size-5 text-red-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
+                <svg className="size-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
                 </svg>
               </div>
               <div>
@@ -356,7 +363,9 @@ export function AdminLeavePage() {
               <h2 className="font-bold text-foreground">Detail Pengajuan</h2>
               <button onClick={() => setDetailItem(null)}
                 className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted">
-                <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+                </svg>
               </button>
             </div>
 
@@ -398,12 +407,18 @@ export function AdminLeavePage() {
             {detailItem.status === "pending" && (
               <div className="mt-5 flex gap-2">
                 <button onClick={() => { void handleApprove(detailItem); setDetailItem(null); }} disabled={actionLoading}
-                  className="flex-1 rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white hover:bg-emerald-600 disabled:opacity-60">
-                  ✓ Setujui
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-3 text-sm font-bold text-white hover:bg-emerald-600 disabled:opacity-60">
+                  <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+                  </svg>
+                  Setujui
                 </button>
                 <button onClick={() => { setRejectTarget(detailItem); setDetailItem(null); }}
-                  className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600">
-                  ✕ Tolak
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600">
+                  <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+                  </svg>
+                  Tolak
                 </button>
               </div>
             )}
