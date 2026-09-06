@@ -1,4 +1,4 @@
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api").replace(/\/$/, "");
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api-absensi.lebahkreatif.or.id/api").replace(/\/$/, "");
 
 export type ApiResponse<T> = { status: "success" | "error"; message: string; data: T; errors?: Record<string, string[] | string> | null };
 
@@ -15,11 +15,30 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}, token
     ...(!isFormData ? { "Content-Type": "application/json" } : {}),
   };
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: { ...baseHeaders, ...(options.headers as Record<string, string> | undefined) },
-  });
-  const body = (await response.json().catch(() => ({ status: "error", message: "Server mengirim respons yang tidak valid.", data: null }))) as ApiResponse<T>;
-  if (!response.ok) throw new ApiError(body.message || "Permintaan ke server gagal.", response.status, body.errors);
-  return body;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${cleanPath}`, {
+      ...options,
+      headers: { ...baseHeaders, ...(options.headers as Record<string, string> | undefined) },
+    });
+
+    const body = (await response.json().catch(() => ({
+      status: "error",
+      message: `Server mengirim status ${response.status} dengan respons yang tidak valid.`,
+      data: null,
+    }))) as ApiResponse<T>;
+
+    if (!response.ok) {
+      throw new ApiError(body.message || "Permintaan ke server gagal.", response.status, body.errors);
+    }
+    return body;
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    throw new ApiError(
+      `Tidak dapat terhubung ke API (${API_BASE_URL}): ${errorMsg}. Pastikan server backend mengizinkan CORS dan URL API sudah benar.`,
+      0
+    );
+  }
 }
