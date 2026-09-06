@@ -574,7 +574,7 @@ export function ProfilePage() {
 
   const handleSelectLanguage = (lang: "id" | "en") => {
     setLanguage(lang);
-    showToast(lang === "id" ? "Bahasa diubah ke Bahasa Indonesia" : "Language changed to English");
+    showToast(lang === "id" ? t("lang_changed_id", "Bahasa diubah ke Bahasa Indonesia") : t("lang_changed_en", "Language changed to English"));
   };
 
   const loadProfile = useCallback(async () => {
@@ -584,11 +584,11 @@ export function ProfilePage() {
       const result = await request<ProfileData>("/profile");
       setData(result);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Gagal memuat profil.");
+      setError(err instanceof ApiError ? err.message : t("profile_load_failed", "Gagal memuat profil."));
     } finally {
       setLoading(false);
     }
-  }, [request]);
+  }, [request, t]);
 
   useEffect(() => { void loadProfile(); }, [loadProfile]);
 
@@ -654,7 +654,7 @@ export function ProfilePage() {
           </svg>
         </div>
         <p className="text-sm text-red-600 dark:text-red-500">{error}</p>
-        <Button variant="secondary" onClick={() => void loadProfile()}>Coba Lagi</Button>
+        <Button variant="secondary" onClick={() => void loadProfile()}>{t("try_again", "Coba Lagi")}</Button>
       </div>
     );
   }

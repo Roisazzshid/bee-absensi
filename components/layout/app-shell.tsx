@@ -116,14 +116,6 @@ export function AppShell({ children, activeItem, noPadding = false }: { children
         {/* Mobile top header */}
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between bg-card px-5 shadow-sm md:hidden border-b border-border">
           <div className="flex items-center gap-2">
-            <button
-              className="flex items-center justify-center rounded-xl p-2 text-muted-foreground hover:bg-muted"
-              aria-label="Menu"
-            >
-              <svg className="size-5" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z" clipRule="evenodd" />
-              </svg>
-            </button>
             <Brand />
           </div>
           <div className="flex items-center gap-2">

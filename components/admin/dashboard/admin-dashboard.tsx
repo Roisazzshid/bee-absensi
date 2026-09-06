@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 
+import { useLanguage } from "@/lib/language-context";
+
 type DashboardData = {
   today: string;
   total_employees: number;
@@ -15,6 +17,7 @@ type DashboardData = {
 
 export function AdminDashboard() {
   const { request, user } = useAuth();
+  const { t, formatDate, getGreeting, language } = useLanguage();
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,20 +29,12 @@ export function AdminDashboard() {
         const res = await request<DashboardData>("/admin/dashboard");
         setData(res);
       } catch {
-        setError("Gagal memuat data dashboard.");
+        setError(t("admin_dashboard_error", "Gagal memuat data dashboard."));
       } finally {
         setLoading(false);
       }
     })();
-  }, [request]);
-
-  const greeting = () => {
-    const h = new Date().getHours();
-    if (h < 11) return "Selamat pagi";
-    if (h < 15) return "Selamat siang";
-    if (h < 18) return "Selamat sore";
-    return "Selamat malam";
-  };
+  }, [request, t]);
 
   const todayLabel = data
     ? (() => {
@@ -48,11 +43,11 @@ export function AdminDashboard() {
           const y = parseInt(parts[0], 10);
           const m = parseInt(parts[1], 10) - 1;
           const d = parseInt(parts[2], 10);
-          return new Date(y, m, d).toLocaleDateString("id-ID", {
+          return formatDate(new Date(y, m, d), {
             weekday: "long", day: "numeric", month: "long", year: "numeric",
           });
         }
-        return new Date(data.today).toLocaleDateString("id-ID", {
+        return formatDate(new Date(data.today), {
           weekday: "long", day: "numeric", month: "long", year: "numeric",
         });
       })()
@@ -79,7 +74,7 @@ export function AdminDashboard() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            {greeting()}, {user?.profile?.full_name ?? "Administrator"}!
+            {getGreeting()}, {user?.profile?.full_name ?? "Administrator"}!
           </h1>
           <div className="flex items-center gap-2 mt-1">
             <svg className="size-4 text-primary fill-current" viewBox="0 0 24 24">
@@ -95,14 +90,14 @@ export function AdminDashboard() {
           <svg className="size-4 fill-current" viewBox="0 0 24 24">
             <path fillRule="evenodd" clipRule="evenodd" d="M12 2.25a.75.75 0 01.75.75v11.69l3.22-3.22a.75.75 0 111.06 1.06l-4.5 4.5a.75.75 0 01-1.06 0l-4.5-4.5a.75.75 0 111.06-1.06l3.22 3.22V3a.75.75 0 01.75-.75zm-9 13.5a.75.75 0 01.75.75v2.25a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5V16.5a.75.75 0 011.5 0v2.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V16.5a.75.75 0 01.75-.75z"/>
           </svg>
-          <span className="hidden sm:inline">Export Laporan</span>
+          <span className="hidden sm:inline">{t("admin_export_report", "Export Laporan")}</span>
         </button>
       </div>
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard
-          label="TOTAL HADIR"
+          label={t("admin_total_present", "TOTAL HADIR")}
           value={data.attendance.present}
           iconBgClass="bg-green-500/15"
           icon={
@@ -112,7 +107,7 @@ export function AdminDashboard() {
           }
         />
         <StatCard
-          label="TEPAT WAKTU"
+          label={t("admin_on_time", "TEPAT WAKTU")}
           value={data.attendance.on_time}
           iconBgClass="bg-primary/15"
           icon={
@@ -122,7 +117,7 @@ export function AdminDashboard() {
           }
         />
         <StatCard
-          label="TERLAMBAT"
+          label={t("admin_late", "TERLAMBAT")}
           value={data.attendance.late}
           iconBgClass="bg-orange-500/15"
           icon={
@@ -132,7 +127,7 @@ export function AdminDashboard() {
           }
         />
         <StatCard
-          label="BELUM ABSEN"
+          label={t("admin_absent", "BELUM ABSEN")}
           value={data.attendance.absent}
           iconBgClass="bg-red-500/15"
           icon={
@@ -149,8 +144,8 @@ export function AdminDashboard() {
         <div className="relative overflow-hidden rounded-3xl p-5 lg:col-span-3 border border-border bg-card shadow-2xl">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#f5c518] to-[#d97706]" />
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-base text-foreground">Persentase Kehadiran</h2>
-            <span className="rounded-full px-3 py-1 text-xs font-semibold bg-primary/10 text-primary">Hari Ini</span>
+            <h2 className="font-bold text-base text-foreground">{t("admin_attendance_percentage", "Persentase Kehadiran")}</h2>
+            <span className="rounded-full px-3 py-1 text-xs font-semibold bg-primary/10 text-primary">{t("admin_today", "Hari Ini")}</span>
           </div>
 
           {/* SVG Donut Chart */}
@@ -168,15 +163,15 @@ export function AdminDashboard() {
           <div className="flex items-center justify-center gap-6 mt-4">
             <div className="flex items-center gap-1.5">
               <span className="size-2.5 rounded-full bg-[#f5c518]" />
-              <span className="text-xs text-muted-foreground">Tepat Waktu ({data.attendance.on_time})</span>
+              <span className="text-xs text-muted-foreground">{t("status_on_time", "Tepat Waktu")} ({data.attendance.on_time})</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="size-2.5 rounded-full bg-[#f97316]" />
-              <span className="text-xs text-muted-foreground">Terlambat ({data.attendance.late})</span>
+              <span className="text-xs text-muted-foreground">{t("status_late", "Terlambat")} ({data.attendance.late})</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="size-2.5 rounded-full bg-[#ef4444]" />
-              <span className="text-xs text-muted-foreground">Belum ({data.attendance.absent})</span>
+              <span className="text-xs text-muted-foreground">{t("admin_absent", "Belum")} ({data.attendance.absent})</span>
             </div>
           </div>
         </div>
@@ -192,7 +187,7 @@ export function AdminDashboard() {
                   <path fillRule="evenodd" clipRule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 013.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 013.75 3.75v7.875c0 2.071-1.679 3.75-3.75 3.75H5.625a3.75 3.75 0 01-3.75-3.75V5.25c0-2.071 1.679-3.75 3.75-3.75zm8.25 1.625v3.375c0 .207.168.375.375.375h3.375l-3.75-3.75zM7.5 12a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 12zm0 3.75a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zm0 3.75a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z"/>
                 </svg>
               </div>
-              <h2 className="font-bold text-sm text-foreground">Pengajuan Izin</h2>
+              <h2 className="font-bold text-sm text-foreground">{t("admin_leave_requests", "Pengajuan Izin")}</h2>
             </div>
 
             {/* Menunggu Persetujuan */}
@@ -202,7 +197,7 @@ export function AdminDashboard() {
             >
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-[#f97316]" />
-                <span className="text-sm text-muted-foreground">Menunggu Persetujuan</span>
+                <span className="text-sm text-muted-foreground">{t("admin_pending_approval", "Menunggu Persetujuan")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm text-foreground">{data.leave_requests.pending}</span>
@@ -219,7 +214,7 @@ export function AdminDashboard() {
             >
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-[#22c55e]" />
-                <span className="text-sm text-muted-foreground">Disetujui Bulan Ini</span>
+                <span className="text-sm text-muted-foreground">{t("admin_approved_this_month", "Disetujui Bulan Ini")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm text-foreground">{data.leave_requests.approved_this_month}</span>
@@ -237,14 +232,14 @@ export function AdminDashboard() {
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#f5c518] to-[#d97706]" />
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="font-bold text-base text-foreground">Kehadiran 7 Hari Terakhir</h2>
-            <p className="text-xs mt-0.5 text-primary">Tren tingkat kehadiran karyawan mingguan</p>
+            <h2 className="font-bold text-base text-foreground">{t("admin_attendance_last_7_days", "Kehadiran 7 Hari Terakhir")}</h2>
+            <p className="text-xs mt-0.5 text-primary">{t("admin_trend_weekly", "Tren tingkat kehadiran karyawan mingguan")}</p>
           </div>
           <button
             onClick={() => router.push("/admin/absensi")}
             className="flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-80 text-primary"
           >
-            Lihat Detail
+            {t("admin_view_details", "Lihat Detail")}
             <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
               <path fillRule="evenodd" d="M12.97 3.97a.75.75 0 011.06 0l7.5 7.5a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 11-1.06-1.06l6.22-6.22H3a.75.75 0 010-1.5h16.19l-6.22-6.22a.75.75 0 010-1.06z" clipRule="evenodd" />
             </svg>
@@ -262,6 +257,7 @@ function DonutChart({ onTime, late, absent, total, rate }: {
   onTime: number; late: number; absent: number; total: number; rate: number;
 }) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isDark = theme === "dark";
   
   const size = 160;
@@ -323,7 +319,7 @@ function DonutChart({ onTime, late, absent, total, rate }: {
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-black text-foreground">{rate}%</span>
-        <span className="text-xs text-muted-foreground">Tingkat Hadir</span>
+        <span className="text-xs text-muted-foreground">{t("admin_attendance_rate", "Tingkat Hadir")}</span>
       </div>
     </div>
   );
@@ -338,6 +334,7 @@ function LineChart({ data, today, total }: {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
+  const { language } = useLanguage();
 
   useEffect(() => {
     const isDark = theme === "dark";
@@ -438,8 +435,9 @@ function LineChart({ data, today, total }: {
       }
 
       // X-label (shortened date)
-      const label = d.date ? d.date.slice(5).replace("-", " ").replace(/^0/, "") : d.day;
-      const months = ["","Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+      const months = language === "en"
+        ? ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+        : ["","Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
       const [mm, dd] = d.date.split("-").slice(1);
       const shortLabel = `${parseInt(dd)} ${months[parseInt(mm)] ?? ""}`;
 
@@ -449,7 +447,7 @@ function LineChart({ data, today, total }: {
       ctx.fillText(shortLabel, x, h - 6);
     });
 
-  }, [data, today, total, theme]);
+  }, [data, today, total, theme, language]);
 
   return (
     <div ref={containerRef} className="w-full">

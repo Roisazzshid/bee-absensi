@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLanguage } from "@/lib/language-context";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 
@@ -17,28 +18,72 @@ export type UserNotificationItem = {
   is_important: boolean;
 };
 
+const STORAGE_KEY_USER_READ_NOTIFS = "bee_user_read_notif_ids";
+
 export function UserNotification() {
   const { request } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<UserNotificationItem[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [readNotifIds, setReadNotifIds] = useState<string[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "leave" | "reminder" | "attendance">("all");
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const fetchNotifications = useCallback(async () => {
+  // Muat ID notifikasi yang sudah dibaca dari localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_USER_READ_NOTIFS);
+      if (saved) {
+        setReadNotifIds(JSON.parse(saved));
+      }
+    } catch {
+      // Abaikan jika localStorage tidak tersedia
+    }
+  }, []);
+
+  const markAllAsRead = useCallback((itemsToMark?: UserNotificationItem[]) => {
+    const list = itemsToMark ?? notifications;
+    if (list.length === 0) return;
+    const allIds = list.map((n) => n.id);
+    setReadNotifIds((prev) => {
+      const updated = Array.from(new Set([...prev, ...allIds]));
+      try {
+        localStorage.setItem(STORAGE_KEY_USER_READ_NOTIFS, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  }, [notifications]);
+
+  const markAsRead = useCallback((id: string) => {
+    setReadNotifIds((prev) => {
+      if (prev.includes(id)) return prev;
+      const updated = [...prev, id];
+      try {
+        localStorage.setItem(STORAGE_KEY_USER_READ_NOTIFS, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  }, []);
+
+  const fetchNotifications = useCallback(async (isManual = false) => {
+    if (isManual) setIsRefreshing(true);
     try {
       const res = await request<{
         unread_alert_count?: number;
         total_notifications?: number;
         notifications?: UserNotificationItem[];
       }>("/notifications");
-      if (res) {
-        setUnreadCount(res.unread_alert_count ?? 0);
-        setNotifications(res.notifications ?? []);
+      if (res && res.notifications) {
+        setNotifications(res.notifications);
       }
     } catch {
       // ignore silently
+    } finally {
+      if (isManual) {
+        setTimeout(() => setIsRefreshing(false), 500);
+      }
     }
   }, [request]);
 
@@ -64,6 +109,24 @@ export function UserNotification() {
     };
   }, [notifOpen]);
 
+  const handleToggleNotif = useCallback(() => {
+    setNotifOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        // Saat dibuka, otomatis tandai semua notifikasi saat ini sebagai sudah dilihat
+        markAllAsRead();
+        void fetchNotifications();
+      }
+      return next;
+    });
+  }, [fetchNotifications, markAllAsRead]);
+
+  // Hitung notifikasi penting yang belum pernah dibaca
+  const unreadAlerts = notifications.filter(
+    (i) => i.is_important && !readNotifIds.includes(i.id)
+  );
+  const unreadCount = unreadAlerts.length;
+
   const leaveCount = notifications.filter((i) => i.category === "leave").length;
   const reminderCount = notifications.filter((i) => i.category === "reminder").length;
   const attendanceCount = notifications.filter((i) => i.category === "attendance").length;
@@ -80,10 +143,7 @@ export function UserNotification() {
       {/* Notification Bell Button */}
       <button
         type="button"
-        onClick={() => {
-          setNotifOpen((prev) => !prev);
-          if (!notifOpen) void fetchNotifications();
-        }}
+        onClick={handleToggleNotif}
         className={`relative flex size-9 items-center justify-center rounded-xl transition-all cursor-pointer border ${
           notifOpen
             ? "bg-primary/15 border-primary/40 text-primary shadow-xs"
@@ -114,25 +174,49 @@ export function UserNotification() {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
             <div className="flex items-center gap-2">
-              <div className="size-2 rounded-full bg-primary" />
-              <span className="text-sm font-bold text-foreground">Notifikasi Saya</span>
+              <div className={`size-2 rounded-full ${unreadCount > 0 ? "bg-red-500 animate-pulse" : "bg-primary"}`} />
+              <span className="text-sm font-bold text-foreground">{t("my_notifications")}</span>
               {unreadCount > 0 ? (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-500/15 text-red-600 dark:text-red-400">
-                  {unreadCount} Baru
+                  {unreadCount} {t("new_badge", "Baru")}
                 </span>
               ) : (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
-                  {notifications.length} Aktivitas
+                  {notifications.length} {t("activities")}
                 </span>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => void fetchNotifications()}
-              className="text-[11px] font-semibold text-muted-foreground hover:text-foreground transition cursor-pointer"
-            >
-              Segarkan
-            </button>
+
+            <div className="flex items-center gap-2">
+              {notifications.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => markAllAsRead()}
+                  className="text-[11px] font-medium text-muted-foreground hover:text-foreground transition cursor-pointer"
+                  title={t("mark_read")}
+                >
+                  {t("mark_read")}
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={isRefreshing}
+                onClick={() => void fetchNotifications(true)}
+                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-semibold text-primary hover:bg-primary/10 transition cursor-pointer disabled:opacity-50"
+                title={t("refresh")}
+              >
+                <svg
+                  className={`size-3.5 ${isRefreshing ? "animate-spin text-primary" : "text-primary"}`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                <span>{isRefreshing ? t("refreshing") : t("refresh")}</span>
+              </button>
+            </div>
           </div>
 
           {/* Filter Tabs */}
@@ -147,7 +231,7 @@ export function UserNotification() {
                     : "bg-card hover:bg-muted text-muted-foreground border border-border/60"
                 }`}
               >
-                Semua ({notifications.length})
+                {t("tab_all")} ({notifications.length})
               </button>
               {leaveCount > 0 && (
                 <button
@@ -159,7 +243,7 @@ export function UserNotification() {
                       : "bg-card hover:bg-muted text-muted-foreground border border-border/60"
                   }`}
                 >
-                  Izin &amp; Cuti ({leaveCount})
+                  {t("tab_leave")} ({leaveCount})
                 </button>
               )}
               {reminderCount > 0 && (
@@ -172,7 +256,7 @@ export function UserNotification() {
                       : "bg-card hover:bg-muted text-muted-foreground border border-border/60"
                   }`}
                 >
-                  Pengingat ({reminderCount})
+                  {t("tab_reminder")} ({reminderCount})
                 </button>
               )}
               {attendanceCount > 0 && (
@@ -185,7 +269,7 @@ export function UserNotification() {
                       : "bg-card hover:bg-muted text-muted-foreground border border-border/60"
                   }`}
                 >
-                  Absensi ({attendanceCount})
+                  {t("tab_attendance")} ({attendanceCount})
                 </button>
               )}
             </div>
@@ -204,13 +288,16 @@ export function UserNotification() {
                     />
                   </svg>
                 </div>
-                <p className="text-xs font-bold text-foreground">Tidak Ada Notifikasi</p>
+                <p className="text-xs font-bold text-foreground">{t("no_notifications")}</p>
                 <p className="text-[11px] text-muted-foreground">
-                  Belum ada pembaruan aktivitas untuk Anda.
+                  {t("no_user_notif_desc")}
                 </p>
               </div>
             ) : (
               filteredNotifications.map((item) => {
+                const isRead = readNotifIds.includes(item.id);
+                const isUnreadAlert = item.is_important && !isRead;
+
                 const badgeStyle =
                   item.badge_color === "amber"
                     ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20"
@@ -228,11 +315,12 @@ export function UserNotification() {
                   <div
                     key={item.id}
                     onClick={() => {
+                      markAsRead(item.id);
                       setNotifOpen(false);
                       router.push(item.route);
                     }}
                     className={`flex items-start gap-3 p-3.5 hover:bg-muted/60 cursor-pointer transition-colors group ${
-                      item.is_important ? "bg-amber-500/5" : ""
+                      isUnreadAlert ? "bg-amber-500/10 dark:bg-amber-500/15 border-l-2 border-amber-500" : isRead ? "opacity-80" : ""
                     }`}
                   >
                     {/* Category Icon */}
@@ -296,7 +384,7 @@ export function UserNotification() {
                       <div className="flex items-center justify-between mt-1 text-[10px] text-muted-foreground">
                         <span>{item.time_formatted}</span>
                         <span className="font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                          Buka Halaman →
+                          {t("open_page")}
                         </span>
                       </div>
                     </div>

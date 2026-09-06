@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLanguage } from "@/lib/language-context";
 import { ApiError } from "@/lib/api";
 
 type LeaveItem = {
@@ -20,20 +21,15 @@ type LeaveItem = {
 
 type Pagination = { current_page: number; last_page: number; per_page: number; total: number };
 
-const TYPE_MAP: Record<string, string> = { sick: "Sakit", leave: "Cuti", permission: "Izin" };
 const TYPE_COLOR: Record<string, string> = {
   sick: "bg-red-50 text-red-600 ring-red-200 dark:bg-red-500/20 dark:text-red-500 dark:ring-0",
   leave: "bg-blue-50 text-blue-600 ring-blue-200 dark:bg-blue-500/20 dark:text-blue-500 dark:ring-0",
   permission: "bg-purple-50 text-purple-600 ring-purple-200 dark:bg-purple-500/20 dark:text-purple-500 dark:ring-0",
 };
-const STATUS_CONFIG: Record<string, { label: string; badge: string; dot: string }> = {
-  pending: { label: "Pending", badge: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/20 dark:text-amber-500 dark:ring-0", dot: "bg-amber-400" },
-  approved: { label: "Disetujui", badge: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-500 dark:ring-0", dot: "bg-emerald-500" },
-  rejected: { label: "Ditolak", badge: "bg-red-50 text-red-600 ring-red-200 dark:bg-red-500/20 dark:text-red-500 dark:ring-0", dot: "bg-red-400" },
-};
 
 export function AdminLeavePage() {
   const { request } = useAuth();
+  const { t, formatDate } = useLanguage();
   const [items, setItems] = useState<LeaveItem[]>([]);
   const [summary, setSummary] = useState({ pending: 0, approved: 0, rejected: 0 });
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -48,6 +44,27 @@ export function AdminLeavePage() {
   const [actionError, setActionError] = useState("");
   const [detailItem, setDetailItem] = useState<LeaveItem | null>(null);
 
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case "sick": return t("type_sick_short", "Sakit");
+      case "leave": return t("type_leave_short", "Cuti");
+      case "permission": return t("type_permission_short", "Izin");
+      default: return type;
+    }
+  };
+
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case "pending":
+        return { label: t("status_pending", "Pending"), badge: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/20 dark:text-amber-500 dark:ring-0", dot: "bg-amber-400" };
+      case "approved":
+        return { label: t("status_approved", "Disetujui"), badge: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-500 dark:ring-0", dot: "bg-emerald-500" };
+      case "rejected":
+      default:
+        return { label: t("status_rejected", "Ditolak"), badge: "bg-red-50 text-red-600 ring-red-200 dark:bg-red-500/20 dark:text-red-500 dark:ring-0", dot: "bg-red-400" };
+    }
+  };
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -61,11 +78,11 @@ export function AdminLeavePage() {
       setSummary(res.summary);
       setPagination(res.pagination);
     } catch {
-      setError("Gagal memuat data pengajuan.");
+      setError(t("leave_load_failed_admin", "Gagal memuat data pengajuan."));
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, page, request]);
+  }, [statusFilter, page, request, t]);
 
   useEffect(() => { void fetchData(); }, [fetchData]);
 
@@ -76,7 +93,7 @@ export function AdminLeavePage() {
       await request(`/admin/leave-requests/${item.id}/approve`, { method: "PUT" });
       await fetchData();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : "Gagal menyetujui.");
+      setActionError(err instanceof ApiError ? err.message : t("approve_failed", "Gagal menyetujui."));
     } finally {
       setActionLoading(false);
     }
@@ -95,7 +112,7 @@ export function AdminLeavePage() {
       setRejectionReason("");
       await fetchData();
     } catch (err) {
-      setActionError(err instanceof ApiError ? err.message : "Gagal menolak.");
+      setActionError(err instanceof ApiError ? err.message : t("reject_failed", "Gagal menolak."));
     } finally {
       setActionLoading(false);
     }
@@ -110,22 +127,18 @@ export function AdminLeavePage() {
       const month = parseInt(parts[1], 10) - 1;
       const day = parseInt(parts[2], 10);
       if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        const localD = new Date(year, month, day);
-        return localD.toLocaleDateString("id-ID", {
+        return formatDate(new Date(year, month, day), {
           day: "numeric",
           month: "short",
           year: "numeric",
         });
       }
     }
-    const parsed = new Date(d);
-    return Number.isNaN(parsed.getTime())
-      ? d
-      : parsed.toLocaleDateString("id-ID", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        });
+    return formatDate(d, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const daysDiff = (s: string, e: string) => {
@@ -137,21 +150,19 @@ export function AdminLeavePage() {
   };
 
   const initials = (name: string) =>
-    (name || "K").split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
-
-  const tabs = [
-    { key: "", label: "Semua", count: summary.pending + summary.approved + summary.rejected },
-    { key: "pending", label: "Pending", count: summary.pending },
-    { key: "approved", label: "Disetujui", count: summary.approved },
-    { key: "rejected", label: "Ditolak", count: summary.rejected },
+    (name || "K").split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();  const tabs = [
+    { key: "", label: t("filter_all", "Semua"), count: summary.pending + summary.approved + summary.rejected },
+    { key: "pending", label: t("status_pending", "Pending"), count: summary.pending },
+    { key: "approved", label: t("status_approved", "Disetujui"), count: summary.approved },
+    { key: "rejected", label: t("status_rejected", "Ditolak"), count: summary.rejected },
   ];
 
   return (
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-foreground md:text-2xl">Pengajuan Izin & Cuti</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">Kelola dan proses pengajuan dari karyawan</p>
+        <h1 className="text-xl font-bold text-foreground md:text-2xl">{t("admin_leave_title", "Pengajuan Izin & Cuti")}</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">{t("admin_leave_subtitle", "Kelola dan proses pengajuan dari karyawan")}</p>
       </div>
 
       {/* Tabs */}
@@ -196,13 +207,13 @@ export function AdminLeavePage() {
               <path d="M14.25 5.25a5.23 5.23 0 00-1.279-3.434 9.768 9.768 0 016.963 6.963A5.23 5.23 0 0016.5 7.5h-1.875a.375.375 0 01-.375-.375V5.25z" />
             </svg>
           </div>
-          <p className="mt-3 font-bold text-foreground">Tidak ada pengajuan</p>
-          <p className="mt-1 text-sm text-muted-foreground">Belum ada pengajuan dengan filter ini</p>
+          <p className="mt-3 font-bold text-foreground">{t("no_leave_requests", "Tidak ada pengajuan")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("no_leave_requests_desc", "Belum ada pengajuan dengan filter ini")}</p>
         </div>
       ) : (
         <div className="space-y-3">
           {items.map((item) => {
-            const st = STATUS_CONFIG[item.status];
+            const st = getStatusConfig(item.status);
             const tc = TYPE_COLOR[item.type] ?? "bg-muted text-muted-foreground ring-border dark:ring-0";
             return (
               <div
@@ -228,11 +239,11 @@ export function AdminLeavePage() {
 
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <span className={["inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 dark:ring-0", tc].join(" ")}>
-                        {TYPE_MAP[item.type] ?? item.type}
+                        {getTypeLabel(item.type)}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {fmtDate(item.start_date)} – {fmtDate(item.end_date)}
-                        <span className="ml-1 text-primary font-semibold">({daysDiff(item.start_date, item.end_date)} hari)</span>
+                        <span className="ml-1 text-primary font-semibold">({daysDiff(item.start_date, item.end_date)} {t("days_count", "hari")})</span>
                       </span>
                       <span className={["inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 dark:ring-0", st.badge].join(" ")}>
                         <span className={["size-1.5 rounded-full", st.dot].join(" ")} />{st.label}
@@ -242,11 +253,11 @@ export function AdminLeavePage() {
                     <p className="text-xs text-muted-foreground line-clamp-2">{item.reason}</p>
 
                     {item.rejection_reason && (
-                      <p className="mt-1 text-xs text-red-600 dark:text-red-400 italic">Ditolak: {item.rejection_reason}</p>
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400 italic">{t("rejected_prefix", "Ditolak")}: {item.rejection_reason}</p>
                     )}
                     {item.approved_by && (
                       <p className="mt-1 text-[10px] text-muted-foreground">
-                        Diproses: <span className="font-semibold">{item.approved_by.full_name}</span>
+                        {t("processed_by", "Diproses")}: <span className="font-semibold">{item.approved_by.full_name}</span>
                       </p>
                     )}
                   </div>
@@ -257,7 +268,7 @@ export function AdminLeavePage() {
                       onClick={() => setDetailItem(item)}
                       className="rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted transition-colors"
                     >
-                      Detail
+                      {t("detail_btn", "Detail")}
                     </button>
                     {item.status === "pending" && (
                       <>
@@ -269,7 +280,7 @@ export function AdminLeavePage() {
                           <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
                             <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
                           </svg>
-                          Setujui
+                          {t("approve_btn", "Setujui")}
                         </button>
                         <button
                           onClick={() => { setRejectTarget(item); setRejectionReason(""); setActionError(""); }}
@@ -279,7 +290,7 @@ export function AdminLeavePage() {
                           <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
                             <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
                           </svg>
-                          Tolak
+                          {t("reject_btn", "Tolak")}
                         </button>
                       </>
                     )}
@@ -295,16 +306,16 @@ export function AdminLeavePage() {
       {pagination && pagination.last_page > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
-            Halaman <span className="font-bold text-foreground">{pagination.current_page}</span> dari <span className="font-bold text-foreground">{pagination.last_page}</span>
+            {t("page_prefix", "Halaman")} <span className="font-bold text-foreground">{pagination.current_page}</span> {t("page_of", "dari")} <span className="font-bold text-foreground">{pagination.last_page}</span>
           </p>
           <div className="flex gap-2">
             <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
               className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
-              <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg> Prev
+              <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg> {t("prev", "Prev")}
             </button>
             <button disabled={page >= pagination.last_page} onClick={() => setPage((p) => p + 1)}
               className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
-              Next <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" /></svg>
+              {t("next", "Next")} <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" /></svg>
             </button>
           </div>
         </div>
@@ -317,23 +328,23 @@ export function AdminLeavePage() {
             <div className="flex items-start gap-3 mb-4">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/50">
                 <svg className="size-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                  <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75-4.365 9.75-9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
                 </svg>
               </div>
               <div>
-                <h2 className="font-bold text-foreground">Tolak Pengajuan</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">dari <span className="font-semibold">{rejectTarget.user.full_name}</span></p>
+                <h2 className="font-bold text-foreground">{t("reject_modal_title", "Tolak Pengajuan")}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("reject_modal_from", "dari")} <span className="font-semibold">{rejectTarget.user.full_name}</span></p>
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-muted-foreground mb-2">
-                Alasan penolakan <span className="font-normal opacity-60">(opsional)</span>
+                {t("reject_reason_label", "Alasan penolakan")} <span className="font-normal opacity-60">{t("optional", "(opsional)")}</span>
               </label>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Tulis alasan penolakan…"
+                placeholder={t("reject_reason_placeholder", "Tulis alasan penolakan…")}
                 rows={3}
                 className="w-full resize-none rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
@@ -344,11 +355,11 @@ export function AdminLeavePage() {
             <div className="mt-4 flex gap-2">
               <button onClick={() => setRejectTarget(null)}
                 className="flex-1 rounded-xl border border-border py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors">
-                Batal
+                {t("cancel", "Batal")}
               </button>
               <button onClick={() => void handleRejectSubmit()} disabled={actionLoading}
                 className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-60 transition-colors">
-                {actionLoading ? "Memproses…" : "Tolak"}
+                {actionLoading ? t("processing", "Memproses…") : t("reject_btn", "Tolak")}
               </button>
             </div>
           </div>
@@ -360,7 +371,7 @@ export function AdminLeavePage() {
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl bg-background border border-border p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-bold text-foreground">Detail Pengajuan</h2>
+              <h2 className="font-bold text-foreground">{t("leave_detail_title", "Detail Pengajuan")}</h2>
               <button onClick={() => setDetailItem(null)}
                 className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted">
                 <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
@@ -370,38 +381,38 @@ export function AdminLeavePage() {
             </div>
 
             <div className="space-y-3">
-              <Row label="Karyawan" value={`${detailItem.user.full_name} (${detailItem.user.nip})`} />
-              <Row label="Departemen" value={`${detailItem.user.department} — ${detailItem.user.position}`} />
-              <Row label="Jenis">
+              <Row label={t("th_employee", "Karyawan")} value={`${detailItem.user.full_name} (${detailItem.user.nip})`} />
+              <Row label={t("th_department", "Departemen")} value={`${detailItem.user.department} — ${detailItem.user.position}`} />
+              <Row label={t("leave_type", "Jenis")}>
                 <span className={["inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 dark:ring-0", TYPE_COLOR[detailItem.type]].join(" ")}>
-                  {TYPE_MAP[detailItem.type]}
+                  {getTypeLabel(detailItem.type)}
                 </span>
               </Row>
-              <Row label="Tanggal" value={`${fmtDate(detailItem.start_date)} – ${fmtDate(detailItem.end_date)} (${daysDiff(detailItem.start_date, detailItem.end_date)} hari)`} />
-              <Row label="Status">
-                <span className={["inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 dark:ring-0", STATUS_CONFIG[detailItem.status].badge].join(" ")}>
-                  <span className={["size-1.5 rounded-full", STATUS_CONFIG[detailItem.status].dot].join(" ")} />
-                  {STATUS_CONFIG[detailItem.status].label}
+              <Row label={t("date", "Tanggal")} value={`${fmtDate(detailItem.start_date)} – ${fmtDate(detailItem.end_date)} (${daysDiff(detailItem.start_date, detailItem.end_date)} ${t("days_count", "hari")})`} />
+              <Row label={t("status", "Status")}>
+                <span className={["inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 dark:ring-0", getStatusConfig(detailItem.status).badge].join(" ")}>
+                  <span className={["size-1.5 rounded-full", getStatusConfig(detailItem.status).dot].join(" ")} />
+                  {getStatusConfig(detailItem.status).label}
                 </span>
               </Row>
               <div className="rounded-xl bg-muted/50 p-3">
-                <p className="text-[10px] font-bold text-muted-foreground mb-1">Alasan</p>
+                <p className="text-[10px] font-bold text-muted-foreground mb-1">{t("reason", "Alasan")}</p>
                 <p className="text-sm text-foreground">{detailItem.reason}</p>
               </div>
               {detailItem.rejection_reason && (
                 <div className="rounded-xl bg-red-50 dark:bg-red-950/50 p-3 ring-1 ring-red-200 dark:ring-red-900/50">
-                  <p className="text-[10px] font-bold text-red-600 dark:text-red-400 mb-1">Alasan Penolakan</p>
+                  <p className="text-[10px] font-bold text-red-600 dark:text-red-400 mb-1">{t("reject_reason_label", "Alasan Penolakan")}</p>
                   <p className="text-sm text-red-700 dark:text-red-300">{detailItem.rejection_reason}</p>
                 </div>
               )}
               {detailItem.attachment_url && (
-                <Row label="Lampiran">
+                <Row label={t("attachment", "Lampiran")}>
                   <a href={detailItem.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-sm font-bold hover:underline">
-                    Lihat dokumen →
+                    {t("view_document", "Lihat dokumen →")}
                   </a>
                 </Row>
               )}
-              {detailItem.approved_by && <Row label="Diproses" value={detailItem.approved_by.full_name} />}
+              {detailItem.approved_by && <Row label={t("processed_by", "Diproses")} value={detailItem.approved_by.full_name} />}
             </div>
 
             {detailItem.status === "pending" && (
@@ -411,20 +422,20 @@ export function AdminLeavePage() {
                   <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
                     <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
                   </svg>
-                  Setujui
+                  {t("approve_btn", "Setujui")}
                 </button>
                 <button onClick={() => { setRejectTarget(detailItem); setDetailItem(null); }}
                   className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600">
                   <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
                     <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
                   </svg>
-                  Tolak
+                  {t("reject_btn", "Tolak")}
                 </button>
               </div>
             )}
             <button onClick={() => setDetailItem(null)}
               className="mt-2 w-full rounded-xl border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors">
-              Tutup
+              {t("close", "Tutup")}
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLanguage } from "@/lib/language-context";
 import { Button } from "@/components/ui";
 import { ApiError } from "@/lib/api";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -34,43 +35,6 @@ type HistoryData = {
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function fmtTime(value: string | null): string {
-  if (!value) return "--:--";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value.slice(11, 16) || "--:--";
-  return new Intl.DateTimeFormat("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(d);
-}
-
-function fmtDate(dateStr: string): string {
-  if (!dateStr) return "—";
-  try {
-    // Ambil hanya bagian tanggal (YYYY-MM-DD) — potong jika ada bagian waktu
-    const datePart = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr.split(" ")[0];
-    const d = new Date(datePart + "T00:00:00");
-    if (Number.isNaN(d.getTime())) return dateStr;
-    return new Intl.DateTimeFormat("id-ID", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }).format(d);
-  } catch {
-    return dateStr;
-  }
-}
-
-
-function monthLabel(ym: string): string {
-  const [year, month] = ym.split("-");
-  return new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(
-    new Date(Number(year), Number(month) - 1, 1)
-  );
-}
 
 function addMonth(ym: string, delta: number): string {
   const [year, month] = ym.split("-").map(Number);
@@ -133,31 +97,60 @@ function SummaryCard({
 }
 
 function AttendanceItem({ record }: { record: AttendanceRecord }) {
-  const cfg = STATUS_CONFIG[record.status] ?? STATUS_CONFIG.absent;
+  const { t, formatDate, formatTime } = useLanguage();
   const noData = !record.clock_in_time && !record.clock_out_time;
+
+  const statusMap = {
+    on_time: {
+      label: t("status_on_time"),
+      border: "border-l-emerald-500",
+      badge: "bg-emerald-500/10 border border-emerald-500/20",
+      text: "text-emerald-600 dark:text-emerald-500",
+    },
+    late: {
+      label: t("status_late"),
+      border: "border-l-red-500",
+      badge: "bg-red-500/10 border border-red-500/20",
+      text: "text-red-600 dark:text-red-500",
+    },
+    absent: {
+      label: t("status_absent"),
+      border: "border-l-primary",
+      badge: "bg-primary/10 border border-primary/20",
+      text: "text-primary",
+    },
+  };
+  const cfg = statusMap[record.status] ?? statusMap.absent;
 
   return (
     <div
       className={`shadow-sm relative flex items-center justify-between overflow-hidden rounded-2xl border-l-4 bg-card border border-border p-4 ${cfg.border}`}
     >
       <div className="flex flex-col gap-1">
-        <span className="text-xs text-muted-foreground">{fmtDate(record.date)}</span>
+        <span className="text-xs text-muted-foreground">
+          {formatDate(record.date, {
+            weekday: "short",
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </span>
         <div className={`mt-1 flex items-center gap-4 ${noData ? "opacity-50" : ""}`}>
           <div>
             <span className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-              Masuk
+              {t("clock_in_title")}
             </span>
             <span className="text-xl font-bold leading-none text-foreground">
-              {fmtTime(record.clock_in_time)}
+              {formatTime(record.clock_in_time)}
             </span>
           </div>
           <div className="h-8 w-px bg-border" />
           <div>
             <span className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-              Pulang
+              {t("clock_out_title")}
             </span>
             <span className="text-xl font-bold leading-none text-foreground">
-              {fmtTime(record.clock_out_time)}
+              {formatTime(record.clock_out_time)}
             </span>
           </div>
         </div>
@@ -173,6 +166,13 @@ function AttendanceItem({ record }: { record: AttendanceRecord }) {
 }
 
 function EmptyState({ month }: { month: string }) {
+  const { t, formatDate } = useLanguage();
+  const [year, m] = month.split("-");
+  const monthDisplay = formatDate(new Date(Number(year), Number(m) - 1, 1), {
+    month: "long",
+    year: "numeric",
+  });
+
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
       <div className="flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground/80">
@@ -180,8 +180,8 @@ function EmptyState({ month }: { month: string }) {
           <path fillRule="evenodd" clipRule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75A3.75 3.75 0 0122.5 8.25v10.5A3.75 3.75 0 0118.75 22.5H5.25A3.75 3.75 0 011.5 18.75V8.25A3.75 3.75 0 015.25 4.5H6V3a.75.75 0 01.75-.75zm14.25 7.5H3v9a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 19.5v-9z"/>
         </svg>
       </div>
-      <p className="text-sm font-semibold text-foreground">Tidak ada data untuk {monthLabel(month)}</p>
-      <p className="text-xs">Coba pilih bulan lain atau hapus filter status.</p>
+      <p className="text-sm font-semibold text-foreground">{t("no_history_data")} {monthDisplay}</p>
+      <p className="text-xs">{t("no_history_hint")}</p>
     </div>
   );
 }
@@ -190,6 +190,7 @@ function EmptyState({ month }: { month: string }) {
 
 export function AttendanceHistory() {
   const { request } = useAuth();
+  const { t, formatDate } = useLanguage();
   const today = currentYearMonth();
 
   const [month, setMonth] = useState(today);
@@ -202,6 +203,17 @@ export function AttendanceHistory() {
   const [error, setError] = useState<string | null>(null);
 
   const pageRef = useRef(1);
+
+  const monthLabel = useCallback(
+    (ym: string) => {
+      const [year, m] = ym.split("-");
+      return formatDate(new Date(Number(year), Number(m) - 1, 1), {
+        month: "long",
+        year: "numeric",
+      });
+    },
+    [formatDate]
+  );
 
   const fetchPage = useCallback(
     async (targetMonth: string, status: AttendanceStatus | "", page: number) => {
@@ -223,12 +235,12 @@ export function AttendanceHistory() {
         setSummary(data.summary);
         setPagination(data.pagination);
       } catch (err) {
-        setError(err instanceof ApiError ? err.message : "Gagal memuat riwayat kehadiran.");
+        setError(err instanceof ApiError ? err.message : t("history_load_failed"));
       } finally {
         setLoading(false);
       }
     },
-    [fetchPage]
+    [fetchPage, t]
   );
 
   const loadMore = useCallback(async () => {
@@ -241,11 +253,11 @@ export function AttendanceHistory() {
       setPagination(data.pagination);
       pageRef.current = nextPage;
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Gagal memuat lebih banyak data.");
+      setError(err instanceof ApiError ? err.message : t("history_load_failed"));
     } finally {
       setLoadingMore(false);
     }
-  }, [fetchPage, month, pagination, statusFilter]);
+  }, [fetchPage, month, pagination, statusFilter, t]);
 
   useEffect(() => {
     void load(month, statusFilter);
@@ -254,18 +266,18 @@ export function AttendanceHistory() {
   const canGoNext = month < today;
 
   const filterOptions: { key: AttendanceStatus | ""; label: string }[] = [
-    { key: "", label: "Semua" },
-    { key: "on_time", label: "Tepat Waktu" },
-    { key: "late", label: "Terlambat" },
-    { key: "absent", label: "Tidak Hadir" },
+    { key: "", label: t("filter_all") },
+    { key: "on_time", label: t("filter_on_time") },
+    { key: "late", label: t("filter_late") },
+    { key: "absent", label: t("filter_absent") },
   ];
 
   return (
     <section className="mx-auto flex max-w-md flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-foreground">Riwayat Kehadiran</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Rekap absensi Anda per bulan.</p>
+        <h1 className="text-xl font-bold text-foreground">{t("history_title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("history_subtitle")}</p>
       </div>
 
       {/* Month navigator */}
@@ -274,11 +286,11 @@ export function AttendanceHistory() {
           id="btn-prev-month"
           onClick={() => setMonth((m) => addMonth(m, -1))}
           className="pressable flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-lg text-muted-foreground transition hover:bg-muted"
-          aria-label="Bulan sebelumnya"
+          aria-label={t("prev_month")}
         >
           ‹
         </button>
-        <span className="flex-1 text-center text-sm font-bold text-foreground">
+        <span className="flex-1 text-center text-sm font-bold text-foreground capitalize">
           {monthLabel(month)}
         </span>
         <button
@@ -286,7 +298,7 @@ export function AttendanceHistory() {
           onClick={() => setMonth((m) => addMonth(m, 1))}
           disabled={!canGoNext}
           className="pressable flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-lg text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          aria-label="Bulan berikutnya"
+          aria-label={t("next_month")}
         >
           ›
         </button>
@@ -296,19 +308,19 @@ export function AttendanceHistory() {
       <div className="grid grid-cols-3 gap-3">
         <SummaryCard
           value={summary.total}
-          label="Total Hadir"
+          label={t("total_present")}
           colorClass="text-emerald-600 dark:text-emerald-500"
           borderClass="border-l-emerald-500"
         />
         <SummaryCard
           value={summary.late}
-          label="Terlambat"
+          label={t("total_late")}
           colorClass="text-red-600 dark:text-red-500"
           borderClass="border-l-red-500"
         />
         <SummaryCard
           value={summary.absent}
-          label="Tidak Hadir"
+          label={t("total_absent")}
           colorClass="text-primary"
           borderClass="border-l-primary"
         />
@@ -376,14 +388,14 @@ export function AttendanceHistory() {
               className="mt-2"
             >
               {loadingMore
-                ? "Memuat…"
-                : `Muat lebih banyak (${pagination.total - records.length} lagi)`}
+                ? t("loading_more")
+                : `${t("load_more")} (${pagination.total - records.length} ${t("remaining")})`}
             </Button>
           )}
 
           {records.length > 0 && pagination && pagination.current_page >= pagination.last_page && (
             <p className="py-4 text-center text-xs text-muted-foreground">
-              Semua {pagination.total} data telah ditampilkan.
+              {t("all_data_shown")} ({pagination.total})
             </p>
           )}
         </>

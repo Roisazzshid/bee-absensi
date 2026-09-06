@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLanguage } from "@/lib/language-context";
 import { CameraCaptureModal } from "@/components/attendance/camera-capture-modal";
 import { ApiError } from "@/lib/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -17,25 +18,17 @@ type Attendance = {
 
 type Coordinates = { latitude: number; longitude: number; accuracy: number };
 
-function formatTime(value: string | null) {
+function formatTimeWithLocale(value: string | null, locale: string) {
   if (!value) return "--:--";
   const safeStr = value.includes(" ") && !value.includes("T") ? value.replace(" ", "T") : value;
   const date = new Date(safeStr);
   return Number.isNaN(date.getTime())
     ? value.slice(11, 16)
-    : new Intl.DateTimeFormat("id-ID", {
+    : new Intl.DateTimeFormat(locale, {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
       }).format(date);
-}
-
-function positionError(error: GeolocationPositionError) {
-  if (error.code === error.PERMISSION_DENIED)
-    return "Izin lokasi ditolak. Aktifkan izin lokasi di browser.";
-  if (error.code === error.POSITION_UNAVAILABLE)
-    return "Lokasi belum tersedia. Periksa GPS Anda.";
-  return "Pengambilan lokasi terlalu lama. Coba lagi.";
 }
 
 function clockDuration(inTime: string | null, outTime: string | null) {
@@ -51,6 +44,7 @@ function clockDuration(inTime: string | null, outTime: string | null) {
 
 export function AttendanceDashboard() {
   const { user, request } = useAuth();
+  const { t, formatDate, formatTime, getGreeting, language } = useLanguage();
   const [now, setNow] = useState(() => new Date());
   const [attendance, setAttendance] = useState<Attendance | null>(null);
   const [loadingAttendance, setLoadingAttendance] = useState(true);
@@ -83,6 +77,19 @@ export function AttendanceDashboard() {
     return () => window.clearInterval(interval);
   }, []);
 
+  const positionError = useCallback((err: GeolocationPositionError): string => {
+    switch (err.code) {
+      case 1: // PERMISSION_DENIED
+        return t("gps_denied", "Izin lokasi ditolak. Aktifkan izin lokasi di browser.");
+      case 2: // POSITION_UNAVAILABLE
+        return t("gps_unavailable", "Lokasi belum tersedia. Periksa GPS Anda.");
+      case 3: // TIMEOUT
+        return t("gps_timeout", "Pengambilan lokasi terlalu lama. Coba lagi.");
+      default:
+        return err.message || t("gps_inactive", "GPS Tidak Aktif");
+    }
+  }, [t]);
+
   // Auto-request location on mount
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -98,45 +105,36 @@ export function AttendanceDashboard() {
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
     );
-  }, []);
+  }, [positionError]);
 
   const action = attendance?.clock_out_time ? "done" : attendance?.clock_in_time ? "out" : "in";
   const name = user?.profile?.full_name ?? user?.email ?? "Karyawan";
 
   const greeting = useMemo(() => {
-    const h = now.getHours();
-    if (h < 11) return "Selamat pagi";
-    if (h < 15) return "Selamat siang";
-    if (h < 18) return "Selamat sore";
-    return "Selamat malam";
-  }, [now]);
+    return getGreeting(now.getHours());
+  }, [now, getGreeting]);
 
   const dateLabel = useMemo(
     () =>
-      new Intl.DateTimeFormat("id-ID", {
+      formatDate(now, {
         weekday: "long",
         day: "numeric",
         month: "long",
         year: "numeric",
-      }).format(now),
-    [now]
+      }),
+    [now, formatDate]
   );
 
   const timeLabel = useMemo(
-    () =>
-      new Intl.DateTimeFormat("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }).format(now),
-    [now]
+    () => formatTime(now),
+    [now, formatTime]
   );
 
   const getLocationPromise = (): Promise<Coordinates> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         setLocationState("error");
-        reject(new Error("Browser tidak mendukung lokasi."));
+        reject(new Error(t("browser_no_gps")));
         return;
       }
       setLocationState("loading");
@@ -177,7 +175,7 @@ export function AttendanceDashboard() {
     let currentCoords = coordinates;
     if (!currentCoords) {
       try { currentCoords = await getLocationPromise(); }
-      catch { setError("Lokasi tidak terdeteksi. Pastikan GPS aktif."); return; }
+      catch { setError(t("gps_not_detected")); return; }
     }
     setSubmitting(true);
     setError(null);
@@ -193,7 +191,7 @@ export function AttendanceDashboard() {
           image: imageDataUrl,
         }),
       });
-      setMessage(action === "in" ? "✓ Clock in berhasil dicatat." : "✓ Clock out berhasil dicatat.");
+      setMessage(action === "in" ? `✓ ${t("clock_in_success")}` : `✓ ${t("clock_out_success")}`);
       setCameraModalOpen(false);
       await refreshAttendance();
     } catch (caught) {
@@ -202,7 +200,7 @@ export function AttendanceDashboard() {
       setError(
         typeof distance === "string"
           ? `${apiError?.message} ${distance}`
-          : apiError?.message ?? "Absensi gagal. Coba lagi."
+          : apiError?.message ?? t("attendance_failed")
       );
     } finally {
       setSubmitting(false);
@@ -210,8 +208,8 @@ export function AttendanceDashboard() {
   };
 
   const duration = clockDuration(attendance?.clock_in_time ?? null, attendance?.clock_out_time ?? null);
-  const inTime = formatTime(attendance?.clock_in_time ?? null);
-  const outTime = formatTime(attendance?.clock_out_time ?? null);
+  const inTime = formatTime(attendance?.clock_in_time);
+  const outTime = formatTime(attendance?.clock_out_time);
 
   // Location status info
   const isInRange = locationState === "ready";
@@ -238,7 +236,7 @@ export function AttendanceDashboard() {
           <iframe
             src={mapSrc}
             className="h-full w-full border-none opacity-80 mix-blend-luminosity grayscale"
-            title="Lokasi GPS"
+            title={t("gps_location")}
             loading="lazy"
           />
         ) : (
@@ -252,7 +250,7 @@ export function AttendanceDashboard() {
               </div>
             </div>
             <p className="text-xs font-medium text-muted-foreground">
-              {isLocLoading ? "Mengambil lokasi GPS…" : "Peta akan muncul setelah GPS aktif"}
+              {isLocLoading ? t("fetching_coords") : t("map_placeholder")}
             </p>
           </div>
         )}
@@ -276,14 +274,14 @@ export function AttendanceDashboard() {
           </div>
           <div>
             <p className={`text-sm font-bold ${isInRange ? "text-emerald-600 dark:text-emerald-500" : isLocLoading ? "text-primary" : "text-foreground"}`}>
-              {isInRange ? "In Range" : isLocLoading ? "Memeriksa Lokasi…" : locationState === "error" ? "Lokasi Tidak Aktif" : "Belum Ada Lokasi"}
+              {isInRange ? t("inside_office") : isLocLoading ? t("checking_location") : locationState === "error" ? t("gps_inactive") : t("no_location")}
             </p>
             <p className="text-xs text-muted-foreground">
               {isInRange
-                ? `Anda berada di dalam radius kantor (±${Math.round(coordinates?.accuracy ?? 0)}m)`
+                ? `${t("in_office_radius")} (±${Math.round(coordinates?.accuracy ?? 0)}m)`
                 : isLocLoading
-                ? "Sedang mengambil koordinat GPS…"
-                : locationError ?? "Izinkan akses lokasi untuk absensi"}
+                ? t("fetching_coords")
+                : locationError ?? t("allow_location_access")}
             </p>
           </div>
           {(locationState === "error" || locationState === "idle") && (
@@ -291,7 +289,7 @@ export function AttendanceDashboard() {
               onClick={() => void getLocationPromise()}
               className="ml-auto shrink-0 rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
             >
-              Aktifkan
+              {t("enable_btn")}
             </button>
           )}
         </div>
@@ -315,7 +313,7 @@ export function AttendanceDashboard() {
               <svg className="size-12 text-white fill-current" viewBox="0 0 24 24">
                 <path fillRule="evenodd" clipRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"/>
               </svg>
-              <p className="mt-2 text-sm font-bold tracking-widest text-white">SELESAI</p>
+              <p className="mt-2 text-sm font-bold tracking-widest text-white">{t("clock_completed_btn")}</p>
             </>
           ) : (
             <>
@@ -323,7 +321,7 @@ export function AttendanceDashboard() {
                 <path fillRule="evenodd" clipRule="evenodd" d="M12 1.5a9.75 9.75 0 00-9.75 9.75.75.75 0 001.5 0 8.25 8.25 0 0116.5 0 .75.75 0 001.5 0A9.75 9.75 0 0012 1.5zm-6.75 9.75a6.75 6.75 0 0113.5 0v1.5a.75.75 0 001.5 0v-1.5a8.25 8.25 0 00-16.5 0v2.25a.75.75 0 001.5 0v-2.25zm9.75 0a3 3 0 00-6 0v5.25a.75.75 0 001.5 0v-5.25a1.5 1.5 0 013 0v4.5a.75.75 0 001.5 0v-4.5zm-3 7.5a.75.75 0 00-.75.75v1.5a.75.75 0 001.5 0v-1.5a.75.75 0 00-.75-.75zm3.75-2.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0v-3.75a.75.75 0 01.75-.75z"/>
               </svg>
               <p className="mt-2 text-sm font-bold tracking-widest text-white">
-                {action === "in" ? "CLOCK IN" : "CLOCK OUT"}
+                {action === "in" ? t("clock_in_btn") : t("clock_out_btn")}
               </p>
             </>
           )}
@@ -331,10 +329,10 @@ export function AttendanceDashboard() {
 
         <p className="mt-4 text-center text-xs leading-5 text-muted-foreground">
           {action === "done"
-            ? "Absensi hari ini sudah lengkap. Sampai jumpa besok!"
+            ? t("hint_completed")
             : action === "in"
-            ? "Pastikan Anda berada di dalam area kantor untuk clock in."
-            : "Selfie & konfirmasi sebelum pulang."}
+            ? t("hint_clock_in")
+            : t("hint_clock_out")}
         </p>
 
         {/* Alert messages */}
@@ -367,10 +365,14 @@ export function AttendanceDashboard() {
                 <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
               </svg>
             </div>
-            <p className="text-xs font-bold text-foreground">SECURE</p>
+            <p className="text-xs font-bold text-foreground">{t("secure_card_title", "KEAMANAN")}</p>
           </div>
           <ul className="mt-2 space-y-1">
-            {["Anti-Fake GPS Active", "Liveness Verified", "Encrypted Data"].map((item) => (
+            {[
+              t("feature_anti_fake_gps", "Anti-Fake GPS Aktif"),
+              t("feature_liveness", "Verifikasi Wajah Aktif"),
+              t("feature_encrypted", "Data Terenkripsi"),
+            ].map((item) => (
               <li key={item} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                 <span className="size-1.5 rounded-full bg-emerald-500" />
                 {item}
@@ -382,7 +384,7 @@ export function AttendanceDashboard() {
         {/* Today's Hours Card */}
         <div className="relative overflow-hidden rounded-2xl bg-card border border-border p-4 shadow-sm">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 to-primary" />
-          <p className="text-xs font-bold text-foreground">TODAY&apos;S HOURS</p>
+          <p className="text-xs font-bold text-foreground">{t("hours_summary_title", "Jam Kerja Hari Ini")}</p>
           {loadingAttendance ? (
             <div className="mt-3 space-y-2">
               <div className="h-4 animate-pulse rounded-full bg-muted" />
@@ -393,27 +395,27 @@ export function AttendanceDashboard() {
               <p className="text-2xl font-bold tabular-nums text-primary">
                 {duration.hrs}:{String(duration.mins).padStart(2, "0")}
               </p>
-              <p className="text-[11px] text-muted-foreground">jam kerja hari ini</p>
+              <p className="text-[11px] text-muted-foreground">{t("work_duration", "Total Jam Kerja")}</p>
             </div>
           ) : (
             <div className="mt-2">
               <p className="text-xl font-bold text-muted-foreground">
                 <span className="text-muted-foreground/40">--</span>{" "}
-                <span className="text-sm">hrs</span>{" "}
+                <span className="text-sm">{t("unit_hours", "jam")}</span>{" "}
                 <span className="text-muted-foreground/40">--</span>{" "}
-                <span className="text-sm">mins</span>
+                <span className="text-sm">{t("unit_mins", "menit")}</span>
               </p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Belum ada data</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t("no_attendance_data", "Tidak ada data absensi")}</p>
             </div>
           )}
 
           <div className="mt-3 space-y-1.5 border-t border-border pt-2">
             <div className="flex justify-between text-[11px]">
-              <span className="text-muted-foreground">Masuk</span>
+              <span className="text-muted-foreground">{t("clock_in_title")}</span>
               <span className={`font-bold ${inTime === "--:--" ? "text-muted-foreground/50" : "text-foreground"}`}>{inTime}</span>
             </div>
             <div className="flex justify-between text-[11px]">
-              <span className="text-muted-foreground">Pulang</span>
+              <span className="text-muted-foreground">{t("clock_out_title")}</span>
               <span className={`font-bold ${outTime === "--:--" ? "text-muted-foreground/50" : "text-foreground"}`}>{outTime}</span>
             </div>
           </div>
@@ -433,7 +435,7 @@ export function AttendanceDashboard() {
               }
             </svg>
             <p className={`text-xs font-bold ${attendance.status === "on_time" ? "text-emerald-700 dark:text-emerald-500" : "text-red-700 dark:text-red-500"}`}>
-              {attendance.status === "on_time" ? "Tepat Waktu" : "Terlambat"}
+              {attendance.status === "on_time" ? t("status_on_time") : t("status_late")}
             </p>
           </div>
         </div>
@@ -444,8 +446,8 @@ export function AttendanceDashboard() {
         isOpen={cameraModalOpen}
         onClose={() => setCameraModalOpen(false)}
         onCapture={(img) => void handleCaptureAndSubmit(img)}
-        title={action === "in" ? "Foto Selfie Masuk" : "Foto Selfie Pulang"}
-        subTitle={`Pastikan wajah terlihat jelas untuk bukti absensi ${action === "in" ? "masuk" : "pulang"}`}
+        title={action === "in" ? t("camera_clock_in_title") : t("camera_clock_out_title")}
+        subTitle={action === "in" ? t("camera_clock_in_sub") : t("camera_clock_out_sub")}
         isSubmitting={submitting}
       />
     </section>

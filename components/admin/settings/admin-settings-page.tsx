@@ -1,50 +1,11 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLanguage, type Language } from "@/lib/language-context";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 type Tab = "umum" | "absensi" | "notifikasi" | "akun";
-
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  {
-    id: "umum",
-    label: "Umum",
-    icon: (
-      <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
-        <path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.16 5.43a1.875 1.875 0 00-2.282.818l1.642 1.642a1.875 1.875 0 002.582 2.582l-1.642-1.642a1.875 1.875 0 00-.818 2.282l.46 1.157c.043.116.032.284-.083.45-.17.238-.363.468-.57.686-.088.182-.228.277-.348.297L3.817 12.922a1.875 1.875 0 00-1.567 1.85v1.456c0 .917.663 1.699 1.567 1.85l1.062.177c.12.02.26.115.348.297.207.218.4.448.57.686.115.166.126.334.083.45l-.46 1.157a1.875 1.875 0 00.818 2.282l1.03.595a1.875 1.875 0 002.282-.818l.459-1.157c.043-.116.211-.127.377-.083.313.19.642.355.986.494.182.088.277.228.297.348l.177 1.062c.151.904.933 1.567 1.85 1.567h1.844c.917 0 1.699-.663 1.85-1.567l.177-1.062c.02-.12.115-.26.297-.348.344-.139.673-.304.986-.494.166-.115.334-.126.45-.083l1.157.46a1.875 1.875 0 002.282-.818l.595-1.03a1.875 1.875 0 00-.818-2.282l-1.157-.459c-.116-.043-.127-.211-.083-.377.19-.313.355-.642.494-.986.088-.182.228-.277.348-.297l1.062-.177c.904-.151 1.567-.933 1.567-1.85v-1.844c0-.917-.663-1.699-1.567-1.85l-1.062-.177c-.12-.02-.26-.115-.348-.297a7.493 7.493 0 00-.494-.986c-.115-.166-.126-.334-.083-.45l.46-1.157a1.875 1.875 0 00-.818-2.282l-1.03-.595a1.875 1.875 0 00-2.282.818l-.459 1.157c-.043.116-.211.127-.377.083a7.493 7.493 0 00-.986-.494c-.182-.088-.277-.228-.297-.348l-.177-1.062A1.875 1.875 0 0012.922 2.25h-1.844zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clipRule="evenodd" />
-      </svg>
-    ),
-  },
-  {
-    id: "absensi",
-    label: "Absensi",
-    icon: (
-      <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM8.25 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM10.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM12.75 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.25 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 13.5a.75.75 0 100-1.5.75.75 0 000 1.5z" />
-        <path fillRule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75A3.75 3.75 0 0122.5 8.25v10.5A3.75 3.75 0 0118.75 22.5H5.25A3.75 3.75 0 011.5 18.75V8.25A3.75 3.75 0 015.25 4.5H6V3a.75.75 0 01.75-.75zm12 6H5.25a2.25 2.25 0 00-2.25 2.25v8.25c0 1.243 1.007 2.25 2.25 2.25h13.5c1.243 0 2.25-1.007 2.25-2.25v-8.25a2.25 2.25 0 00-2.25-2.25z" clipRule="evenodd" />
-      </svg>
-    ),
-  },
-  {
-    id: "notifikasi",
-    label: "Notifikasi",
-    icon: (
-      <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
-        <path fillRule="evenodd" d="M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 004.496 0 25.057 25.057 0 01-4.496 0z" clipRule="evenodd" />
-      </svg>
-    ),
-  },
-  {
-    id: "akun",
-    label: "Akun",
-    icon: (
-      <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
-        <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
-      </svg>
-    ),
-  },
-];
 
 export function AdminSettingsPage() {
   return (
@@ -56,12 +17,53 @@ export function AdminSettingsPage() {
 
 function SettingsContent() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab") as Tab | null;
   const [activeTab, setActiveTab] = useState<Tab>(
     tabParam && ["umum", "absensi", "notifikasi", "akun"].includes(tabParam) ? tabParam : "umum"
   );
   const [saved, setSaved] = useState(false);
+
+  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    {
+      id: "umum",
+      label: t("tab_general", "Umum"),
+      icon: (
+        <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+          <path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.334.126-.45.083L6.16 5.43a1.875 1.875 0 00-2.282.818l1.642 1.642a1.875 1.875 0 002.582 2.582l-1.642-1.642a1.875 1.875 0 00-.818 2.282l.46 1.157c.043.116.032.284-.083.45-.17.238-.363.468-.57.686-.088.182-.228.277-.348.297L3.817 12.922a1.875 1.875 0 00-1.567 1.85v1.456c0 .917.663 1.699 1.567 1.85l1.062.177c.12.02.26.115.348.297.207.218.4.448.57.686.115.166.126.334.083.45l-.46 1.157a1.875 1.875 0 00.818 2.282l1.03.595a1.875 1.875 0 002.282-.818l.459-1.157c.043-.116.211-.127.377-.083.313.19.642.355.986.494.182.088.277.228.297.348l.177 1.062c.151.904.933 1.567 1.85 1.567h1.844c.917 0 1.699-.663 1.85-1.567l.177-1.062c.02-.12.115-.26.297-.348.344-.139.673-.304.986-.494.166-.115.334-.126.45-.083l1.157.46a1.875 1.875 0 002.282-.818l.595-1.03a1.875 1.875 0 00-.818-2.282l-1.157-.459c-.116-.043-.127-.211-.083-.377.19-.313.355-.642.494-.986.088-.182.228-.277.348-.297l1.062-.177c.904-.151 1.567-.933 1.567-1.85v-1.844c0-.917-.663-1.699-1.567-1.85l-1.062-.177c-.12-.02-.26-.115-.348-.297a7.493 7.493 0 00-.494-.986c-.115-.166-.126-.334-.083-.45l.46-1.157a1.875 1.875 0 00-.818-2.282l-1.03-.595a1.875 1.875 0 00-2.282.818l-.459 1.157c-.043.116-.211.127-.377.083a7.493 7.493 0 00-.986-.494c-.182-.088-.277-.228-.297-.348l-.177-1.062A1.875 1.875 0 0012.922 2.25h-1.844zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" clipRule="evenodd" />
+        </svg>
+      ),
+    },
+    {
+      id: "absensi",
+      label: t("tab_attendance_rules", "Absensi"),
+      icon: (
+        <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12.75 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM7.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM8.25 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM9.75 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM10.5 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM12.75 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM14.25 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 17.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 15.75a.75.75 0 100-1.5.75.75 0 000 1.5zM15 12.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM16.5 13.5a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+          <path fillRule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75A3.75 3.75 0 0122.5 8.25v10.5A3.75 3.75 0 0118.75 22.5H5.25A3.75 3.75 0 011.5 18.75V8.25A3.75 3.75 0 015.25 4.5H6V3a.75.75 0 01.75-.75zm12 6H5.25a2.25 2.25 0 00-2.25 2.25v8.25c0 1.243 1.007 2.25 2.25 2.25h13.5c1.243 0 2.25-1.007 2.25-2.25v-8.25a2.25 2.25 0 00-2.25-2.25z" clipRule="evenodd" />
+        </svg>
+      ),
+    },
+    {
+      id: "notifikasi",
+      label: t("tab_notification_settings", "Notifikasi"),
+      icon: (
+        <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+          <path fillRule="evenodd" d="M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 004.496 0 25.057 25.057 0 01-4.496 0z" clipRule="evenodd" />
+        </svg>
+      ),
+    },
+    {
+      id: "akun",
+      label: t("tab_admin_account", "Akun"),
+      icon: (
+        <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
+          <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
+        </svg>
+      ),
+    },
+  ];
 
   useEffect(() => {
     if (tabParam && ["umum", "absensi", "notifikasi", "akun"].includes(tabParam)) {
@@ -78,8 +80,8 @@ function SettingsContent() {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Pengaturan Sistem</h1>
-        <p className="text-sm mt-1 text-muted-foreground">Kelola konfigurasi aplikasi, aturan absensi, notifikasi, dan profil akun administrator</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("settings_title", "Pengaturan Sistem")}</h1>
+        <p className="text-sm mt-1 text-muted-foreground">{t("settings_subtitle", "Kelola konfigurasi aplikasi, aturan absensi, notifikasi, dan profil akun administrator")}</p>
       </div>
 
       {/* Saved toast */}
@@ -88,14 +90,14 @@ function SettingsContent() {
           <svg className="size-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
             <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
           </svg>
-          Pengaturan berhasil disimpan!
+          {t("settings_saved", "Pengaturan berhasil disimpan!")}
         </div>
       )}
 
       <div className="flex gap-6 flex-col md:flex-row">
         {/* Sidebar tabs */}
         <div className="flex md:flex-col gap-2 md:w-56 shrink-0 overflow-x-auto md:overflow-visible">
-          {TABS.map((tab) => {
+          {tabs.map((tab) => {
             const active = activeTab === tab.id;
             return (
               <button
@@ -131,6 +133,7 @@ function SettingsContent() {
 /* ── Tab Umum ── */
 function TabUmum({ onSave }: { onSave: () => void }) {
   const { request } = useAuth();
+  const { t, setLanguage } = useLanguage();
   const [form, setForm] = useState({
     app_name: "Bee Absensi",
     company: "PT. Bee Digital Indonesia",
@@ -170,6 +173,9 @@ function TabUmum({ onSave }: { onSave: () => void }) {
     try {
       localStorage.setItem("bee_settings_general", JSON.stringify(form));
       window.dispatchEvent(new CustomEvent("bee_settings_updated", { detail: form }));
+      if (form.language === "id" || form.language === "en") {
+        setLanguage(form.language as Language);
+      }
       await request("/admin/settings", {
         method: "POST",
         body: JSON.stringify(form),
@@ -185,26 +191,26 @@ function TabUmum({ onSave }: { onSave: () => void }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-bold text-base text-foreground">Pengaturan Umum</h2>
-        <p className="text-xs mt-0.5 text-muted-foreground">Informasi dasar aplikasi dan perusahaan</p>
+        <h2 className="font-bold text-base text-foreground">{t("general_settings", "Pengaturan Umum")}</h2>
+        <p className="text-xs mt-0.5 text-muted-foreground">{t("general_settings_desc", "Informasi dasar aplikasi dan perusahaan")}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Nama Aplikasi">
+        <Field label={t("app_name", "Nama Aplikasi")}>
           <input
             className="field-input"
             value={form.app_name}
             onChange={(e) => setForm((f) => ({ ...f, app_name: e.target.value }))}
           />
         </Field>
-        <Field label="Nama Perusahaan">
+        <Field label={t("company_name", "Nama Perusahaan")}>
           <input
             className="field-input"
             value={form.company}
             onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
           />
         </Field>
-        <Field label="Zona Waktu">
+        <Field label={t("timezone", "Zona Waktu")}>
           <select
             className="field-input"
             value={form.timezone}
@@ -215,7 +221,7 @@ function TabUmum({ onSave }: { onSave: () => void }) {
             <option value="Asia/Jayapura">Asia/Jayapura (WIT, UTC+9)</option>
           </select>
         </Field>
-        <Field label="Bahasa">
+        <Field label={t("language", "Bahasa")}>
           <select
             className="field-input"
             value={form.language}
@@ -254,16 +260,39 @@ const ALL_DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"
 const TOLERANCE_PRESETS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120];
 const CUTOFF_PRESETS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120];
 
-function formatMinuteOption(min: number) {
-  if (min === 0) return "0 Menit (Tepat Waktu - Tanpa Toleransi)";
-  if (min === 60) return "60 Menit (1 Jam)";
-  if (min === 90) return "90 Menit (1.5 Jam)";
-  if (min === 120) return "120 Menit (2 Jam)";
-  return `${min} Menit`;
-}
-
 function TabAbsensi({ onSave }: { onSave: () => void }) {
   const { request } = useAuth();
+  const { t, language } = useLanguage();
+
+  const getDayLabel = (day: string) => {
+    const map: Record<string, { id: string; en: string }> = {
+      Senin: { id: "Senin", en: "Monday" },
+      Selasa: { id: "Selasa", en: "Tuesday" },
+      Rabu: { id: "Rabu", en: "Wednesday" },
+      Kamis: { id: "Kamis", en: "Thursday" },
+      Jumat: { id: "Jumat", en: "Friday" },
+      Sabtu: { id: "Sabtu", en: "Saturday" },
+      Minggu: { id: "Minggu", en: "Sunday" },
+    };
+    return map[day] ? (language === "en" ? map[day].en : map[day].id) : day;
+  };
+
+  const formatMinuteOption = (min: number) => {
+    if (min === 0) {
+      return language === "en" ? "0 Minutes (On Time - No Grace Period)" : "0 Menit (Tepat Waktu - Tanpa Toleransi)";
+    }
+    if (min === 60) {
+      return language === "en" ? "60 Minutes (1 Hour)" : "60 Menit (1 Jam)";
+    }
+    if (min === 90) {
+      return language === "en" ? "90 Minutes (1.5 Hours)" : "90 Menit (1.5 Jam)";
+    }
+    if (min === 120) {
+      return language === "en" ? "120 Minutes (2 Hours)" : "120 Menit (2 Jam)";
+    }
+    return `${min} ${t("unit_minutes", "Menit")}`;
+  };
+
   const [form, setForm] = useState({
     schedule_mode: "same" as "same" | "custom",
     start_time: "08:30",
@@ -423,14 +452,14 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-bold text-base text-foreground">Pengaturan Absensi</h2>
-        <p className="text-xs mt-0.5 text-muted-foreground">Konfigurasi jam kerja dan aturan kehadiran karyawan</p>
+        <h2 className="font-bold text-base text-foreground">{t("tab_attendance_rules", "Pengaturan Absensi")}</h2>
+        <p className="text-xs mt-0.5 text-muted-foreground">{t("rules_section_desc", "Konfigurasi jam kerja dan aturan kehadiran karyawan")}</p>
       </div>
 
       {/* Mode Jam Kerja Switcher */}
       <div className="rounded-2xl border border-border bg-muted/30 p-4">
         <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-2">
-          Mode Jam Kerja
+          {t("schedule_mode_title", "Mode Jam Kerja")}
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
@@ -450,8 +479,8 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">Semua Hari Sama</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Satu jam masuk & jam pulang yang sama untuk semua hari kerja.</p>
+              <p className="text-sm font-bold text-foreground">{t("schedule_same_title", "Semua Hari Sama")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("schedule_same_desc", "Satu jam masuk & jam pulang yang sama untuk semua hari kerja.")}</p>
             </div>
           </button>
 
@@ -473,8 +502,8 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">Beda Jam Tiap Hari (Kustom)</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Atur jam masuk & jam pulang berbeda untuk tiap hari (misal: Jumat beda jam).</p>
+              <p className="text-sm font-bold text-foreground">{t("schedule_custom_title", "Beda Jam Tiap Hari (Kustom)")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("schedule_custom_desc", "Atur jam masuk & jam pulang berbeda untuk tiap hari (misal: Jumat beda jam).")}</p>
             </div>
           </button>
         </div>
@@ -484,9 +513,9 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
       {form.schedule_mode === "same" && (
         <div className="space-y-5 animate-in fade-in duration-200">
           <div>
-            <h3 className="font-semibold text-sm mb-3 text-foreground">Jam Kerja Seragam</h3>
+            <h3 className="font-semibold text-sm mb-3 text-foreground">{t("uniform_schedule", "Jam Kerja Seragam")}</h3>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Jam Masuk Kerja">
+              <Field label={t("clock_in_time_label", "Jam Masuk Kerja")}>
                 <input
                   type="time"
                   className="field-input font-bold"
@@ -494,7 +523,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                   onChange={(e) => setForm((f) => ({ ...f, start_time: e.target.value, late_threshold: e.target.value }))}
                 />
               </Field>
-              <Field label="Jam Pulang Kerja">
+              <Field label={t("clock_out_time_label", "Jam Pulang Kerja")}>
                 <input
                   type="time"
                   className="field-input font-bold"
@@ -506,7 +535,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
           </div>
 
           <div className="pt-4 border-t border-border">
-            <h3 className="font-semibold text-sm mb-3 text-foreground">Hari Kerja Aktif</h3>
+            <h3 className="font-semibold text-sm mb-3 text-foreground">{t("active_work_days", "Hari Kerja Aktif")}</h3>
             <div className="flex flex-wrap gap-2">
               {ALL_DAYS.map((day) => {
                 const active = form.work_days.includes(day);
@@ -521,7 +550,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                         : "bg-card text-muted-foreground border-border hover:bg-muted hover:text-foreground shadow-2xs"
                     }`}
                   >
-                    {day}
+                    {getDayLabel(day)}
                   </button>
                 );
               })}
@@ -539,10 +568,10 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                 <svg className="size-4 fill-amber-700 dark:fill-amber-400" viewBox="0 0 24 24">
                   <path fillRule="evenodd" clipRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.75 4.5a.75.75 0 00-1.5 0v5.25c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5H12.75V6.75z" />
                 </svg>
-                Jadwal Jam Kerja Kustom Aktif
+                {t("custom_schedule_active", "Jadwal Jam Kerja Kustom Aktif")}
               </p>
               <p className="text-amber-900 dark:text-amber-200/90 font-medium mt-1">
-                Tiap hari memiliki jam masuk dan jam pulang tersendiri.
+                {t("custom_schedule_active_desc", "Tiap hari memiliki jam masuk dan jam pulang tersendiri.")}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -554,7 +583,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                 <svg className="size-3.5 fill-white" viewBox="0 0 24 24">
                   <path fillRule="evenodd" clipRule="evenodd" d="M14.615 1.595a.75.75 0 01.359.852L12.982 9.75h7.268a.75.75 0 01.548 1.262l-10.5 11.25a.75.75 0 01-1.272-.71l1.992-7.302H3.75a.75.75 0 01-.548-1.262l10.5-11.25a.75.75 0 01.913-.143z" />
                 </svg>
-                <span>Set Senin–Kamis 08:30 & Jumat 10:00</span>
+                <span>{t("preset_fri_btn", "Set Senin–Kamis 08:30 & Jumat 10:00")}</span>
               </button>
               <button
                 type="button"
@@ -564,7 +593,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                 <svg className="size-3.5 fill-current" viewBox="0 0 24 24">
                   <path fillRule="evenodd" clipRule="evenodd" d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5h-6zm10.72 4.72a.75.75 0 011.06 0l2.25 2.25a.75.75 0 010 1.06l-2.25 2.25a.75.75 0 11-1.06-1.06l.97-.97H14.25a.75.75 0 010-1.5h4.94l-.97-.97a.75.75 0 010-1.06z" />
                 </svg>
-                <span>Salin Jam Senin ke Sel-Kam</span>
+                <span>{t("preset_copy_mon_btn", "Salin Jam Senin ke Sel-Kam")}</span>
               </button>
             </div>
           </div>
@@ -594,15 +623,15 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                     </label>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-foreground">{day}</span>
+                        <span className="text-sm font-bold text-foreground">{getDayLabel(day)}</span>
                         {isFriday && (
                           <span className="text-[10px] font-extrabold bg-primary/20 text-primary px-2 py-0.5 rounded-md">
-                            Khusus
+                            {t("special_badge", "Khusus")}
                           </span>
                         )}
                       </div>
                       <p className="text-[11px] text-muted-foreground">
-                        {sched.active ? "Hari Kerja Aktif" : "Libur"}
+                        {sched.active ? t("day_active_status", "Hari Kerja Aktif") : t("day_off_status", "Libur")}
                       </p>
                     </div>
                   </div>
@@ -612,7 +641,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                     <div className="flex flex-wrap items-center gap-4">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
-                          Jam Masuk:
+                          {t("clock_in_title", "Jam Masuk")}:
                         </span>
                         <input
                           type="time"
@@ -623,7 +652,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
-                          Jam Pulang:
+                          {t("clock_out_title", "Jam Pulang")}:
                         </span>
                         <input
                           type="time"
@@ -635,7 +664,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                     </div>
                   ) : (
                     <span className="text-xs italic text-muted-foreground">
-                      Karyawan tidak diwajibkan absensi pada hari ini
+                      {t("no_attendance_required_day", "Karyawan tidak diwajibkan absensi pada hari ini")}
                     </span>
                   )}
                 </div>
@@ -651,11 +680,11 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
           <div className="flex items-center gap-2">
             <div className="size-2 rounded-full bg-primary" />
             <h3 className="font-bold text-sm text-foreground">
-              Aturan Keterlambatan &amp; Batas Check-in
+              {t("rules_section_title", "Aturan Keterlambatan & Batas Check-in")}
             </h3>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5 ml-4">
-            Aturan kelonggaran telat dan batas akhir check-in (berlaku untuk semua mode jam kerja).
+            {t("rules_section_desc", "Aturan kelonggaran telat dan batas akhir check-in (berlaku untuk semua mode jam kerja).")}
           </p>
         </div>
 
@@ -664,10 +693,10 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
           <div className="rounded-2xl border border-border bg-card p-4 space-y-3 flex flex-col justify-between">
             <div>
               <label className="text-xs font-bold text-foreground block">
-                Toleransi Keterlambatan
+                {t("late_tolerance_title", "Toleransi Keterlambatan")}
               </label>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Kelonggaran waktu setelah jam masuk sebelum kehadiran dihitung terlambat.
+                {t("late_tolerance_desc", "Kelonggaran waktu setelah jam masuk sebelum kehadiran dihitung terlambat.")}
               </p>
 
               <div className="mt-3">
@@ -688,7 +717,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                         {formatMinuteOption(m)}
                       </option>
                     ))}
-                    <option value="custom">✏️ Kustom / Isi Menit Sendiri...</option>
+                    <option value="custom">{t("custom_minutes_option", "✏️ Kustom / Isi Menit Sendiri...")}</option>
                   </select>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -697,12 +726,12 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                       min="0"
                       max="720"
                       className="field-input font-bold text-xs py-1.5 w-24 text-center"
-                      placeholder="Menit"
+                      placeholder={t("unit_minutes", "Menit")}
                       value={form.late_tolerance_minutes}
                       onChange={(e) => setForm((f) => ({ ...f, late_tolerance_minutes: e.target.value }))}
                       autoFocus
                     />
-                    <span className="text-xs font-semibold text-muted-foreground">Menit</span>
+                    <span className="text-xs font-semibold text-muted-foreground">{t("unit_minutes", "Menit")}</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -713,7 +742,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                       }}
                       className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 px-3.5 py-1.5 text-xs font-bold shadow-xs transition cursor-pointer shrink-0 ml-auto"
                     >
-                      Pilih
+                      {t("select_btn", "Pilih")}
                     </button>
                   </div>
                 )}
@@ -723,15 +752,21 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
             {/* Helper Info */}
             <div className="rounded-xl bg-muted/40 border border-border/80 px-3 py-2 text-[11px] text-muted-foreground flex items-center gap-2">
               <svg className="size-4 shrink-0 text-primary fill-current" viewBox="0 0 24 24">
-                <path fillRule="evenodd" clipRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.464-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.464-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" />
               </svg>
               <span>
                 {Number(form.late_tolerance_minutes) === 0 ? (
-                  <span>Check-in lewat dari jam masuk langsung dihitung <strong>Terlambat</strong>.</span>
+                  language === "en" ? (
+                    <span>Clock-in past work start time is immediately counted as <strong>Late</strong>.</span>
+                  ) : (
+                    <span>Check-in lewat dari jam masuk langsung dihitung <strong>Terlambat</strong>.</span>
+                  )
                 ) : (
-                  <span>
-                    Check-in hingga <strong>+{form.late_tolerance_minutes} menit</strong> tetap <strong>Tepat Waktu</strong>. Di atas itu dihitung <strong>Terlambat</strong>.
-                  </span>
+                  language === "en" ? (
+                    <span>Check-in up to <strong>+{form.late_tolerance_minutes} minutes</strong> remains <strong>On Time</strong>. Beyond that is counted as <strong>Late</strong>.</span>
+                  ) : (
+                    <span>Check-in hingga <strong>+{form.late_tolerance_minutes} menit</strong> tetap <strong>Tepat Waktu</strong>. Di atas itu dihitung <strong>Terlambat</strong>.</span>
+                  )
                 )}
               </span>
             </div>
@@ -741,10 +776,10 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
           <div className="rounded-2xl border border-border bg-card p-4 space-y-3 flex flex-col justify-between">
             <div>
               <label className="text-xs font-bold text-foreground block">
-                Batas Akhir Check-in
+                {t("cutoff_title", "Batas Akhir Check-in")}
               </label>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Batas waktu toleransi maksimal sebelum sistem menolak absen masuk.
+                {t("cutoff_desc", "Batas waktu toleransi maksimal sebelum sistem menolak absen masuk.")}
               </p>
 
               <div className="mt-3">
@@ -767,13 +802,13 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                       }
                     }}
                   >
-                    <option value="none">0 / Tanpa Batas Akhir (Bebas Kapan Saja)</option>
+                    <option value="none">{t("no_cutoff_option", "0 / Tanpa Batas Akhir (Bebas Kapan Saja)")}</option>
                     {CUTOFF_PRESETS.map((m) => (
                       <option key={m} value={String(m)}>
                         {formatMinuteOption(m)}
                       </option>
                     ))}
-                    <option value="custom">✏️ Kustom / Isi Menit Sendiri...</option>
+                    <option value="custom">{t("custom_minutes_option", "✏️ Kustom / Isi Menit Sendiri...")}</option>
                   </select>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -782,7 +817,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                       min="0"
                       max="720"
                       className="field-input font-bold text-xs py-1.5 w-24 text-center"
-                      placeholder="Menit"
+                      placeholder={t("unit_minutes", "Menit")}
                       value={form.check_in_cutoff_minutes}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -794,7 +829,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                       }}
                       autoFocus
                     />
-                    <span className="text-xs font-semibold text-muted-foreground">Menit</span>
+                    <span className="text-xs font-semibold text-muted-foreground">{t("unit_minutes", "Menit")}</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -805,7 +840,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
                       }}
                       className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 px-3.5 py-1.5 text-xs font-bold shadow-xs transition cursor-pointer shrink-0 ml-auto"
                     >
-                      Pilih
+                      {t("select_btn", "Pilih")}
                     </button>
                   </div>
                 )}
@@ -819,11 +854,17 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
               </svg>
               <span>
                 {form.check_in_cutoff_mode === "none" || Number(form.check_in_cutoff_minutes) === 0 ? (
-                  <span>Check-in <strong>bisa dilakukan kapan saja</strong> sepanjang hari kerja (tanpa batas penutupan).</span>
+                  language === "en" ? (
+                    <span>Clock-in <strong>can be done anytime</strong> during the working day (no cutoff limit).</span>
+                  ) : (
+                    <span>Check-in <strong>bisa dilakukan kapan saja</strong> sepanjang hari kerja (tanpa batas penutupan).</span>
+                  )
                 ) : (
-                  <span>
-                    Check-in ditutup setelah <strong>{form.check_in_cutoff_minutes} menit</strong> ({Number(form.check_in_cutoff_minutes) >= 60 ? `${Number(form.check_in_cutoff_minutes) / 60} jam` : `${form.check_in_cutoff_minutes} menit`}) dari jam masuk.
-                  </span>
+                  language === "en" ? (
+                    <span>Check-in closes after <strong>{form.check_in_cutoff_minutes} minutes</strong> ({Number(form.check_in_cutoff_minutes) >= 60 ? `${Number(form.check_in_cutoff_minutes) / 60} hours` : `${form.check_in_cutoff_minutes} minutes`}) from work start time.</span>
+                  ) : (
+                    <span>Check-in ditutup setelah <strong>{form.check_in_cutoff_minutes} menit</strong> ({Number(form.check_in_cutoff_minutes) >= 60 ? `${Number(form.check_in_cutoff_minutes) / 60} jam` : `${form.check_in_cutoff_minutes} menit`}) dari jam masuk.</span>
+                  )
                 )}
               </span>
             </div>
@@ -833,8 +874,8 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
 
       {/* Radius */}
       <div className="pt-4 border-t border-border">
-        <h3 className="font-semibold text-sm mb-3 text-foreground">Lokasi & Radius</h3>
-        <Field label="Radius Check-in (meter)">
+        <h3 className="font-semibold text-sm mb-3 text-foreground">{t("office_radius_title", "Lokasi & Radius")}</h3>
+        <Field label={t("office_radius_label", "Radius Check-in (meter)")}>
           <input
             type="number" min="10" max="5000" className="field-input w-40"
             value={form.radius_meter}
@@ -842,7 +883,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
           />
         </Field>
         <p className="text-xs mt-1 text-muted-foreground">
-          Karyawan harus berada dalam radius ini dari kantor untuk bisa check-in
+          {t("office_radius_desc", "Karyawan harus berada dalam radius ini dari kantor untuk bisa check-in")}
         </p>
       </div>
 
@@ -854,6 +895,7 @@ function TabAbsensi({ onSave }: { onSave: () => void }) {
 /* ── Tab Notifikasi ── */
 function TabNotifikasi({ onSave }: { onSave: () => void }) {
   const { request } = useAuth();
+  const { t } = useLanguage();
   const [notifs, setNotifs] = useState({
     email_late: true,
     email_absent: true,
@@ -908,65 +950,65 @@ function TabNotifikasi({ onSave }: { onSave: () => void }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-bold text-base text-foreground">Pengaturan Notifikasi</h2>
-        <p className="text-xs mt-0.5 text-muted-foreground">Pilih notifikasi yang ingin Anda terima</p>
+        <h2 className="font-bold text-base text-foreground">{t("notif_settings_title", "Pengaturan Notifikasi")}</h2>
+        <p className="text-xs mt-0.5 text-muted-foreground">{t("notif_settings_desc", "Pilih notifikasi yang ingin Anda terima")}</p>
       </div>
 
-      <NotifGroup title="Email — Kehadiran">
+      <NotifGroup title={t("grp_email_attendance", "Email — Kehadiran")}>
         <NotifRow
-          label="Karyawan Terlambat"
-          desc="Kirim email saat karyawan check-in setelah batas waktu"
+          label={t("notif_late_emp", "Karyawan Terlambat")}
+          desc={t("notif_late_emp_desc", "Kirim email saat karyawan check-in setelah batas waktu")}
           checked={notifs.email_late}
           onChange={() => toggle("email_late")}
         />
         <NotifRow
-          label="Karyawan Belum Absen"
-          desc="Kirim email harian daftar karyawan yang belum check-in"
+          label={t("notif_absent_emp", "Karyawan Belum Absen")}
+          desc={t("notif_absent_emp_desc", "Kirim email harian daftar karyawan yang belum check-in")}
           checked={notifs.email_absent}
           onChange={() => toggle("email_absent")}
         />
       </NotifGroup>
 
-      <NotifGroup title="Email — Pengajuan Izin">
+      <NotifGroup title={t("grp_email_leave", "Email — Pengajuan Izin")}>
         <NotifRow
-          label="Pengajuan Izin Baru"
-          desc="Kirim email saat ada karyawan mengajukan izin/cuti"
+          label={t("notif_new_leave", "Pengajuan Izin Baru")}
+          desc={t("notif_new_leave_desc", "Kirim email saat ada karyawan mengajukan izin/cuti")}
           checked={notifs.email_leave_request}
           onChange={() => toggle("email_leave_request")}
         />
         <NotifRow
-          label="Izin Disetujui/Ditolak"
-          desc="Kirim email konfirmasi ke karyawan setelah diproses"
+          label={t("notif_leave_status", "Izin Disetujui/Ditolak")}
+          desc={t("notif_leave_status_desc", "Kirim email konfirmasi ke karyawan setelah diproses")}
           checked={notifs.email_leave_approved}
           onChange={() => toggle("email_leave_approved")}
         />
       </NotifGroup>
 
-      <NotifGroup title="Email — Laporan Otomatis">
+      <NotifGroup title={t("grp_email_reports", "Email — Laporan Otomatis")}>
         <NotifRow
-          label="Laporan Mingguan"
-          desc="Kirim ringkasan kehadiran setiap Senin pagi"
+          label={t("notif_weekly_rep", "Laporan Mingguan")}
+          desc={t("notif_weekly_rep_desc", "Kirim ringkasan kehadiran setiap Senin pagi")}
           checked={notifs.email_weekly_report}
           onChange={() => toggle("email_weekly_report")}
         />
         <NotifRow
-          label="Laporan Bulanan"
-          desc="Kirim rekap bulanan setiap tanggal 1"
+          label={t("notif_monthly_rep", "Laporan Bulanan")}
+          desc={t("notif_monthly_rep_desc", "Kirim rekap bulanan setiap tanggal 1")}
           checked={notifs.email_monthly_report}
           onChange={() => toggle("email_monthly_report")}
         />
       </NotifGroup>
 
-      <NotifGroup title="Log Sistem">
+      <NotifGroup title={t("grp_system_log", "Log Sistem")}>
         <NotifRow
-          label="Login Admin"
-          desc="Catat setiap aktivitas login ke panel admin"
+          label={t("notif_admin_login", "Login Admin")}
+          desc={t("notif_admin_login_desc", "Catat setiap aktivitas login ke panel admin")}
           checked={notifs.system_login}
           onChange={() => toggle("system_login")}
         />
         <NotifRow
-          label="Export Data"
-          desc="Catat setiap kali data di-export"
+          label={t("notif_data_export", "Export Data")}
+          desc={t("notif_data_export_desc", "Catat setiap kali data di-export")}
           checked={notifs.system_export}
           onChange={() => toggle("system_export")}
         />
@@ -979,6 +1021,7 @@ function TabNotifikasi({ onSave }: { onSave: () => void }) {
 
 /* ── Tab Akun ── */
 function TabAkun({ user, onSave }: { user: any; onSave: () => void }) {
+  const { t } = useLanguage();
   const [profile, setProfile] = useState({
     full_name: user?.profile?.full_name ?? "",
     email: user?.email ?? "",
@@ -991,9 +1034,9 @@ function TabAkun({ user, onSave }: { user: any; onSave: () => void }) {
 
   const handleChangePassword = () => {
     setPwError("");
-    if (!pw.current) return setPwError("Masukkan password saat ini.");
-    if (pw.new_pw.length < 8) return setPwError("Password baru minimal 8 karakter.");
-    if (pw.new_pw !== pw.confirm) return setPwError("Konfirmasi password tidak cocok.");
+    if (!pw.current) return setPwError(t("admin_pw_curr_error", "Masukkan password saat ini."));
+    if (pw.new_pw.length < 8) return setPwError(t("admin_pw_min_error", "Password baru minimal 8 karakter."));
+    if (pw.new_pw !== pw.confirm) return setPwError(t("admin_pw_match_error", "Konfirmasi password tidak cocok."));
     setPw({ current: "", new_pw: "", confirm: "" });
     onSave();
   };
@@ -1005,8 +1048,8 @@ function TabAkun({ user, onSave }: { user: any; onSave: () => void }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-bold text-base text-foreground">Profil Akun</h2>
-        <p className="text-xs mt-0.5 text-muted-foreground">Kelola informasi akun administrator</p>
+        <h2 className="font-bold text-base text-foreground">{t("admin_account_title", "Profil Akun")}</h2>
+        <p className="text-xs mt-0.5 text-muted-foreground">{t("admin_account_desc", "Kelola informasi akun administrator")}</p>
       </div>
 
       {/* Avatar Card */}
@@ -1028,15 +1071,15 @@ function TabAkun({ user, onSave }: { user: any; onSave: () => void }) {
 
       {/* Profile form */}
       <div className="grid gap-4 sm:grid-cols-2 pt-5 border-t border-border">
-        <Field label="Nama Lengkap">
+        <Field label={t("full_name", "Nama Lengkap")}>
           <input className="field-input" value={profile.full_name}
             onChange={(e) => setProfile((p) => ({ ...p, full_name: e.target.value }))} />
         </Field>
-        <Field label="Email">
+        <Field label={t("email", "Email")}>
           <input className="field-input" type="email" value={profile.email}
             onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))} />
         </Field>
-        <Field label="No. Telepon">
+        <Field label={t("phone_number", "No. Telepon")}>
           <input className="field-input" type="tel" value={profile.phone}
             onChange={(e) => setProfile((p) => ({ ...p, phone: e.target.value }))} />
         </Field>
@@ -1046,30 +1089,30 @@ function TabAkun({ user, onSave }: { user: any; onSave: () => void }) {
           onClick={handleSaveProfile}
           className="rounded-xl px-5 py-2.5 text-sm font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-95 bg-primary shadow-xs"
         >
-          Simpan Profil
+          {t("admin_save_profile", "Simpan Profil")}
         </button>
       </div>
 
       {/* Change password */}
       <div className="pt-5 border-t border-border">
-        <h3 className="font-semibold text-sm mb-4 text-foreground">Ubah Password</h3>
+        <h3 className="font-semibold text-sm mb-4 text-foreground">{t("admin_change_pw_title", "Ubah Password")}</h3>
         {pwError && (
           <div className="mb-3 rounded-xl px-3 py-2 text-xs font-semibold bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900/50">
             {pwError}
           </div>
         )}
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Password Saat Ini">
+          <Field label={t("admin_current_pw", "Password Saat Ini")}>
             <input className="field-input" type="password" value={pw.current} placeholder="••••••••"
               onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))} />
           </Field>
           <div />
-          <Field label="Password Baru">
-            <input className="field-input" type="password" value={pw.new_pw} placeholder="Min. 8 karakter"
+          <Field label={t("admin_new_pw", "Password Baru")}>
+            <input className="field-input" type="password" value={pw.new_pw} placeholder={t("password_placeholder", "Min. 8 karakter")}
               onChange={(e) => setPw((p) => ({ ...p, new_pw: e.target.value }))} />
           </Field>
-          <Field label="Konfirmasi Password Baru">
-            <input className="field-input" type="password" value={pw.confirm} placeholder="Ulangi password baru"
+          <Field label={t("admin_confirm_pw", "Konfirmasi Password Baru")}>
+            <input className="field-input" type="password" value={pw.confirm} placeholder={t("confirm_password_placeholder", "Ulangi password baru")}
               onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))} />
           </Field>
         </div>
@@ -1077,7 +1120,7 @@ function TabAkun({ user, onSave }: { user: any; onSave: () => void }) {
           onClick={handleChangePassword}
           className="mt-4 rounded-xl px-5 py-2.5 text-sm font-bold transition-all hover:opacity-90 active:scale-95 bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/25 hover:bg-red-600 hover:text-white"
         >
-          Ganti Password
+          {t("admin_btn_change_pw", "Ganti Password")}
         </button>
       </div>
     </div>
@@ -1095,6 +1138,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function SaveButton({ onClick, saving = false }: { onClick: () => void; saving?: boolean }) {
+  const { t } = useLanguage();
   return (
     <div className="flex justify-end pt-5 border-t border-border">
       <button
@@ -1110,7 +1154,7 @@ function SaveButton({ onClick, saving = false }: { onClick: () => void; saving?:
             <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" />
           </svg>
         )}
-        <span>{saving ? "Menyimpan…" : "Simpan Pengaturan"}</span>
+        <span>{saving ? t("saving_settings", "Menyimpan…") : t("save_settings", "Simpan Pengaturan")}</span>
       </button>
     </div>
   );

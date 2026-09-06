@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLanguage } from "@/lib/language-context";
 import { useCallback, useEffect, useState } from "react";
 
 type AttendanceItem = {
@@ -20,14 +21,9 @@ type AttendanceItem = {
 
 type Pagination = { current_page: number; last_page: number; per_page: number; total: number };
 
-const STATUS_CONFIG = {
-  on_time: { label: "Tepat Waktu", dot: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-500 dark:ring-0" },
-  late: { label: "Terlambat", dot: "bg-amber-400", badge: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/20 dark:text-amber-500 dark:ring-0" },
-  absent: { label: "Belum Hadir", dot: "bg-red-400", badge: "bg-red-50 text-red-600 ring-red-200 dark:bg-red-500/20 dark:text-red-500 dark:ring-0" },
-};
-
 export function AdminAttendancePage() {
   const { request } = useAuth();
+  const { t, formatDate: ctxFormatDate, formatTime: ctxFormatTime } = useLanguage();
   const [items, setItems] = useState<AttendanceItem[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,6 +40,18 @@ export function AdminAttendancePage() {
     type: "in" | "out";
   } | null>(null);
 
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case "on_time":
+        return { label: t("status_on_time", "Tepat Waktu"), dot: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-500 dark:ring-0" };
+      case "late":
+        return { label: t("status_late", "Terlambat"), dot: "bg-amber-400", badge: "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/20 dark:text-amber-500 dark:ring-0" };
+      case "absent":
+      default:
+        return { label: t("status_absent", "Belum Hadir"), dot: "bg-red-400", badge: "bg-red-50 text-red-600 ring-red-200 dark:bg-red-500/20 dark:text-red-500 dark:ring-0" };
+    }
+  };
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -56,34 +64,31 @@ export function AdminAttendancePage() {
       setItems(res.attendances);
       setPagination(res.pagination);
     } catch {
-      setError("Gagal memuat data absensi.");
+      setError(t("attendance_load_failed", "Gagal memuat data absensi."));
     } finally {
       setLoading(false);
     }
-  }, [date, statusFilter, page, request]);
+  }, [date, statusFilter, page, request, t]);
 
   useEffect(() => { void fetchData(); }, [fetchData]);
 
-  const formatTime = (t: string | null) => {
-    if (!t) return "—";
-    const safeStr = t.includes(" ") && !t.includes("T") ? t.replace(" ", "T") : t;
+  const formatTime = (timeStr: string | null) => {
+    if (!timeStr) return "—";
+    const safeStr = timeStr.includes(" ") && !timeStr.includes("T") ? timeStr.replace(" ", "T") : timeStr;
     const d = new Date(safeStr);
-    return Number.isNaN(d.getTime())
-      ? t.slice(11, 16) || t
-      : d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    return Number.isNaN(d.getTime()) ? timeStr.slice(11, 16) || timeStr : ctxFormatTime(d);
   };
 
-  const formatDate = (d: string) => {
-    if (!d) return "—";
-    const datePart = d.includes("T") ? d.split("T")[0] : d.split(" ")[0];
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "—";
+    const datePart = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr.split(" ")[0];
     const parts = datePart.split("-");
     if (parts.length === 3) {
       const year = parseInt(parts[0], 10);
       const month = parseInt(parts[1], 10) - 1;
       const day = parseInt(parts[2], 10);
       if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        const localD = new Date(year, month, day);
-        return localD.toLocaleDateString("id-ID", {
+        return ctxFormatDate(new Date(year, month, day), {
           weekday: "long",
           day: "numeric",
           month: "long",
@@ -91,15 +96,7 @@ export function AdminAttendancePage() {
         });
       }
     }
-    const parsed = new Date(d);
-    return Number.isNaN(parsed.getTime())
-      ? d
-      : parsed.toLocaleDateString("id-ID", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        });
+    return ctxFormatDate(dateStr);
   };
 
   const initials = (name: string) =>
@@ -109,8 +106,8 @@ export function AdminAttendancePage() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-foreground md:text-2xl">Monitoring Absensi</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">Pantau kehadiran seluruh karyawan dan bukti foto selfie</p>
+        <h1 className="text-xl font-bold text-foreground md:text-2xl">{t("admin_attendance_title", "Monitoring Absensi")}</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">{t("admin_attendance_subtitle", "Pantau kehadiran seluruh karyawan dan bukti foto selfie")}</p>
       </div>
 
       {/* Filter bar */}
@@ -129,9 +126,9 @@ export function AdminAttendancePage() {
 
         <div className="flex gap-1.5 rounded-xl bg-muted p-1">
           {[
-            { val: "", label: "Semua" },
-            { val: "on_time", label: "Tepat Waktu" },
-            { val: "late", label: "Terlambat" },
+            { val: "", label: t("filter_all", "Semua") },
+            { val: "on_time", label: t("status_on_time", "Tepat Waktu") },
+            { val: "late", label: t("status_late", "Terlambat") },
           ].map((opt) => (
             <button
               key={opt.val}
@@ -151,8 +148,8 @@ export function AdminAttendancePage() {
 
       {/* Date label */}
       <p className="text-xs text-muted-foreground">
-        Menampilkan: <span className="font-semibold text-foreground">{formatDate(date)}</span>
-        {pagination && <span> · <span className="font-semibold text-foreground">{pagination.total}</span> data</span>}
+        {t("showing_label", "Menampilkan")}: <span className="font-semibold text-foreground">{formatDate(date)}</span>
+        {pagination && <span> · <span className="font-semibold text-foreground">{pagination.total}</span> {t("data_count", "data")}</span>}
       </p>
 
       {error && (
@@ -180,8 +177,8 @@ export function AdminAttendancePage() {
               <rect x="9" y="3" width="6" height="4" rx="1" />
             </svg>
           </div>
-          <p className="mt-3 font-bold text-foreground">Tidak ada data absensi</p>
-          <p className="mt-1 text-sm text-muted-foreground">Belum ada karyawan yang absen pada tanggal ini</p>
+          <p className="mt-3 font-bold text-foreground">{t("no_attendance_data", "Tidak ada data absensi")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("no_attendance_data_desc", "Belum ada karyawan yang absen pada tanggal ini")}</p>
         </div>
       ) : (
         <>
@@ -191,21 +188,17 @@ export function AdminAttendancePage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
-                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Karyawan</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Departemen</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Jam Masuk</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Jam Pulang</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Foto Bukti</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Status</th>
+                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_employee", "Karyawan")}</th>
+                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_department", "Departemen")}</th>
+                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_clock_in", "Jam Masuk")}</th>
+                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_clock_out", "Jam Pulang")}</th>
+                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_photo_proof", "Foto Bukti")}</th>
+                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_status", "Status")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {items.map((item) => {
-                  const cfg = STATUS_CONFIG[item.status] ?? {
-                    label: item.status,
-                    dot: "bg-muted",
-                    badge: "bg-muted text-muted-foreground ring-border dark:ring-0",
-                  };
+                  const cfg = getStatusConfig(item.status);
                   return (
                     <tr key={item.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-5 py-3.5">
@@ -232,13 +225,13 @@ export function AdminAttendancePage() {
                               type="button"
                               onClick={() => setPhotoModal({ item, type: "in" })}
                               className="group/btn relative flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1 text-xs font-semibold text-primary hover:border-primary hover:bg-primary/5 transition-all"
-                              title="Lihat Foto Masuk"
+                              title={t("photo_in", "Lihat Foto Masuk")}
                             >
                               <svg className="size-3.5 text-primary" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                                 <circle cx="12" cy="13" r="4" />
                               </svg>
-                              <span>Masuk</span>
+                              <span>{t("entry_in", "Masuk")}</span>
                             </button>
                           ) : (
                             <span className="text-[11px] text-muted-foreground/40">—</span>
@@ -249,13 +242,13 @@ export function AdminAttendancePage() {
                               type="button"
                               onClick={() => setPhotoModal({ item, type: "out" })}
                               className="group/btn relative flex items-center gap-1 rounded-lg border border-border bg-background px-2 py-1 text-xs font-semibold text-primary hover:border-primary hover:bg-primary/5 transition-all"
-                              title="Lihat Foto Pulang"
+                              title={t("photo_out", "Lihat Foto Pulang")}
                             >
                               <svg className="size-3.5 text-primary" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                                 <circle cx="12" cy="13" r="4" />
                               </svg>
-                              <span>Pulang</span>
+                              <span>{t("entry_out", "Pulang")}</span>
                             </button>
                           ) : null}
                         </div>
@@ -276,11 +269,7 @@ export function AdminAttendancePage() {
           {/* Mobile cards */}
           <div className="flex flex-col gap-3 md:hidden">
             {items.map((item) => {
-              const cfg = STATUS_CONFIG[item.status] ?? {
-                label: item.status,
-                dot: "bg-muted",
-                badge: "bg-muted text-muted-foreground ring-border dark:ring-0",
-              };
+              const cfg = getStatusConfig(item.status);
               return (
                 <div key={item.id} className="relative overflow-hidden flex flex-col gap-3 rounded-3xl border border-border bg-card shadow-sm p-4">
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 to-primary" />
@@ -301,17 +290,17 @@ export function AdminAttendancePage() {
 
                   <div className="mt-3 flex gap-4 text-xs text-muted-foreground border-t border-border/50 pt-2">
                     <span className="flex items-center gap-1">
-                      Masuk: <span className="font-mono font-bold text-foreground ml-0.5">{formatTime(item.clock_in_time)}</span>
+                      {t("entry_in", "Masuk")}: <span className="font-mono font-bold text-foreground ml-0.5">{formatTime(item.clock_in_time)}</span>
                     </span>
                     <span className="flex items-center gap-1">
-                      Pulang: <span className="font-mono font-bold text-foreground ml-0.5">{formatTime(item.clock_out_time)}</span>
+                      {t("entry_out", "Pulang")}: <span className="font-mono font-bold text-foreground ml-0.5">{formatTime(item.clock_out_time)}</span>
                     </span>
                   </div>
 
                   {/* Photo buttons on mobile */}
                   {(item.clock_in_image_url || item.clock_out_image_url) && (
                     <div className="mt-2.5 flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-muted-foreground">Bukti Foto:</span>
+                      <span className="text-[10px] font-bold text-muted-foreground">{t("th_photo_proof", "Bukti Foto")}:</span>
                       {item.clock_in_image_url && (
                         <button
                           type="button"
@@ -322,7 +311,7 @@ export function AdminAttendancePage() {
                             <path d="M12 9a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>
                             <path fillRule="evenodd" clipRule="evenodd" d="M9.344 3.071a2.25 2.25 0 012.112-1.321h1.088a2.25 2.25 0 012.112 1.321l.666 1.679h3.54a2.25 2.25 0 012.25 2.25v12a2.25 2.25 0 01-2.25 2.25H3.75a2.25 2.25 0 01-2.25-2.25v-12a2.25 2.25 0 012.25-2.25h3.54l.666-1.679h1.138zM12 7.5a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5z"/>
                           </svg>
-                          Foto Masuk
+                          {t("photo_in", "Foto Masuk")}
                         </button>
                       )}
                       {item.clock_out_image_url && (
@@ -335,7 +324,7 @@ export function AdminAttendancePage() {
                             <path d="M12 9a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>
                             <path fillRule="evenodd" clipRule="evenodd" d="M9.344 3.071a2.25 2.25 0 012.112-1.321h1.088a2.25 2.25 0 012.112 1.321l.666 1.679h3.54a2.25 2.25 0 012.25 2.25v12a2.25 2.25 0 01-2.25 2.25H3.75a2.25 2.25 0 01-2.25-2.25v-12a2.25 2.25 0 012.25-2.25h3.54l.666-1.679h1.138zM12 7.5a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5z"/>
                           </svg>
-                          Foto Pulang
+                          {t("photo_out", "Foto Pulang")}
                         </button>
                       )}
                     </div>
@@ -351,7 +340,7 @@ export function AdminAttendancePage() {
       {pagination && pagination.last_page > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
-            Halaman <span className="font-bold text-foreground">{pagination.current_page}</span> dari{" "}
+            {t("page_prefix", "Halaman")} <span className="font-bold text-foreground">{pagination.current_page}</span> {t("page_of", "dari")}{" "}
             <span className="font-bold text-foreground">{pagination.last_page}</span>
           </p>
           <div className="flex gap-2">
@@ -361,14 +350,14 @@ export function AdminAttendancePage() {
               className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground disabled:opacity-40 hover:bg-muted transition-colors"
             >
               <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" /></svg>
-              Prev
+              {t("prev", "Prev")}
             </button>
             <button
               disabled={page >= pagination.last_page}
               onClick={() => setPage((p) => p + 1)}
               className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground disabled:opacity-40 hover:bg-muted transition-colors"
             >
-              Next
+              {t("next", "Next")}
               <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg>
             </button>
           </div>
@@ -389,7 +378,7 @@ export function AdminAttendancePage() {
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-foreground">
-                    Foto Bukti Absen {photoModal.type === "in" ? "Masuk" : "Pulang"}
+                    {t("photo_modal_title", "Foto Bukti Absen")} {photoModal.type === "in" ? t("entry_in", "Masuk") : t("entry_out", "Pulang")}
                   </h2>
                   <p className="text-xs text-muted-foreground">
                     {photoModal.item.user.full_name} ({photoModal.item.user.nip})
@@ -426,7 +415,7 @@ export function AdminAttendancePage() {
             {/* Info details */}
             <div className="p-4 bg-muted/30 space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Waktu Absensi:</span>
+                <span className="text-muted-foreground">{t("attendance_time", "Waktu Absensi")}:</span>
                 <span className="font-mono font-bold text-foreground">
                   {formatDate(photoModal.item.date)} ·{" "}
                   {formatTime(
@@ -437,14 +426,14 @@ export function AdminAttendancePage() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Departemen / Jabatan:</span>
+                <span className="text-muted-foreground">{t("dept_position", "Departemen / Jabatan")}:</span>
                 <span className="font-semibold text-foreground">
                   {photoModal.item.user.department} — {photoModal.item.user.position}
                 </span>
               </div>
               {(photoModal.type === "in" ? photoModal.item.clock_in_lat : photoModal.item.clock_out_lat) && (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Koordinat GPS:</span>
+                  <span className="text-muted-foreground">{t("gps_coordinates", "Koordinat GPS")}:</span>
                   <span className="font-mono font-semibold text-primary">
                     {photoModal.type === "in"
                       ? `${photoModal.item.clock_in_lat}, ${photoModal.item.clock_in_long}`
@@ -461,7 +450,7 @@ export function AdminAttendancePage() {
                 onClick={() => setPhotoModal(null)}
                 className="w-full rounded-2xl bg-primary py-2.5 text-xs font-bold text-primary-foreground hover:opacity-90 transition-opacity"
               >
-                Tutup
+                {t("close", "Tutup")}
               </button>
             </div>
           </div>

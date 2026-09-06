@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLanguage } from "@/lib/language-context";
 import { usePathname, useRouter } from "next/navigation";
 import { JSX, useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -19,9 +20,10 @@ type NotificationItem = {
   user_name?: string | null;
 };
 
-const NAV_ITEMS: { label: string; href: string; icon: JSX.Element }[] = [
+const NAV_CONFIG: { key: string; defaultLabel: string; href: string; icon: JSX.Element }[] = [
   {
-    label: "Dashboard",
+    key: "admin_dashboard",
+    defaultLabel: "Dashboard",
     href: "/admin",
     icon: (
       <svg className="size-5 fill-current" viewBox="0 0 24 24">
@@ -30,7 +32,8 @@ const NAV_ITEMS: { label: string; href: string; icon: JSX.Element }[] = [
     ),
   },
   {
-    label: "Absensi",
+    key: "admin_attendance",
+    defaultLabel: "Absensi",
     href: "/admin/absensi",
     icon: (
       <svg className="size-5 fill-current" viewBox="0 0 24 24">
@@ -39,7 +42,8 @@ const NAV_ITEMS: { label: string; href: string; icon: JSX.Element }[] = [
     ),
   },
   {
-    label: "Pengajuan Izin",
+    key: "admin_leave",
+    defaultLabel: "Pengajuan Izin",
     href: "/admin/izin",
     icon: (
       <svg className="size-5 fill-current" viewBox="0 0 24 24">
@@ -48,7 +52,8 @@ const NAV_ITEMS: { label: string; href: string; icon: JSX.Element }[] = [
     ),
   },
   {
-    label: "Karyawan",
+    key: "admin_employees",
+    defaultLabel: "Karyawan",
     href: "/admin/karyawan",
     icon: (
       <svg className="size-5 fill-current" viewBox="0 0 24 24">
@@ -57,7 +62,8 @@ const NAV_ITEMS: { label: string; href: string; icon: JSX.Element }[] = [
     ),
   },
   {
-    label: "Laporan",
+    key: "admin_reports",
+    defaultLabel: "Laporan",
     href: "/admin/laporan",
     icon: (
       <svg className="size-5 fill-current" viewBox="0 0 24 24">
@@ -67,18 +73,64 @@ const NAV_ITEMS: { label: string; href: string; icon: JSX.Element }[] = [
   },
 ];
 
+const STORAGE_KEY_ADMIN_READ_NOTIFS = "bee_admin_read_notif_ids";
+
 export function AdminShell({ children }: { children: ReactNode }) {
   const { signOut, user, request } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [pendingCount, setPendingCount] = useState(0);
+  const [readNotifIds, setReadNotifIds] = useState<string[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "warning" | "leave" | "attendance">("all");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const fetchNotifications = useCallback(async () => {
+  // Tutup drawer sidebar mobile saat rute berubah
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [pathname]);
+
+  // Muat ID notifikasi yang sudah pernah dibaca dari localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_ADMIN_READ_NOTIFS);
+      if (saved) {
+        setReadNotifIds(JSON.parse(saved));
+      }
+    } catch {
+      // Abaikan jika localStorage tidak tersedia
+    }
+  }, []);
+
+  const markAllAsRead = useCallback((itemsToMark?: NotificationItem[]) => {
+    const list = itemsToMark ?? notifications;
+    if (list.length === 0) return;
+    const allIds = list.map((n) => n.id);
+    setReadNotifIds((prev) => {
+      const updated = Array.from(new Set([...prev, ...allIds]));
+      try {
+        localStorage.setItem(STORAGE_KEY_ADMIN_READ_NOTIFS, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  }, [notifications]);
+
+  const markAsRead = useCallback((id: string) => {
+    setReadNotifIds((prev) => {
+      if (prev.includes(id)) return prev;
+      const updated = [...prev, id];
+      try {
+        localStorage.setItem(STORAGE_KEY_ADMIN_READ_NOTIFS, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  }, []);
+
+  const fetchNotifications = useCallback(async (isManual = false) => {
+    if (isManual) setIsRefreshing(true);
     try {
       const res = await request<{
         pending_leave_count?: number;
@@ -87,12 +139,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
         total_notifications?: number;
         notifications?: NotificationItem[];
       }>("/admin/notifications");
-      if (res) {
-        setPendingCount(res.total_alert_count ?? res.pending_leave_count ?? 0);
-        setNotifications(res.notifications ?? []);
+      if (res && res.notifications) {
+        setNotifications(res.notifications);
       }
     } catch {
-      // ignore
+      // Abaikan error jaringan berkala
+    } finally {
+      if (isManual) {
+        setTimeout(() => setIsRefreshing(false), 500);
+      }
     }
   }, [request]);
 
@@ -118,6 +173,23 @@ export function AdminShell({ children }: { children: ReactNode }) {
     };
   }, [notifOpen]);
 
+  const handleToggleNotif = useCallback(() => {
+    setNotifOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        // Saat dibuka, otomatis tandai semua notifikasi saat ini sebagai sudah dilihat
+        // agar badge merah lonceng langsung hilang
+        markAllAsRead();
+        void fetchNotifications();
+      }
+      return next;
+    });
+  }, [fetchNotifications, markAllAsRead]);
+
+  const unreadAlerts = notifications.filter(
+    (i) => i.is_pending && !readNotifIds.includes(i.id)
+  );
+  const pendingCount = unreadAlerts.length;
   const leaveCount = notifications.filter((i) => i.category === "leave").length;
   const attendanceCount = notifications.filter((i) => i.category === "clock_in" || i.category === "clock_out").length;
   const warningCount = notifications.filter((i) => i.category === "warning").length;
@@ -131,12 +203,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   const name = user?.profile?.full_name ?? user?.email ?? "Admin";
   const initials = name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+  const NAV_ITEMS = NAV_CONFIG.map((item) => ({
+    ...item,
+    label: t(item.key, item.defaultLabel),
+  }));
+
   const ALL_PAGES: { href: string; label: string }[] = [
     ...NAV_ITEMS,
-    { href: "/admin/settings", label: "Pengaturan" },
-    { href: "/admin/support", label: "Pusat Bantuan" },
+    { href: "/admin/settings", label: t("admin_settings", "Settings") },
+    { href: "/admin/support", label: t("support", "Support") },
   ];
-  const activeItem = ALL_PAGES.find((i) => pathname === i.href || (i.href !== "/admin" && pathname.startsWith(i.href))) ?? { href: "/admin", label: "Dashboard" };
+  const activeItem = ALL_PAGES.find((i) => pathname === i.href || (i.href !== "/admin" && pathname.startsWith(i.href))) ?? { href: "/admin", label: t("admin_dashboard", "Dashboard") };
 
   const NavButton = ({ item, onClick }: { item: typeof NAV_ITEMS[0]; onClick?: () => void }) => {
     const active = pathname === item.href;
@@ -155,11 +232,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
     );
   };
 
-  const BottomNavButton = ({ href, label, icon }: { href: string; label: string; icon: JSX.Element }) => {
+  const BottomNavButton = ({ href, label, icon, onClick }: { href: string; label: string; icon: JSX.Element; onClick?: () => void }) => {
     const active = pathname === href;
     return (
       <button
-        onClick={() => { router.push(href); setSidebarOpen(false); }}
+        onClick={() => {
+          router.push(href);
+          onClick?.();
+        }}
         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-150 border ${
           active
             ? "bg-primary/15 text-[#f5c518] border-primary/30"
@@ -172,23 +252,37 @@ export function AdminShell({ children }: { children: ReactNode }) {
     );
   };
 
-  const SidebarContent = () => (
+  const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
     <div className="flex h-full flex-col bg-background">
       {/* Brand */}
-      <div className="flex items-center gap-3 px-6 pt-6 pb-5">
-        <div className="flex size-9 items-center justify-center rounded-xl p-1 bg-white/95 dark:bg-white border border-border/80 shadow-2xs">
-          <img src="/images/logo_lebah_kreatif-removebg.png" alt="Bee Absensi" className="size-full object-contain" />
+      <div className="flex items-center justify-between px-5 pt-5 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 items-center justify-center rounded-xl p-1 bg-white/95 dark:bg-white border border-border/80 shadow-2xs">
+            <img src="/images/logo_lebah_kreatif-removebg.png" alt="Bee Absensi" className="size-full object-contain" />
+          </div>
+          <div>
+            <p className="text-base font-bold leading-tight text-foreground">Bee Absensi</p>
+            <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">Admin Panel</p>
+          </div>
         </div>
-        <div>
-          <p className="text-base font-bold leading-tight text-foreground">Bee Absensi</p>
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">Admin Panel</p>
-        </div>
+        {onNavigate && (
+          <button
+            type="button"
+            onClick={onNavigate}
+            className="flex size-8 items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted md:hidden transition-colors"
+            aria-label="Tutup menu"
+          >
+            <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 space-y-0.5 mt-2">
+      <nav className="flex-1 px-3 space-y-0.5 mt-2 overflow-y-auto">
         {NAV_ITEMS.map((item) => (
-          <NavButton key={item.href} item={item} onClick={() => setSidebarOpen(false)} />
+          <NavButton key={item.href} item={item} onClick={onNavigate} />
         ))}
       </nav>
 
@@ -199,21 +293,23 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <div className="px-3 pb-2 space-y-0.5">
         <BottomNavButton
           href="/admin/settings"
-          label="Settings"
+          label={t("admin_settings", "Settings")}
           icon={
             <svg className="size-5 fill-current" viewBox="0 0 24 24">
-              <path fillRule="evenodd" clipRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.311.144-.424.084L6.177 5.25a1.875 1.875 0 00-2.278.432l-1.05 1.253a1.875 1.875 0 00-.098 2.316l.72.96c.08.106.096.262.03.42a7.575 7.575 0 000 1.138c.066.158.05.314-.03.42l-.72.96a1.875 1.875 0 00.098 2.316l1.05 1.253a1.875 1.875 0 002.278.432l1.166-.641c.113-.06.258-.031.424.084.31.214.64.405.986.57.182.088.277.228.297.348l.178 1.072c.151.904.933 1.567 1.85 1.567h1.844c.917 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.115-.26.297-.348.346-.165.676-.356.986-.57.166-.115.311-.144.424-.084l1.166.641a1.875 1.875 0 002.278-.432l1.05-1.253a1.875 1.875 0 00.098-2.316l-.72-.96c-.08-.106-.096-.262-.03-.42a7.575 7.575 0 000-1.138c-.066-.158-.05-.314.03-.42l.72-.96a1.875 1.875 0 00-.098-2.316l-1.05-1.253a1.875 1.875 0 00-2.278-.432l-1.166.641c-.113.06-.258.031-.424-.084a7.493 7.493 0 00-.986-.57c-.182-.088-.277-.228-.297-.348l-.178-1.072a1.875 1.875 0 00-1.85-1.567h-1.844zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z"/>
+              <path fillRule="evenodd" clipRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 00-.986.57c-.166.115-.311.144-.424.084L6.177 5.25a1.875 1.875 0 00-2.278.432l-1.05 1.253a1.875 1.875 0 00-.098 2.316l.72.96c.08.106.096.262.03.42a7.575 7.575 0 000 1.138c.066.158.05.314-.03.42l-.72.96a1.875 1.875 0 00.098 2.316l1.05 1.253a1.875 1.875 0 002.278.432l1.166-.641c.113-.06.258-.031.424.084.31.214.64.405.986.57.182.088.277.228.297.348l.178 1.072c.151.904.933 1.567 1.85 1.567h1.844c.917 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.115-.26.297-.348.346-.165.676-.356.986-.57.166-.115.311-.144.424-.084l1.166.641a1.875 1.875 0 002.278-.432l1.05-1.253a1.875 1.875 0 00.098-2.316l-.72-.96c-.08-.106-.096-.262-.03-.42a7.575 7.575 0 000-1.138c-.066-.158-.05-.314.03-.42l.72-.96a1.875 1.875 0 00-.098-2.316l-1.05-1.253a1.875 1.875 0 00-2.278-.432l-1.166.641c-.113.06-.258.031-.424.084a7.493 7.493 0 00-.986-.57c-.182-.088-.277-.228-.297-.348l-.178-1.072a1.875 1.875 0 00-1.85-1.567h-1.844zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z"/>
             </svg>
           }
+          onClick={onNavigate}
         />
         <BottomNavButton
           href="/admin/support"
-          label="Support"
+          label={t("support", "Support")}
           icon={
             <svg className="size-5 fill-current" viewBox="0 0 24 24">
               <path fillRule="evenodd" clipRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm11.378-3.917c-.076-.656-.582-1.15-1.24-1.183a3.46 3.46 0 00-2.458.875.75.75 0 00.998 1.12c.38-.34.88-.517 1.393-.49.317.016.544.238.577.514.041.341-.122.646-.37.896l-.99 1c-.512.518-.768 1.074-.768 1.685v.25a.75.75 0 001.5 0v-.25c0-.285.109-.545.394-.834l.99-1c.548-.553.948-1.306.874-2.183zM12 18a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
             </svg>
           }
+          onClick={onNavigate}
         />
       </div>
 
@@ -222,9 +318,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
       {/* User profile at bottom */}
       <div
-        onClick={() => router.push("/admin/settings?tab=akun")}
+        onClick={() => {
+          router.push("/admin/settings?tab=akun");
+          onNavigate?.();
+        }}
         className="mx-3 mb-4 flex items-center gap-3 rounded-xl px-3 py-2.5 bg-card border border-border hover:border-primary/50 hover:bg-muted/50 cursor-pointer transition-all group"
-        title="Buka Profil Akun"
+        title={t("open_profile", "Buka Profil Akun")}
       >
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full text-white text-sm font-bold bg-primary group-hover:scale-105 transition-transform shadow-xs">
           {initials}
@@ -239,7 +338,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             void signOut();
           }}
           className="flex shrink-0 size-7 items-center justify-center rounded-lg transition-colors text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50"
-          title="Keluar"
+          title={t("logout", "Keluar")}
         >
           <svg className="size-4 fill-current" viewBox="0 0 24 24">
             <path fillRule="evenodd" clipRule="evenodd" d="M7.5 3.75A1.5 1.5 0 006 5.25v13.5a1.5 1.5 0 001.5 1.5h6a1.5 1.5 0 001.5-1.5v-2.25a.75.75 0 00-1.5 0v2.25a.5.5 0 01-.5.5h-6a.5.5 0 01-.5-.5V5.25a.5.5 0 01.5-.5h6a.5.5 0 01.5.5v2.25a.75.75 0 001.5 0V5.25a1.5 1.5 0 00-1.5-1.5h-6zm9.72 4.72a.75.75 0 011.06 0l3.75 3.75a.75.75 0 010 1.06l-3.75 3.75a.75.75 0 11-1.06-1.06l2.47-2.47H10.5a.75.75 0 010-1.5h9.19l-2.47-2.47a.75.75 0 010-1.06z"/>
@@ -251,14 +350,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* ── Mobile overlay sidebar ── */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
-      <aside className={["fixed inset-y-0 left-0 z-50 w-64 shadow-2xl transition-transform duration-300 ease-in-out md:hidden", sidebarOpen ? "translate-x-0" : "-translate-x-full"].join(" ")}>
-        <SidebarContent />
-      </aside>
-
       {/* ── Desktop sidebar ── */}
       <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-30 md:flex md:w-56 md:flex-col">
         <SidebarContent />
@@ -267,19 +358,28 @@ export function AdminShell({ children }: { children: ReactNode }) {
       {/* ── Main content ── */}
       <div className="md:pl-56 flex flex-col min-h-screen">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between px-4 md:px-8 bg-background">
-          {/* Mobile: hamburger */}
-          <button onClick={() => setSidebarOpen(true)} className="flex size-9 items-center justify-center rounded-xl md:hidden text-muted-foreground">
-            <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between px-4 md:px-8 bg-background border-b border-border md:border-b-0">
+          {/* Left: Hamburger menu for mobile & Page title */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setMobileSidebarOpen(true)}
+              className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground md:hidden transition-colors shadow-2xs"
+              aria-label="Buka navigasi"
+              title="Menu Navigasi"
+            >
+              <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
 
-          {/* Page title */}
-          <p className="text-lg font-bold hidden md:block text-foreground">
-            {activeItem.label === "Dashboard" ? "Dashboard Overview" : activeItem.label}
-          </p>
-          <p className="text-sm font-bold md:hidden text-foreground">{activeItem.label}</p>
+            <div>
+              <p className="text-lg font-bold hidden md:block text-foreground">
+                {activeItem.href === "/admin" ? t("admin_overview", "Dashboard Overview") : activeItem.label}
+              </p>
+              <p className="text-base font-bold md:hidden text-foreground">{activeItem.label}</p>
+            </div>
+          </div>
 
           {/* Right side */}
           <div className="flex items-center gap-3">
@@ -290,7 +390,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               </svg>
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder={t("search", "Search...")}
                 className="pl-9 pr-4 h-9 w-[180px] rounded-xl text-sm border outline-none transition-all bg-card border-border text-foreground"
               />
             </div>
@@ -301,22 +401,19 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <div className="relative" ref={notifRef}>
               <button
                 type="button"
-                onClick={() => {
-                  setNotifOpen((prev) => !prev);
-                  if (!notifOpen) void fetchNotifications();
-                }}
+                onClick={handleToggleNotif}
                 className={`relative flex size-9 items-center justify-center rounded-xl transition-all cursor-pointer border ${
                   notifOpen
                     ? "bg-primary/15 border-primary/40 text-primary shadow-xs"
                     : "bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 }`}
-                title="Pusat Notifikasi"
+                title={t("notifications", "Pusat Notifikasi")}
               >
                 <svg className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                 </svg>
 
-                {/* Bulet Merah Notifikasi */}
+                {/* Bulet Merah Notifikasi (Hanya muncul jika ada alert yang belum dilihat) */}
                 {pendingCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex min-w-5 h-5 px-1 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white shadow-sm ring-2 ring-background animate-pulse">
                     {pendingCount > 9 ? "9+" : pendingCount}
@@ -330,25 +427,49 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   {/* Header */}
                   <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
                     <div className="flex items-center gap-2">
-                      <div className="size-2 rounded-full bg-primary" />
-                      <span className="text-sm font-bold text-foreground">Notifikasi</span>
+                      <div className={`size-2 rounded-full ${pendingCount > 0 ? "bg-red-500 animate-pulse" : "bg-primary"}`} />
+                      <span className="text-sm font-bold text-foreground">{t("notifications")}</span>
                       {pendingCount > 0 ? (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-500/15 text-red-600 dark:text-red-400">
-                          {pendingCount} Perlu Aksi
+                          {pendingCount} {t("action_needed")}
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
-                          {notifications.length} Aktivitas
+                          {notifications.length} {t("activities")}
                         </span>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => void fetchNotifications()}
-                      className="text-[11px] font-semibold text-muted-foreground hover:text-foreground transition cursor-pointer"
-                    >
-                      Segarkan
-                    </button>
+
+                    <div className="flex items-center gap-2">
+                      {notifications.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => markAllAsRead()}
+                          className="text-[11px] font-medium text-muted-foreground hover:text-foreground transition cursor-pointer"
+                          title={t("mark_read")}
+                        >
+                          {t("mark_read")}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        disabled={isRefreshing}
+                        onClick={() => void fetchNotifications(true)}
+                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-semibold text-primary hover:bg-primary/10 transition cursor-pointer disabled:opacity-50"
+                        title={t("refresh")}
+                      >
+                        <svg
+                          className={`size-3.5 ${isRefreshing ? "animate-spin text-primary" : "text-primary"}`}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={2.2}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        <span>{isRefreshing ? t("refreshing") : t("refresh")}</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Filter Tabs */}
@@ -363,7 +484,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                             : "bg-card hover:bg-muted text-muted-foreground border border-border/60"
                         }`}
                       >
-                        Semua ({notifications.length})
+                        {t("tab_all")} ({notifications.length})
                       </button>
                       {warningCount > 0 && (
                         <button
@@ -376,7 +497,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                           }`}
                         >
                           <span className="size-1.5 rounded-full bg-red-500" />
-                          Peringatan ({warningCount})
+                          {t("tab_warning")} ({warningCount})
                         </button>
                       )}
                       <button
@@ -388,7 +509,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                             : "bg-card hover:bg-muted text-muted-foreground border border-border/60"
                         }`}
                       >
-                        Izin &amp; Cuti ({leaveCount})
+                        {t("tab_leave")} ({leaveCount})
                       </button>
                       <button
                         type="button"
@@ -399,7 +520,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                             : "bg-card hover:bg-muted text-muted-foreground border border-border/60"
                         }`}
                       >
-                        Absensi ({attendanceCount})
+                        {t("tab_attendance")} ({attendanceCount})
                       </button>
                     </div>
                   )}
@@ -413,13 +534,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
                             <path fillRule="evenodd" clipRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" />
                           </svg>
                         </div>
-                        <p className="text-xs font-bold text-foreground">Tidak Ada Notifikasi</p>
+                        <p className="text-xs font-bold text-foreground">{t("no_notifications")}</p>
                         <p className="text-[11px] text-muted-foreground">
-                          Belum ada aktivitas notifikasi terbaru.
+                          {t("no_admin_notif_desc")}
                         </p>
                       </div>
                     ) : (
                       filteredNotifications.map((item) => {
+                        const isRead = readNotifIds.includes(item.id);
+                        const isUnreadAlert = item.is_pending && !isRead;
+
                         const badgeStyle =
                           item.badge_color === "amber"
                             ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20"
@@ -437,11 +561,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
                           <div
                             key={item.id}
                             onClick={() => {
+                              markAsRead(item.id);
                               setNotifOpen(false);
                               router.push(item.route);
                             }}
                             className={`flex items-start gap-3 p-3.5 hover:bg-muted/60 cursor-pointer transition-colors group ${
-                              item.is_pending ? "bg-amber-500/5" : ""
+                              isUnreadAlert ? "bg-amber-500/10 dark:bg-amber-500/15 border-l-2 border-amber-500" : isRead ? "opacity-80" : ""
                             }`}
                           >
                             {/* Category Icon */}
@@ -489,7 +614,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                               <div className="flex items-center justify-between mt-1 text-[10px] text-muted-foreground">
                                 <span>{item.time_formatted}</span>
                                 <span className="font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                                  Lihat Detail →
+                                  {t("see_details")}
                                 </span>
                               </div>
                             </div>
@@ -508,31 +633,20 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <main className="flex-1 px-4 py-5 md:px-8 md:py-6">{children}</main>
       </div>
 
-      {/* ── Mobile bottom nav ── */}
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex h-[68px] items-center justify-around px-2 md:hidden bg-background border-t border-border">
-        {NAV_ITEMS.map((item) => {
-          const active = pathname === item.href;
-          return (
-            <button
-              key={item.href}
-              onClick={() => router.push(item.href)}
-              className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-semibold transition-colors ${
-                active ? "text-[#f5c518]" : "text-muted-foreground"
-              }`}
-            >
-              <span className={`flex size-8 items-center justify-center rounded-xl transition-colors ${
-                active ? "bg-primary/15" : "transparent"
-              }`}>
-                {item.icon}
-              </span>
-              {item.label.split(" ")[0]}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Bottom spacer on mobile */}
-      <div className="h-[68px] md:hidden" />
+      {/* ── Mobile Sidebar Drawer (Off-canvas) ── */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop overlay */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          {/* Drawer sidebar */}
+          <aside className="fixed inset-y-0 left-0 w-64 max-w-[80vw] bg-background shadow-2xl border-r border-border flex flex-col transition-transform animate-in slide-in-from-left duration-200 z-10">
+            <SidebarContent onNavigate={() => setMobileSidebarOpen(false)} />
+          </aside>
+        </div>
+      )}
     </div>
   );
 }

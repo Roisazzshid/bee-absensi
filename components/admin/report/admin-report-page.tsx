@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { API_BASE_URL } from "@/lib/api";
+import { useLanguage } from "@/lib/language-context";
 import { useCallback, useEffect, useState } from "react";
 
 type AttendanceReportItem = {
@@ -41,22 +42,30 @@ type Pagination = {
   total: number;
 };
 
-const MONTH_NAMES = [
-  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-  "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-];
-
-const STATUS_CONFIG = {
-  on_time: { label: "Tepat Waktu", dot: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-700 ring-emerald-200" },
-  late: { label: "Terlambat", dot: "bg-amber-400", badge: "bg-amber-50 text-amber-700 ring-amber-200" },
-  absent: { label: "Belum Hadir", dot: "bg-red-400", badge: "bg-red-50 text-red-600 ring-red-200" },
-};
-
 export function AdminReportPage() {
   const { request, token } = useAuth();
+  const { t, formatDate: ctxFormatDate, formatTime: ctxFormatTime, language } = useLanguage();
 
   const now = new Date();
   const todayStr = now.toISOString().split("T")[0];
+
+  const monthNames = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(2026, i, 1);
+    return d.toLocaleDateString(language === "en" ? "en-US" : "id-ID", { month: "long" });
+  });
+
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case "on_time":
+        return { label: t("status_on_time", "Tepat Waktu"), dot: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-700 ring-emerald-200" };
+      case "late":
+        return { label: t("status_late", "Terlambat"), dot: "bg-amber-400", badge: "bg-amber-50 text-amber-700 ring-amber-200" };
+      case "absent":
+        return { label: t("status_absent", "Belum Hadir"), dot: "bg-red-400", badge: "bg-red-50 text-red-600 ring-red-200" };
+      default:
+        return { label: status, dot: "bg-muted", badge: "bg-muted text-muted-foreground ring-border" };
+    }
+  };
 
   // Period mode: 'yearly' | 'monthly' | 'weekly' | 'daily' | 'custom'
   const [period, setPeriod] = useState<"yearly" | "monthly" | "weekly" | "daily" | "custom">("yearly");
@@ -152,11 +161,11 @@ export function AdminReportPage() {
       setPagination(res.pagination);
       setPeriodLabel(res.period_label);
     } catch {
-      setError("Gagal memuat laporan absensi.");
+      setError(t("report_load_failed", "Gagal memuat laporan absensi."));
     } finally {
       setLoading(false);
     }
-  }, [buildQueryParams, request]);
+  }, [buildQueryParams, request, t]);
 
   useEffect(() => {
     void fetchData();
@@ -186,7 +195,7 @@ export function AdminReportPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Gagal mengunduh file export");
+        throw new Error(t("export_download_failed", "Gagal mengunduh file export"));
       }
 
       const blob = await res.blob();
@@ -210,19 +219,15 @@ export function AdminReportPage() {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal mengunduh laporan spreadsheet.");
+      alert(err instanceof Error ? err.message : t("export_download_failed", "Gagal mengunduh laporan spreadsheet."));
     } finally {
       setExporting(false);
     }
   };
 
-  const formatTime = (t: string | null) => {
-    if (!t) return "—";
-    const safeStr = t.includes(" ") && !t.includes("T") ? t.replace(" ", "T") : t;
-    const d = new Date(safeStr);
-    return Number.isNaN(d.getTime())
-      ? t.slice(11, 16) || t
-      : d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const formatTime = (tStr: string | null) => {
+    if (!tStr) return "—";
+    return ctxFormatTime(tStr);
   };
 
   const formatDate = (d: string) => {
@@ -230,12 +235,11 @@ export function AdminReportPage() {
     const datePart = d.includes("T") ? d.split("T")[0] : d.split(" ")[0];
     const parts = datePart.split("-");
     if (parts.length === 3) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
       const day = parseInt(parts[2], 10);
-      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-        const localD = new Date(year, month, day);
-        return localD.toLocaleDateString("id-ID", {
+      if (!isNaN(y) && !isNaN(m) && !isNaN(day)) {
+        return ctxFormatDate(new Date(y, m, day), {
           weekday: "short",
           day: "numeric",
           month: "short",
@@ -243,15 +247,12 @@ export function AdminReportPage() {
         });
       }
     }
-    const parsed = new Date(d);
-    return Number.isNaN(parsed.getTime())
-      ? d
-      : parsed.toLocaleDateString("id-ID", {
-          weekday: "short",
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        });
+    return ctxFormatDate(d, {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const initials = (name: string) =>
@@ -271,9 +272,9 @@ export function AdminReportPage() {
       {/* ── Page Header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground md:text-2xl">Laporan & Export Absensi</h1>
+          <h1 className="text-xl font-bold text-foreground md:text-2xl">{t("report_page_title", "Laporan & Export Absensi")}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Rekap dan unduh spreadsheet absensi tahunan, bulanan, mingguan, maupun harian.
+            {t("report_page_subtitle", "Rekap dan unduh spreadsheet absensi tahunan, bulanan, mingguan, maupun harian.")}
           </p>
         </div>
 
@@ -290,7 +291,7 @@ export function AdminReportPage() {
               <path fillRule="evenodd" d="M12 2.25a.75.75 0 01.75.75v11.69l3.22-3.22a.75.75 0 111.06 1.06l-4.5 4.5a.75.75 0 01-1.06 0l-4.5-4.5a.75.75 0 111.06-1.06l3.22 3.22V3a.75.75 0 01.75-.75zm-9 13.5a.75.75 0 01.75.75v2.25a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5V16.5a.75.75 0 011.5 0v2.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V16.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
             </svg>
           )}
-          <span>{exporting ? "Membuat Spreadsheet…" : "Export Spreadsheet (Excel / CSV)"}</span>
+          <span>{exporting ? t("exporting_spreadsheet", "Membuat Spreadsheet…") : t("export_spreadsheet", "Export Spreadsheet (Excel / CSV)")}</span>
         </button>
       </div>
 
@@ -299,11 +300,11 @@ export function AdminReportPage() {
         {/* Period Tabs */}
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar rounded-xl bg-muted p-1">
           {[
-            { key: "yearly", label: "Tahunan" },
-            { key: "monthly", label: "Bulanan" },
-            { key: "weekly", label: "Mingguan" },
-            { key: "daily", label: "Harian" },
-            { key: "custom", label: "Rentang Kustom" },
+            { key: "yearly", label: t("period_yearly", "Tahunan") },
+            { key: "monthly", label: t("period_monthly", "Bulanan") },
+            { key: "weekly", label: t("period_weekly", "Mingguan") },
+            { key: "daily", label: t("period_daily", "Harian") },
+            { key: "custom", label: t("period_custom", "Rentang Kustom") },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -328,7 +329,7 @@ export function AdminReportPage() {
           {/* Yearly Picker */}
           {period === "yearly" && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-muted-foreground">Pilih Tahun:</span>
+              <span className="text-xs font-bold text-muted-foreground">{t("select_year", "Pilih Tahun:")}</span>
               <select
                 value={year}
                 onChange={(e) => { setYear(Number(e.target.value)); setPage(1); }}
@@ -344,7 +345,7 @@ export function AdminReportPage() {
           {/* Monthly Picker */}
           {period === "monthly" && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-muted-foreground">Bulan & Tahun:</span>
+              <span className="text-xs font-bold text-muted-foreground">{t("month_and_year", "Bulan & Tahun:")}</span>
               <select
                 value={month}
                 onChange={(e) => { setMonth(Number(e.target.value)); setPage(1); }}
@@ -369,7 +370,7 @@ export function AdminReportPage() {
           {/* Daily Picker */}
           {period === "daily" && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-muted-foreground">Pilih Tanggal:</span>
+              <span className="text-xs font-bold text-muted-foreground">{t("select_date", "Pilih Tanggal:")}</span>
               <input
                 type="date"
                 value={dailyDate}
@@ -382,14 +383,14 @@ export function AdminReportPage() {
           {/* Weekly / Custom Range Picker */}
           {(period === "weekly" || period === "custom") && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-muted-foreground">Dari:</span>
+              <span className="text-xs font-bold text-muted-foreground">{t("from_date", "Dari:")}</span>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
                 className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
               />
-              <span className="text-xs font-bold text-muted-foreground">Sampai:</span>
+              <span className="text-xs font-bold text-muted-foreground">{t("to_date", "Sampai:")}</span>
               <input
                 type="date"
                 value={endDate}
@@ -407,7 +408,7 @@ export function AdminReportPage() {
                   }}
                   className="h-10 rounded-xl bg-primary/10 px-3 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
                 >
-                  Minggu Ini
+                  {t("this_week", "Minggu Ini")}
                 </button>
               )}
             </div>
@@ -420,7 +421,7 @@ export function AdminReportPage() {
               onChange={(e) => { setDeptFilter(e.target.value); setPage(1); }}
               className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
             >
-              <option value="">Semua Departemen</option>
+              <option value="">{t("all_departments", "Semua Departemen")}</option>
               {departments.map((d) => (
                 <option key={d} value={d}>{d}</option>
               ))}
@@ -432,10 +433,10 @@ export function AdminReportPage() {
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
             >
-              <option value="">Semua Status</option>
-              <option value="on_time">Tepat Waktu</option>
-              <option value="late">Terlambat</option>
-              <option value="absent">Belum Absen</option>
+              <option value="">{t("filter_status", "Semua Status")}</option>
+              <option value="on_time">{t("status_on_time", "Tepat Waktu")}</option>
+              <option value="late">{t("status_late", "Terlambat")}</option>
+              <option value="absent">{t("status_absent", "Belum Absen")}</option>
             </select>
           </div>
         </div>
@@ -448,14 +449,14 @@ export function AdminReportPage() {
             </svg>
             <input
               type="text"
-              placeholder="Cari nama atau NIP karyawan…"
+              placeholder={t("search_report_placeholder", "Cari nama atau NIP karyawan…")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="h-10 w-full rounded-xl border border-border bg-background pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
             />
           </div>
           <button type="submit" className="h-10 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:opacity-90 transition-opacity">
-            Cari
+            {t("search_btn", "Cari")}
           </button>
         </form>
       </div>
@@ -465,7 +466,7 @@ export function AdminReportPage() {
         <div className="relative overflow-hidden rounded-3xl bg-card border border-border p-5 shadow-sm">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 to-primary" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-primary">Total Kehadiran</span>
+            <span className="text-xs font-bold text-primary">{t("total_attendance_stat", "Total Kehadiran")}</span>
             <div className="flex size-8 items-center justify-center rounded-lg bg-primary/20 text-primary">
               <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-4-4 1.41-1.41L12 14.17l6.59-6.59L20 9l-8 8z" />
@@ -473,13 +474,13 @@ export function AdminReportPage() {
             </div>
           </div>
           <p className="mt-2 text-3xl font-black text-foreground">{summary.total}</p>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">Data absensi tercatat</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">{t("recorded_attendance", "Data absensi tercatat")}</p>
         </div>
 
         <div className="relative overflow-hidden rounded-3xl bg-card border border-border p-5 shadow-sm">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-emerald-600" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-500">Tepat Waktu</span>
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-500">{t("status_on_time", "Tepat Waktu")}</span>
             <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-500">
               <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
                 <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
@@ -488,14 +489,14 @@ export function AdminReportPage() {
           </div>
           <p className="mt-2 text-3xl font-black text-foreground">{summary.on_time}</p>
           <p className="mt-0.5 text-[10px] text-muted-foreground">
-            {summary.total > 0 ? Math.round((summary.on_time / summary.total) * 100) : 0}% dari total
+            {summary.total > 0 ? Math.round((summary.on_time / summary.total) * 100) : 0}% {t("of_total", "dari total")}
           </p>
         </div>
 
         <div className="relative overflow-hidden rounded-3xl bg-card border border-border p-5 shadow-sm">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-600 dark:text-amber-500">Terlambat</span>
+            <span className="text-xs font-bold text-amber-600 dark:text-amber-500">{t("status_late", "Terlambat")}</span>
             <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-500">
               <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
                 <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
@@ -504,22 +505,22 @@ export function AdminReportPage() {
           </div>
           <p className="mt-2 text-3xl font-black text-foreground">{summary.late}</p>
           <p className="mt-0.5 text-[10px] text-muted-foreground">
-            {summary.total > 0 ? Math.round((summary.late / summary.total) * 100) : 0}% dari total
+            {summary.total > 0 ? Math.round((summary.late / summary.total) * 100) : 0}% {t("of_total", "dari total")}
           </p>
         </div>
 
         <div className="relative overflow-hidden rounded-3xl bg-card border border-border p-5 shadow-sm">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-400 to-red-600" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-red-600 dark:text-red-500">Belum Hadir</span>
+            <span className="text-xs font-bold text-red-600 dark:text-red-500">{t("status_absent", "Belum Hadir")}</span>
             <div className="flex size-8 items-center justify-center rounded-lg bg-red-500/20 text-red-600 dark:text-red-500">
               <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
               </svg>
             </div>
           </div>
           <p className="mt-2 text-3xl font-black text-foreground">{summary.absent}</p>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">Perlu tindak lanjut</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">{t("need_action", "Perlu tindak lanjut")}</p>
         </div>
       </div>
 
@@ -536,25 +537,25 @@ export function AdminReportPage() {
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            Preview Data {periodLabel && <span className="text-primary font-bold">({periodLabel.replace(/_/g, " ")})</span>}
+            {t("preview_data", "Preview Data")} {periodLabel && <span className="text-primary font-bold">({periodLabel.replace(/_/g, " ")})</span>}
           </p>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span>Tampilkan:</span>
+              <span>{t("show_per_page", "Tampilkan:")}</span>
               <select
                 value={perPage}
                 onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
                 className="h-8 rounded-lg border border-border bg-background px-2 text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               >
-                <option value={15}>15 baris</option>
-                <option value={25}>25 baris</option>
-                <option value={50}>50 baris</option>
-                <option value={100}>100 baris</option>
+                <option value={15}>15 {t("rows_unit", "baris")}</option>
+                <option value={25}>25 {t("rows_unit", "baris")}</option>
+                <option value={50}>50 {t("rows_unit", "baris")}</option>
+                <option value={100}>100 {t("rows_unit", "baris")}</option>
               </select>
             </div>
             {pagination && (
               <p className="text-xs text-muted-foreground">
-                Total <span className="font-bold text-foreground">{pagination.total}</span> data
+                Total <span className="font-bold text-foreground">{pagination.total}</span> {t("data_count", "data")}
               </p>
             )}
           </div>
@@ -574,8 +575,8 @@ export function AdminReportPage() {
                 <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" />
               </svg>
             </div>
-            <p className="mt-3 font-bold text-foreground">Tidak ada data absensi</p>
-            <p className="mt-1 text-sm text-muted-foreground">Tidak ada data untuk filter periode yang dipilih.</p>
+            <p className="mt-3 font-bold text-foreground">{t("no_report_data", "Tidak ada data absensi")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t("no_report_data_desc", "Tidak ada data untuk filter periode yang dipilih.")}</p>
           </div>
         ) : (
           <>
@@ -584,14 +585,14 @@ export function AdminReportPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/50">
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Tanggal</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Karyawan</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Departemen</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Masuk</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Pulang</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Foto Bukti</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Durasi</th>
-                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Status</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_date", "Tanggal")}</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_employee", "Karyawan")}</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_department", "Departemen")}</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_in", "Masuk")}</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_out", "Pulang")}</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_photo_proof", "Foto Bukti")}</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_duration", "Durasi")}</th>
+                    <th className="px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{t("th_status", "Status")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -639,7 +640,7 @@ export function AdminReportPage() {
                                   <path d="M12 9a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>
                                   <path fillRule="evenodd" clipRule="evenodd" d="M9.344 3.071a2.25 2.25 0 012.112-1.321h1.088a2.25 2.25 0 012.112 1.321l.666 1.679h3.54a2.25 2.25 0 012.25 2.25v12a2.25 2.25 0 01-2.25 2.25H3.75a2.25 2.25 0 01-2.25-2.25v-12a2.25 2.25 0 012.25-2.25h3.54l.666-1.679h1.138zM12 7.5a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5z"/>
                                 </svg>
-                                Masuk
+                                {t("btn_in", "Masuk")}
                               </button>
                             ) : null}
                             {item.clock_out_image_url ? (
@@ -652,7 +653,7 @@ export function AdminReportPage() {
                                   <path d="M12 9a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>
                                   <path fillRule="evenodd" clipRule="evenodd" d="M9.344 3.071a2.25 2.25 0 012.112-1.321h1.088a2.25 2.25 0 012.112 1.321l.666 1.679h3.54a2.25 2.25 0 012.25 2.25v12a2.25 2.25 0 01-2.25 2.25H3.75a2.25 2.25 0 01-2.25-2.25v-12a2.25 2.25 0 012.25-2.25h3.54l.666-1.679h1.138zM12 7.5a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5z"/>
                                 </svg>
-                                Pulang
+                                {t("btn_out", "Pulang")}
                               </button>
                             ) : null}
                             {!item.clock_in_image_url && !item.clock_out_image_url && (
@@ -704,15 +705,15 @@ export function AdminReportPage() {
 
                     <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-2 text-[11px] text-muted-foreground">
                       <div>
-                        <p className="text-[10px] opacity-60">Tanggal</p>
+                        <p className="text-[10px] opacity-60">{t("th_date", "Tanggal")}</p>
                         <p className="font-semibold text-foreground">{formatDate(item.date)}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] opacity-60">Masuk - Pulang</p>
+                        <p className="text-[10px] opacity-60">{t("th_in", "Masuk")} - {t("th_out", "Pulang")}</p>
                         <p className="font-mono font-semibold text-foreground">{formatTime(item.clock_in_time)} - {formatTime(item.clock_out_time)}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] opacity-60">Durasi</p>
+                        <p className="text-[10px] opacity-60">{t("th_duration", "Durasi")}</p>
                         <p className="font-semibold text-foreground">{item.duration ?? "—"}</p>
                       </div>
                     </div>
@@ -730,7 +731,7 @@ export function AdminReportPage() {
                               <path d="M12 9a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>
                               <path fillRule="evenodd" clipRule="evenodd" d="M9.344 3.071a2.25 2.25 0 012.112-1.321h1.088a2.25 2.25 0 012.112 1.321l.666 1.679h3.54a2.25 2.25 0 012.25 2.25v12a2.25 2.25 0 01-2.25 2.25H3.75a2.25 2.25 0 01-2.25-2.25v-12a2.25 2.25 0 012.25-2.25h3.54l.666-1.679h1.138zM12 7.5a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5z"/>
                             </svg>
-                            Masuk
+                            {t("btn_in", "Masuk")}
                           </button>
                         )}
                         {item.clock_out_image_url && (
@@ -743,7 +744,7 @@ export function AdminReportPage() {
                               <path d="M12 9a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z"/>
                               <path fillRule="evenodd" clipRule="evenodd" d="M9.344 3.071a2.25 2.25 0 012.112-1.321h1.088a2.25 2.25 0 012.112 1.321l.666 1.679h3.54a2.25 2.25 0 012.25 2.25v12a2.25 2.25 0 01-2.25 2.25H3.75a2.25 2.25 0 01-2.25-2.25v-12a2.25 2.25 0 012.25-2.25h3.54l.666-1.679h1.138zM12 7.5a5.25 5.25 0 100 10.5 5.25 5.25 0 000-10.5z"/>
                             </svg>
-                            Pulang
+                            {t("btn_out", "Pulang")}
                           </button>
                         )}
                       </div>
@@ -760,7 +761,7 @@ export function AdminReportPage() {
       {pagination && pagination.last_page > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
-            Halaman <span className="font-bold text-foreground">{pagination.current_page}</span> dari{" "}
+            {t("page_prefix", "Halaman")} <span className="font-bold text-foreground">{pagination.current_page}</span> {t("page_of", "dari")}{" "}
             <span className="font-bold text-foreground">{pagination.last_page}</span>
           </p>
           <div className="flex gap-2">
@@ -770,14 +771,14 @@ export function AdminReportPage() {
               className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-3.5 py-2 text-xs font-semibold text-foreground disabled:opacity-40 hover:bg-muted transition-colors"
             >
               <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg>
-              Prev
+              {t("prev", "Prev")}
             </button>
             <button
               disabled={page >= pagination.last_page}
               onClick={() => setPage((p) => p + 1)}
               className="flex items-center gap-1.5 rounded-xl border border-border bg-background px-3.5 py-2 text-xs font-semibold text-foreground disabled:opacity-40 hover:bg-muted transition-colors"
             >
-              Next
+              {t("next", "Next")}
               <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" /></svg>
             </button>
           </div>
@@ -798,7 +799,7 @@ export function AdminReportPage() {
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-foreground">
-                    Foto Bukti Absen {photoModal.type === "in" ? "Masuk" : "Pulang"}
+                    {photoModal.type === "in" ? t("photo_proof_in", "Foto Bukti Absen Masuk") : t("photo_proof_out", "Foto Bukti Absen Pulang")}
                   </h2>
                   <p className="text-xs text-muted-foreground">
                     {photoModal.item.user.full_name} ({photoModal.item.user.nip})
@@ -826,14 +827,14 @@ export function AdminReportPage() {
                 className="size-full object-contain"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
-                    "https://placehold.co/600x600?text=Foto+Tidak+Tersedia";
+                    "https://placehold.co/600x600?text=" + encodeURIComponent(t("photo_not_available", "Foto Tidak Tersedia"));
                 }}
               />
             </div>
 
             <div className="p-4 bg-muted/30 space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Waktu Absensi:</span>
+                <span className="text-muted-foreground">{t("attendance_time", "Waktu Absensi")}:</span>
                 <span className="font-mono font-bold text-foreground">
                   {formatDate(photoModal.item.date)} ·{" "}
                   {formatTime(
@@ -844,14 +845,14 @@ export function AdminReportPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Departemen:</span>
+                <span className="text-muted-foreground">{t("th_department", "Departemen")}:</span>
                 <span className="font-semibold text-foreground">
                   {photoModal.item.user.department} — {photoModal.item.user.position}
                 </span>
               </div>
               {(photoModal.type === "in" ? photoModal.item.clock_in_lat : photoModal.item.clock_out_lat) && (
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Koordinat GPS:</span>
+                  <span className="text-muted-foreground">{t("gps_coordinates", "Koordinat GPS")}:</span>
                   <span className="font-mono font-semibold text-primary">
                     {photoModal.type === "in"
                       ? `${photoModal.item.clock_in_lat}, ${photoModal.item.clock_in_long}`
@@ -867,7 +868,7 @@ export function AdminReportPage() {
                 onClick={() => setPhotoModal(null)}
                 className="w-full rounded-2xl bg-primary py-2.5 text-xs font-bold text-primary-foreground hover:opacity-90 transition-opacity"
               >
-                Tutup
+                {t("close", "Tutup")}
               </button>
             </div>
           </div>

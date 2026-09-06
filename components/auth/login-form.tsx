@@ -2,12 +2,14 @@
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiError } from "@/lib/api";
+import { useLanguage } from "@/lib/language-context";
 import { Button, Card, TextInput } from "@/components/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 export function LoginForm() {
   const { signIn, status, isAdmin } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -72,7 +74,7 @@ export function LoginForm() {
         // Abaikan jika localStorage error
       }
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : "Tidak dapat terhubung ke server. Coba lagi.");
+      setError(caught instanceof ApiError ? caught.message : t("network_error", "Tidak dapat terhubung ke server. Coba lagi."));
     } finally { setPending(false); }
   }
 
@@ -85,22 +87,22 @@ export function LoginForm() {
           className="size-full object-contain drop-shadow-sm"
         />
       </div>
-      <h1 className="text-3xl font-black tracking-tight text-foreground">Bee Absensi</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Masuk untuk melanjutkan ke akun Anda.</p>
+      <h1 className="text-3xl font-black tracking-tight text-foreground">{t("login_title", "Bee Absensi")}</h1>
+      <p className="mt-2 text-sm text-muted-foreground">{t("login_subtitle", "Masuk untuk melanjutkan ke akun Anda.")}</p>
     </div>
     
     <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-2xl">
       <form className="space-y-5" onSubmit={handleSubmit}>
         <label className="block">
-          <span className="mb-2 block text-xs font-bold text-muted-foreground">Alamat email</span>
-          <TextInput type="email" autoComplete="email" placeholder="nama@perusahaan.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <span className="mb-2 block text-xs font-bold text-muted-foreground">{t("email_address", "Alamat email")}</span>
+          <TextInput type="email" autoComplete="email" placeholder={t("email_placeholder", "nama@perusahaan.com")} value={email} onChange={(event) => setEmail(event.target.value)} required />
         </label>
         
         <label className="block">
-          <span className="mb-2 block text-xs font-bold text-muted-foreground">Kata sandi</span>
+          <span className="mb-2 block text-xs font-bold text-muted-foreground">{t("password", "Kata sandi")}</span>
           <div className="relative">
-            <TextInput type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="Masukkan kata sandi" className="pr-20" value={password} onChange={(event) => setPassword(event.target.value)} required />
-            <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute inset-y-0 right-3 text-xs font-bold text-primary hover:text-foreground transition-colors">{showPassword ? "Sembunyi" : "Tampil"}</button>
+            <TextInput type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder={t("login_password_placeholder", "Masukkan kata sandi")} className="pr-20" value={password} onChange={(event) => setPassword(event.target.value)} required />
+            <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute inset-y-0 right-3 text-xs font-bold text-primary hover:text-foreground transition-colors">{showPassword ? t("hide", "Sembunyi") : t("show", "Tampil")}</button>
           </div>
         </label>
         
@@ -114,19 +116,19 @@ export function LoginForm() {
               className="size-4 rounded border-border text-primary accent-primary focus:ring-primary/20 cursor-pointer"
             />
             <span className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors">
-              Ingat saya
+              {t("remember_me", "Ingat saya")}
             </span>
           </label>
         </div>
 
         {error && <p role="alert" className="rounded-xl bg-red-950/50 border border-red-900/50 px-4 py-3 text-sm text-red-400">{error}</p>}
         
-        <Button type="submit" fullWidth disabled={pending || status === "loading"} className="mt-4 h-14 disabled:cursor-not-allowed disabled:opacity-60">{pending ? "Memproses…" : "Masuk"}</Button>
+        <Button type="submit" fullWidth disabled={pending || status === "loading"} className="mt-4 h-14 disabled:cursor-not-allowed disabled:opacity-60">{pending ? t("processing", "Memproses…") : t("login_button", "Masuk")}</Button>
       </form>
     </div>
     
     <p className="mt-6 rounded-2xl border border-border bg-card/50 px-5 py-4 text-center text-xs leading-5 text-muted-foreground">
-      Gunakan akun yang telah didaftarkan oleh admin.<br/>Akses Anda terlindungi dengan autentikasi token.
+      {t("login_footer_note", "Gunakan akun yang telah didaftarkan oleh admin.")}<br/>{t("login_footer_sec", "Akses Anda terlindungi dengan autentikasi token.")}
     </p>
   </section>;
 }

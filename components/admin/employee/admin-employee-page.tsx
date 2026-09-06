@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLanguage } from "@/lib/language-context";
 import { ApiError } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
 
@@ -58,6 +59,7 @@ function initials(name: string) {
 
 export function AdminEmployeePage() {
   const { request } = useAuth();
+  const { t } = useLanguage();
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
@@ -91,11 +93,11 @@ export function AdminEmployeePage() {
       setDepartments(res.departments);
       setPagination(res.pagination);
     } catch {
-      setError("Gagal memuat data karyawan.");
+      setError(t("emp_load_failed", "Gagal memuat data karyawan."));
     } finally {
       setLoading(false);
     }
-  }, [search, deptFilter, page, request]);
+  }, [search, deptFilter, page, request, t]);
 
   useEffect(() => { void fetchData(); }, [fetchData]);
 
@@ -159,7 +161,7 @@ export function AdminEmployeePage() {
       closeModal();
       await fetchData();
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : "Gagal membuat karyawan.");
+      setFormError(err instanceof ApiError ? err.message : t("emp_create_failed", "Gagal membuat karyawan."));
     } finally {
       setFormLoading(false);
     }
@@ -189,7 +191,7 @@ export function AdminEmployeePage() {
       closeModal();
       await fetchData();
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : "Gagal memperbarui karyawan.");
+      setFormError(err instanceof ApiError ? err.message : t("emp_update_failed", "Gagal memperbarui karyawan."));
     } finally {
       setFormLoading(false);
     }
@@ -204,7 +206,7 @@ export function AdminEmployeePage() {
       closeModal();
       await fetchData();
     } catch (err) {
-      setFormError(err instanceof ApiError ? err.message : "Gagal menghapus karyawan.");
+      setFormError(err instanceof ApiError ? err.message : t("emp_delete_failed", "Gagal menghapus karyawan."));
     } finally {
       setFormLoading(false);
     }
@@ -230,22 +232,22 @@ export function AdminEmployeePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground md:text-2xl">Daftar Karyawan</h1>
+          <h1 className="text-xl font-bold text-foreground md:text-2xl">{t("admin_emp_title", "Daftar Karyawan")}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {pagination
-              ? <><span className="font-semibold text-foreground">{pagination.total}</span> karyawan terdaftar</>
-              : "Seluruh karyawan yang terdaftar di sistem"}
+              ? <><span className="font-semibold text-foreground">{pagination.total}</span> {t("emp_registered", "karyawan terdaftar")}</>
+              : t("emp_all_registered", "Seluruh karyawan yang terdaftar di sistem")}
           </p>
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:opacity-90 transition-opacity cursor-pointer"
         >
           <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
             <path fillRule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
           </svg>
-          <span className="hidden sm:inline">Tambah Karyawan</span>
-          <span className="sm:hidden">Tambah</span>
+          <span className="hidden sm:inline">{t("add_employee", "Tambah Karyawan")}</span>
+          <span className="sm:hidden">{t("add_employee_btn", "Tambah")}</span>
         </button>
       </div>
 
@@ -258,14 +260,14 @@ export function AdminEmployeePage() {
             </svg>
             <input
               type="text"
-              placeholder="Cari nama atau NIP…"
+              placeholder={t("search_name_nip", "Cari nama atau NIP…")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="h-10 w-full rounded-xl border border-border bg-background pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <button type="submit" className="h-10 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:opacity-90 transition-opacity">
-            Cari
+            {t("search", "Cari")}
           </button>
         </form>
         <select
@@ -273,7 +275,7 @@ export function AdminEmployeePage() {
           onChange={(e) => { setDeptFilter(e.target.value); setPage(1); }}
           className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          <option value="">Semua Departemen</option>
+          <option value="">{t("all_departments", "Semua Departemen")}</option>
           {departments.map((d) => <option key={d} value={d}>{d}</option>)}
         </select>
       </div>
@@ -292,13 +294,13 @@ export function AdminEmployeePage() {
               <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.604.75.75 0 00.364-.63 7.125 7.125 0 00-5.19-6.837c.758.91 1.22 2.073 1.22 3.342 0 1.637-.775 3.1-1.22 4.625z" />
             </svg>
           </div>
-          <p className="mt-3 font-bold text-foreground">Karyawan tidak ditemukan</p>
-          <p className="mt-1 text-sm text-muted-foreground">Coba ubah kata kunci atau tambah karyawan baru</p>
+          <p className="mt-3 font-bold text-foreground">{t("emp_not_found", "Karyawan tidak ditemukan")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("emp_not_found_desc", "Coba ubah kata kunci atau tambah karyawan baru")}</p>
           <button onClick={openCreate} className="mt-4 flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2 text-sm font-bold text-primary-foreground hover:opacity-90">
             <svg className="size-4" fill="currentColor" viewBox="0 0 24 24">
               <path fillRule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
             </svg>
-            Tambah Karyawan
+            {t("add_employee", "Tambah Karyawan")}
           </button>
         </div>
       ) : (
@@ -322,7 +324,7 @@ export function AdminEmployeePage() {
                         "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold",
                         emp.is_active ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-500" : "bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-500",
                       ].join(" ")}>
-                        {emp.is_active ? "Aktif" : "Nonaktif"}
+                        {emp.is_active ? t("active", "Aktif") : t("inactive", "Nonaktif")}
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-0.5">{emp.profile?.nip ?? "—"}</p>
@@ -345,7 +347,7 @@ export function AdminEmployeePage() {
                     <svg className="size-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path fillRule="evenodd" d="M7.5 5.25a3 3 0 013-3h3a3 3 0 013 3v.205c.933.085 1.857.197 2.774.334 1.454.218 2.476 1.483 2.476 2.917v3.033a48.86 48.86 0 01-7.003.57 49.02 49.02 0 01-7.494-.57V8.706c0-1.434 1.022-2.7 2.476-2.917A48.814 48.814 0 017.5 5.455V5.25zm7.5 0v.09a49.488 49.488 0 00-6 0v-.09a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5zm-9.75 8.87v4.63c0 1.434 1.022 2.7 2.476 2.917.92.138 1.845.249 2.774.334v-3.75a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5v3.75c.93-.085 1.853-.196 2.774-.334 1.454-.218 2.476-1.483 2.476-2.917v-4.63a50.36 50.36 0 01-8.25.68 50.364 50.364 0 01-8.25-.68z" clipRule="evenodd" />
                     </svg>
-                    Cuti: <span className="font-bold text-foreground ml-0.5">{emp.profile?.leave_quota ?? 0}</span>
+                    {t("leave_quota_label", "Cuti")}: <span className="font-bold text-foreground ml-0.5">{emp.profile?.leave_quota ?? 0}</span>
                   </span>
                   <span className="flex-1 truncate">{emp.email}</span>
                 </div>
@@ -360,7 +362,7 @@ export function AdminEmployeePage() {
                       <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
                       <path d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
                     </svg>
-                    Edit
+                    {t("edit", "Edit")}
                   </button>
                   <button
                     onClick={() => void handleToggleActive(emp)}
@@ -374,7 +376,7 @@ export function AdminEmployeePage() {
                     <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
                       <path fillRule="evenodd" d="M12 2.25a.75.75 0 01.75.75v8.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM6.166 5.106a.75.75 0 01.188 1.043A8.963 8.963 0 004.5 12c0 4.97 4.03 9 9 9s9-4.03 9-9a8.963 8.963 0 00-1.854-5.851.75.75 0 111.188-.918A10.463 10.463 0 0124 12c0 5.799-4.701 10.5-10.5 10.5S3 17.799 3 12c0-2.316.75-4.462 2.016-6.194a.75.75 0 011.15.3z" clipRule="evenodd" />
                     </svg>
-                    {emp.is_active ? "Nonaktif" : "Aktifkan"}
+                    {emp.is_active ? t("deactivate", "Nonaktif") : t("activate", "Aktifkan")}
                   </button>
                   <button
                     onClick={() => openDelete(emp)}
@@ -383,7 +385,7 @@ export function AdminEmployeePage() {
                     <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24">
                       <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.09 3.05 14.5 3.553 14.5 4.167v.34a49.19 49.19 0 00-5 0v-.34c0-.614.41-1.117.864-1.141zM9.75 8.25a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm4.5 0a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
                     </svg>
-                    Hapus
+                    {t("delete", "Hapus")}
                   </button>
                 </div>
               </div>
@@ -396,17 +398,17 @@ export function AdminEmployeePage() {
       {pagination && pagination.last_page > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
-            Halaman <span className="font-bold text-foreground">{pagination.current_page}</span> dari{" "}
+            {t("page_prefix", "Halaman")} <span className="font-bold text-foreground">{pagination.current_page}</span> {t("page_of", "dari")}{" "}
             <span className="font-bold text-foreground">{pagination.last_page}</span>
           </p>
           <div className="flex gap-2">
             <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}
               className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
-              <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg> Prev
+              <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z" clipRule="evenodd" /></svg> {t("prev", "Prev")}
             </button>
             <button disabled={page >= pagination.last_page} onClick={() => setPage((p) => p + 1)}
               className="flex items-center gap-1 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold disabled:opacity-40 hover:bg-muted">
-              Next <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" /></svg>
+              {t("next", "Next")} <svg className="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M16.28 11.47a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L14.69 12 7.72 5.03a.75.75 0 011.06-1.06l7.5 7.5z" clipRule="evenodd" /></svg>
             </button>
           </div>
         </div>
@@ -429,9 +431,9 @@ export function AdminEmployeePage() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="font-bold text-foreground">{modalMode === "create" ? "Tambah Karyawan" : "Edit Karyawan"}</h2>
+                  <h2 className="font-bold text-foreground">{modalMode === "create" ? t("add_employee", "Tambah Karyawan") : t("edit_employee_title", "Edit Karyawan")}</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {modalMode === "create" ? "Isi data untuk membuat akun karyawan baru" : `Edit data ${selectedEmployee?.profile?.full_name ?? selectedEmployee?.email}`}
+                    {modalMode === "create" ? t("create_employee_desc", "Isi data untuk membuat akun karyawan baru") : t("edit_employee_desc", "Edit data karyawan")}
                   </p>
                 </div>
               </div>
@@ -445,16 +447,16 @@ export function AdminEmployeePage() {
             {/* Form */}
             <div className="px-6 py-5 space-y-4">
               {/* Section: Akun */}
-              <SectionLabel>Data Akun</SectionLabel>
+              <SectionLabel>{t("account_data", "Data Akun")}</SectionLabel>
               <div className="grid gap-3 sm:grid-cols-2">
-                <FormField label="Email" required>
+                <FormField label={t("email", "Email")} required>
                   <input type="email" value={form.email} onChange={(e) => setField("email", e.target.value)}
                     placeholder="nama@perusahaan.com"
                     className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
-                <FormField label={modalMode === "edit" ? "Password Baru (opsional)" : "Password"} required={modalMode === "create"}>
+                <FormField label={modalMode === "edit" ? t("new_password_optional", "Password Baru (opsional)") : t("password", "Password")} required={modalMode === "create"}>
                   <input type="password" value={form.password} onChange={(e) => setField("password", e.target.value)}
-                    placeholder={modalMode === "edit" ? "Kosongkan jika tidak diubah" : "Min. 6 karakter"}
+                    placeholder={modalMode === "edit" ? t("edit_password_placeholder", "Kosongkan jika tidak diubah") : t("password_placeholder", "Min. 6 karakter")}
                     className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
               </div>
@@ -462,8 +464,8 @@ export function AdminEmployeePage() {
               {/* Status */}
               <div className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Status Akun</p>
-                  <p className="text-xs text-muted-foreground">Karyawan bisa login jika aktif</p>
+                  <p className="text-sm font-semibold text-foreground">{t("account_status", "Status Akun")}</p>
+                  <p className="text-xs text-muted-foreground">{t("account_status_hint", "Karyawan bisa login jika aktif")}</p>
                 </div>
                 <button
                   type="button"
@@ -481,32 +483,32 @@ export function AdminEmployeePage() {
               </div>
 
               {/* Section: Profil */}
-              <SectionLabel>Data Profil</SectionLabel>
+              <SectionLabel>{t("profile_data", "Data Profil")}</SectionLabel>
               <div className="grid gap-3 sm:grid-cols-2">
-                <FormField label="Nama Lengkap" required className="sm:col-span-2">
+                <FormField label={t("full_name", "Nama Lengkap")} required className="sm:col-span-2">
                   <input type="text" value={form.full_name} onChange={(e) => setField("full_name", e.target.value)}
-                    placeholder="Masukkan nama lengkap" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                    placeholder={t("full_name_placeholder", "Masukkan nama lengkap")} className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
-                <FormField label="NIP">
+                <FormField label={t("nip_nim", "NIP")}>
                   <input type="text" value={form.nip} onChange={(e) => setField("nip", e.target.value)}
-                    placeholder="Nomor Induk Pegawai" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                    placeholder={t("nip_nim_placeholder", "Nomor Induk Pegawai")} className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
-                <FormField label="No. Telepon">
+                <FormField label={t("phone_number", "No. Telepon")}>
                   <input type="tel" value={form.phone} onChange={(e) => setField("phone", e.target.value)}
                     placeholder="08xxxxxxxxxx" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
-                <FormField label="Departemen">
+                <FormField label={t("department", "Departemen")}>
                   <input type="text" value={form.department} onChange={(e) => setField("department", e.target.value)}
                     placeholder="Contoh: Engineering" list="dept-list" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                   <datalist id="dept-list">
                     {departments.map((d) => <option key={d} value={d} />)}
                   </datalist>
                 </FormField>
-                <FormField label="Jabatan">
+                <FormField label={t("position", "Jabatan")}>
                   <input type="text" value={form.position} onChange={(e) => setField("position", e.target.value)}
                     placeholder="Contoh: Backend Developer" className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
                 </FormField>
-                <FormField label="Kuota Cuti (hari/tahun)">
+                <FormField label={t("quota_hint", "Kuota Cuti (hari/tahun)")}>
                   <input type="number" min={0} max={365} value={form.leave_quota}
                     onChange={(e) => setField("leave_quota", e.target.value)}
                     className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
@@ -520,14 +522,14 @@ export function AdminEmployeePage() {
               <div className="flex gap-2 pt-1">
                 <button onClick={closeModal}
                   className="flex-1 rounded-xl border border-border py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors">
-                  Batal
+                  {t("cancel", "Batal")}
                 </button>
                 <button
                   onClick={() => void (modalMode === "create" ? handleCreate() : handleUpdate())}
                   disabled={formLoading}
                   className="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground hover:opacity-90 disabled:opacity-60 transition-opacity"
                 >
-                  {formLoading ? "Menyimpan…" : modalMode === "create" ? "Buat Karyawan" : "Simpan Perubahan"}
+                  {formLoading ? t("saving", "Menyimpan…") : modalMode === "create" ? t("create_employee_btn", "Buat Karyawan") : t("save_changes", "Simpan Perubahan")}
                 </button>
               </div>
             </div>
@@ -545,17 +547,17 @@ export function AdminEmployeePage() {
                   <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.09 3.05 14.5 3.553 14.5 4.167v.34a49.19 49.19 0 00-5 0v-.34c0-.614.41-1.117.864-1.141zM9.75 8.25a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75zm4.5 0a.75.75 0 01.75.75v7.5a.75.75 0 01-1.5 0v-7.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h2 className="mt-3 font-bold text-foreground">Hapus Karyawan</h2>
+              <h2 className="mt-3 font-bold text-foreground">{t("delete_employee_title", "Hapus Karyawan")}</h2>
               <p className="mt-1.5 text-sm text-muted-foreground">
-                Karyawan <span className="font-semibold text-foreground">
+                <span className="font-semibold text-foreground">
                   {selectedEmployee.profile?.full_name ?? selectedEmployee.email}
-                </span> akan dihapus dari sistem.
+                </span> {t("delete_employee_confirm", "akan dihapus dari sistem.")}
               </p>
               <div className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-red-50 dark:bg-red-950/50 px-4 py-2.5 text-xs font-semibold text-red-700 dark:text-red-400 ring-1 ring-red-200 dark:ring-red-900/50">
                 <svg className="size-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                   <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
                 </svg>
-                <span>Data yang dihapus tidak dapat dikembalikan.</span>
+                <span>{t("delete_warning", "Data yang dihapus tidak dapat dikembalikan.")}</span>
               </div>
             </div>
 
@@ -564,11 +566,11 @@ export function AdminEmployeePage() {
             <div className="mt-5 flex gap-2">
               <button onClick={closeModal}
                 className="flex-1 rounded-xl border border-border py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors">
-                Batal
+                {t("cancel", "Batal")}
               </button>
               <button onClick={() => void handleDelete()} disabled={formLoading}
                 className="flex-1 rounded-xl bg-red-500 py-3 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-60 transition-colors">
-                {formLoading ? "Menghapus…" : "Hapus"}
+                {formLoading ? t("processing", "Menghapus…") : t("delete", "Hapus")}
               </button>
             </div>
           </div>

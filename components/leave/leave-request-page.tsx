@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLanguage } from "@/lib/language-context";
 import { Badge, Button, Card, TextInput } from "@/components/ui";
 import { ApiError } from "@/lib/api";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -26,28 +27,6 @@ type PaginationMeta = { current_page: number; last_page: number; per_page: numbe
 type ListData = { summary: Summary; leave_requests: LeaveRequest[]; pagination: PaginationMeta };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const TYPE_LABELS: Record<LeaveType, string> = {
-  sick: "Sakit",
-  leave: "Cuti",
-  permission: "Izin",
-};
-
-const STATUS_CFG: Record<LeaveStatus, { tone: "primary" | "success" | "error"; label: string; border: string }> = {
-  pending:  { tone: "primary",  label: "Menunggu",  border: "border-l-primary" },
-  approved: { tone: "success",  label: "Disetujui", border: "border-l-emerald-500" },
-  rejected: { tone: "error",    label: "Ditolak",   border: "border-l-red-500" },
-};
-
-function fmtDate(d: string) {
-  if (!d) return "—";
-  try {
-    const datePart = d.includes("T") ? d.split("T")[0] : d.split(" ")[0];
-    const date = new Date(datePart + "T00:00:00");
-    if (Number.isNaN(date.getTime())) return d;
-    return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(date);
-  } catch { return d; }
-}
 
 function dayCount(start: string, end: string) {
   const s = start.includes("T") ? start.split("T")[0] : start.split(" ")[0];
@@ -100,6 +79,7 @@ function FileUploadZone({
   file: File | null;
   onFileChange: (f: File | null) => void;
 }) {
+  const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div
@@ -126,13 +106,13 @@ function FileUploadZone({
             onClick={(e) => { e.stopPropagation(); onFileChange(null); }}
             className="mt-1 text-xs font-bold text-red-600 dark:text-red-500"
           >
-            Hapus
+            {t("delete")}
           </button>
         </>
       ) : (
         <>
-          <span className="text-sm font-bold text-primary">Ketuk untuk upload file</span>
-          <span className="text-xs text-muted-foreground">PDF, JPG, PNG hingga 5 MB</span>
+          <span className="text-sm font-bold text-primary">{t("tap_to_upload")}</span>
+          <span className="text-xs text-muted-foreground">{t("upload_specs")}</span>
         </>
       )}
       <input
@@ -155,19 +135,35 @@ function LeaveRequestItem({
   onCancel: (id: number) => void;
   cancelling: number | null;
 }) {
-  const cfg = STATUS_CFG[item.status];
+  const { t, formatDate } = useLanguage();
+  const typeLabels: Record<LeaveType, string> = {
+    sick: t("type_sick"),
+    leave: t("type_leave"),
+    permission: t("type_permission"),
+  };
+  const statusCfg: Record<LeaveStatus, { tone: "primary" | "success" | "error"; label: string; border: string }> = {
+    pending:  { tone: "primary",  label: t("status_pending"),  border: "border-l-primary" },
+    approved: { tone: "success",  label: t("status_approved"), border: "border-l-emerald-500" },
+    rejected: { tone: "error",    label: t("status_rejected"), border: "border-l-red-500" },
+  };
+
+  const cfg = statusCfg[item.status] ?? statusCfg.pending;
   const days = dayCount(item.start_date, item.end_date);
+
+  const startFormatted = formatDate(item.start_date, { day: "numeric", month: "short", year: "numeric" });
+  const endFormatted = formatDate(item.end_date, { day: "numeric", month: "short", year: "numeric" });
+
   return (
     <div className={`shadow-sm relative overflow-hidden rounded-2xl border-l-4 bg-card border border-border p-4 ${cfg.border}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-bold text-foreground">{TYPE_LABELS[item.type]}</span>
+            <span className="font-bold text-foreground">{typeLabels[item.type] ?? item.type}</span>
             <Badge tone={cfg.tone}>{cfg.label}</Badge>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {fmtDate(item.start_date)} – {fmtDate(item.end_date)}
-            <span className="ml-2 font-bold text-primary">({days} hari)</span>
+            {startFormatted} – {endFormatted}
+            <span className="ml-2 font-bold text-primary">({days} {t("unit_days")})</span>
           </p>
           <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.reason}</p>
         </div>
@@ -177,7 +173,7 @@ function LeaveRequestItem({
             disabled={cancelling === item.id}
             className="shrink-0 rounded-xl border border-red-500/30 bg-red-50 dark:bg-red-950/50 px-3 py-1.5 text-xs font-bold text-red-600 dark:text-red-500 transition hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-60"
           >
-            {cancelling === item.id ? "…" : "Batal"}
+            {cancelling === item.id ? "…" : t("cancel")}
           </button>
         )}
       </div>
@@ -186,6 +182,7 @@ function LeaveRequestItem({
 }
 
 function EmptyState() {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center gap-3 py-14 text-center text-muted-foreground">
       <div className="flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground/80">
@@ -193,8 +190,8 @@ function EmptyState() {
           <path fillRule="evenodd" clipRule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 013.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 013.75 3.75v7.875c0 2.071-1.679 3.75-3.75 3.75H5.625a3.75 3.75 0 01-3.75-3.75V5.25c0-2.071 1.679-3.75 3.75-3.75zm8.25 1.625v3.375c0 .207.168.375.375.375h3.375l-3.75-3.75zM7.5 12a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 12zm0 3.75a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zm0 3.75a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75z"/>
         </svg>
       </div>
-      <p className="text-sm font-semibold text-foreground">Belum ada pengajuan</p>
-      <p className="text-xs">Gunakan form di atas untuk mengajukan izin atau cuti.</p>
+      <p className="text-sm font-semibold text-foreground">{t("no_leave_history")}</p>
+      <p className="text-xs">{t("no_leave_history_desc")}</p>
     </div>
   );
 }
@@ -203,6 +200,7 @@ function EmptyState() {
 
 export function LeaveRequestPage() {
   const { request } = useAuth();
+  const { t } = useLanguage();
 
   // Form state
   const [type, setType]           = useState<LeaveType | "">("");
@@ -247,12 +245,12 @@ export function LeaveRequestPage() {
         setSummary(data.summary);
         setPagination(data.pagination);
       } catch (err) {
-        setListError(err instanceof ApiError ? err.message : "Gagal memuat daftar pengajuan.");
+        setListError(err instanceof ApiError ? err.message : t("leave_load_failed"));
       } finally {
         setLoading(false);
       }
     },
-    [fetchPage]
+    [fetchPage, t]
   );
 
   const loadMore = useCallback(async () => {
@@ -265,11 +263,11 @@ export function LeaveRequestPage() {
       setPagination(data.pagination);
       pageRef.current = next;
     } catch (err) {
-      setListError(err instanceof ApiError ? err.message : "Gagal memuat lebih banyak.");
+      setListError(err instanceof ApiError ? err.message : t("leave_load_failed"));
     } finally {
       setLoadingMore(false);
     }
-  }, [fetchPage, pagination, statusFilter]);
+  }, [fetchPage, pagination, statusFilter, t]);
 
   useEffect(() => { void loadList(statusFilter); }, [loadList, statusFilter]);
 
@@ -277,10 +275,10 @@ export function LeaveRequestPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!type) { setFormError("Pilih jenis pengajuan."); return; }
-    if (!startDate || !endDate) { setFormError("Pilih rentang tanggal."); return; }
-    if (endDate < startDate) { setFormError("Tanggal selesai harus setelah atau sama dengan tanggal mulai."); return; }
-    if (reason.trim().length < 10) { setFormError("Alasan minimal 10 karakter."); return; }
+    if (!type) { setFormError(t("select_leave_type")); return; }
+    if (!startDate || !endDate) { setFormError(t("select_date_range")); return; }
+    if (endDate < startDate) { setFormError(t("invalid_date_range")); return; }
+    if (reason.trim().length < 10) { setFormError(t("reason_min_length")); return; }
 
     setFormError(null);
     setFormSuccess(null);
@@ -296,7 +294,7 @@ export function LeaveRequestPage() {
 
       await request<LeaveRequest>("/leave-requests", { method: "POST", body });
 
-      setFormSuccess("Pengajuan berhasil dikirim dan menunggu persetujuan.");
+      setFormSuccess(t("leave_submitted_success"));
       // Reset form
       setType(""); setStartDate(""); setEndDate(""); setReason(""); setFile(null);
       // Reload list
@@ -306,7 +304,7 @@ export function LeaveRequestPage() {
       const firstError = apiErr?.errors
         ? Object.values(apiErr.errors).flat()[0]
         : null;
-      setFormError(firstError ?? apiErr?.message ?? "Pengajuan gagal dikirim. Coba lagi.");
+      setFormError(firstError ?? apiErr?.message ?? t("submit_request"));
     } finally {
       setSubmitting(false);
     }
@@ -315,14 +313,14 @@ export function LeaveRequestPage() {
   // ── Cancel ───────────────────────────────────────────────────────────────────
 
   async function handleCancel(id: number) {
-    if (!confirm("Batalkan pengajuan ini?")) return;
+    if (!confirm(t("confirm_cancel_leave"))) return;
     setCancelling(id);
     try {
       await request<null>(`/leave-requests/${id}`, { method: "DELETE" });
       setItems((prev) => prev.filter((item) => item.id !== id));
       setSummary((prev) => ({ ...prev, pending: Math.max(0, prev.pending - 1) }));
     } catch (err) {
-      setListError(err instanceof ApiError ? err.message : "Gagal membatalkan pengajuan.");
+      setListError(err instanceof ApiError ? err.message : t("cancel_leave_failed"));
     } finally {
       setCancelling(null);
     }
@@ -331,10 +329,10 @@ export function LeaveRequestPage() {
   // ── Render ───────────────────────────────────────────────────────────────────
 
   const filterOptions: { key: LeaveStatus | ""; label: string }[] = [
-    { key: "", label: "Semua" },
-    { key: "pending", label: "Menunggu" },
-    { key: "approved", label: "Disetujui" },
-    { key: "rejected", label: "Ditolak" },
+    { key: "", label: t("filter_all") },
+    { key: "pending", label: t("status_pending") },
+    { key: "approved", label: t("status_approved") },
+    { key: "rejected", label: t("status_rejected") },
   ];
 
   const today = new Date().toISOString().split("T")[0];
@@ -344,8 +342,8 @@ export function LeaveRequestPage() {
 
       {/* ── Form pengajuan ── */}
       <div>
-        <h1 className="text-xl font-bold text-foreground">Pengajuan Izin / Cuti</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Ajukan izin, cuti, atau sakit kepada admin.</p>
+        <h1 className="text-xl font-bold text-foreground">{t("leave_page_title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("leave_page_subtitle")}</p>
       </div>
 
       <Card className="p-5">
@@ -353,21 +351,21 @@ export function LeaveRequestPage() {
 
           {/* Jenis pengajuan */}
           <div>
-            <FieldLabel>Jenis Pengajuan</FieldLabel>
+            <FieldLabel>{t("leave_type")}</FieldLabel>
             <FormSelect id="leave-type" value={type} onChange={(v) => setType(v as LeaveType | "")} required>
-              <option value="" disabled>Pilih jenis pengajuan…</option>
-              <option value="leave">Cuti Tahunan</option>
-              <option value="sick">Sakit</option>
-              <option value="permission">Izin</option>
+              <option value="" disabled>{t("select_leave_type")}</option>
+              <option value="leave">{t("type_leave")}</option>
+              <option value="sick">{t("type_sick")}</option>
+              <option value="permission">{t("type_permission")}</option>
             </FormSelect>
           </div>
 
           {/* Rentang tanggal */}
           <div>
-            <FieldLabel>Rentang Tanggal</FieldLabel>
+            <FieldLabel>{t("date_range")}</FieldLabel>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="leave-start-date" className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Mulai</label>
+                <label htmlFor="leave-start-date" className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{t("date_start")}</label>
                 <TextInput
                   id="leave-start-date"
                   type="date"
@@ -378,7 +376,7 @@ export function LeaveRequestPage() {
                 />
               </div>
               <div>
-                <label htmlFor="leave-end-date" className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Selesai</label>
+                <label htmlFor="leave-end-date" className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{t("date_end")}</label>
                 <TextInput
                   id="leave-end-date"
                   type="date"
@@ -390,19 +388,19 @@ export function LeaveRequestPage() {
               </div>
             </div>
             {startDate && endDate && endDate >= startDate && (
-              <p className="mt-1.5 text-xs text-primary font-semibold">{dayCount(startDate, endDate)} hari</p>
+              <p className="mt-1.5 text-xs text-primary font-semibold">{dayCount(startDate, endDate)} {t("unit_days")}</p>
             )}
           </div>
 
           {/* Alasan */}
           <div>
-            <FieldLabel>Alasan</FieldLabel>
+            <FieldLabel>{t("reason")}</FieldLabel>
             <textarea
               id="leave-reason"
               rows={4}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Jelaskan alasan pengajuan Anda (min. 10 karakter)…"
+              placeholder={t("reason_placeholder")}
               required
               className="min-h-[96px] w-full resize-none rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -411,8 +409,8 @@ export function LeaveRequestPage() {
 
           {/* Lampiran */}
           <div>
-            <FieldLabel>Dokumen Pendukung <span className="font-normal text-muted-foreground">(opsional)</span></FieldLabel>
-            <p className="mb-2 text-xs text-muted-foreground">Mis. Surat Keterangan Dokter</p>
+            <FieldLabel>{t("supporting_doc")} <span className="font-normal text-muted-foreground">(opsional)</span></FieldLabel>
+            <p className="mb-2 text-xs text-muted-foreground">{t("supporting_doc_hint")}</p>
             <FileUploadZone file={file} onFileChange={setFile} />
           </div>
 
@@ -436,7 +434,7 @@ export function LeaveRequestPage() {
             disabled={submitting}
             className="h-14 text-base disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Mengirim…" : "Kirim Pengajuan"}
+            {submitting ? t("submitting_request") : t("submit_request")}
           </Button>
         </form>
       </Card>
@@ -444,10 +442,10 @@ export function LeaveRequestPage() {
       {/* ── Daftar pengajuan ── */}
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-bold text-foreground">Riwayat Pengajuan</h2>
+          <h2 className="text-base font-bold text-foreground">{t("tab_request_history")}</h2>
           <div className="flex gap-3 text-xs text-muted-foreground">
-            <span className="font-bold text-primary">{summary.pending}</span> menunggu ·{" "}
-            <span className="font-bold text-emerald-600 dark:text-emerald-500">{summary.approved}</span> disetujui
+            <span className="font-bold text-primary">{summary.pending}</span> {t("status_pending").toLowerCase()} ·{" "}
+            <span className="font-bold text-emerald-600 dark:text-emerald-500">{summary.approved}</span> {t("status_approved").toLowerCase()}
           </div>
         </div>
 
@@ -513,13 +511,13 @@ export function LeaveRequestPage() {
                 disabled={loadingMore}
                 className="mt-4"
               >
-                {loadingMore ? "Memuat…" : `Muat lebih banyak (${pagination.total - items.length} lagi)`}
+                {loadingMore ? t("loading_more") : `${t("load_more")} (${pagination.total - items.length} ${t("remaining")})`}
               </Button>
             )}
 
             {items.length > 0 && pagination && pagination.current_page >= pagination.last_page && (
               <p className="py-4 text-center text-xs text-muted-foreground">
-                Semua {pagination.total} pengajuan ditampilkan.
+                {t("all_data_shown")} ({pagination.total})
               </p>
             )}
           </>
