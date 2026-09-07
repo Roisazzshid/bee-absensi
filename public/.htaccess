@@ -1,0 +1,42 @@
+# ─────────────────────────────────────────────────────────────
+# Bee Absensi - Frontend Static Configuration for cPanel / LiteSpeed
+# ─────────────────────────────────────────────────────────────
+
+# 1. Matikan directory indexing (mencegah tampilan "Index of /...")
+Options -Indexes
+
+# 2. Atur dokumen index utama
+DirectoryIndex index.html
+
+# 3. Halaman error 404 kustom
+ErrorDocument 404 /404.html
+
+# 4. Mod Rewrite untuk rute Next.js Static Export
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Jangan rewrite jika file atau folder asli ada
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Jika mengakses /login (tanpa slash), redirect ke /login/
+  RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
+  RewriteRule ^(.*[^/])$ /$1/ [R=301,L]
+
+  # Jika mengakses /login/ dan ada /login/index.html, biarkan DirectoryIndex memprosesnya
+  RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
+  RewriteRule ^(.*)/$ $1/index.html [L]
+
+  # Fallback file .html jika rute berakhiran .html
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
+</IfModule>
+
+# 5. Header Keamanan & MIME Types
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+</IfModule>
