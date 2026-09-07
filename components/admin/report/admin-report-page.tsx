@@ -351,7 +351,7 @@ export function AdminReportPage() {
                 onChange={(e) => { setMonth(Number(e.target.value)); setPage(1); }}
                 className="h-10 rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
               >
-                {MONTH_NAMES.map((name, idx) => (
+                {monthNames.map((name, idx) => (
                   <option key={idx + 1} value={idx + 1}>{name}</option>
                 ))}
               </select>
@@ -597,11 +597,7 @@ export function AdminReportPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {items.map((item) => {
-                    const cfg = STATUS_CONFIG[item.status] ?? {
-                      label: item.status,
-                      dot: "bg-muted",
-                      badge: "bg-muted text-muted-foreground ring-border",
-                    };
+                    const cfg = getStatusConfig(item.status);
                     return (
                       <tr key={item.id} className="hover:bg-muted/30 transition-colors">
                         <td className="px-4 py-3.5 font-medium text-xs text-foreground">
@@ -680,11 +676,7 @@ export function AdminReportPage() {
             {/* Mobile Card View */}
             <div className="md:hidden space-y-2">
               {items.map((item) => {
-                const cfg = STATUS_CONFIG[item.status] ?? {
-                  label: item.status,
-                  dot: "bg-muted",
-                  badge: "bg-muted text-muted-foreground ring-border",
-                };
+                const cfg = getStatusConfig(item.status);
                 return (
                   <div key={item.id} className="rounded-3xl bg-card border border-border shadow-sm p-5">
                     <div className="flex items-start justify-between gap-2">
