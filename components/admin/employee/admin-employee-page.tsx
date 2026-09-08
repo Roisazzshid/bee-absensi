@@ -5,6 +5,14 @@ import { useLanguage } from "@/lib/language-context";
 import { ApiError } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
 
+type Location = {
+  id: number;
+  name: string;
+  latitude: number | string;
+  longitude: number | string;
+  radius: number;
+};
+
 type Employee = {
   id: number;
   email: string;
@@ -18,6 +26,8 @@ type Employee = {
     position: string;
     avatar_url: string | null;
     leave_quota: number;
+    location_id?: number | null;
+    location?: Location | null;
   } | null;
 };
 
@@ -33,11 +43,13 @@ type EmployeeForm = {
   position: string;
   leave_quota: string;
   is_active: boolean;
+  location_id: string;
 };
 
 const EMPTY_FORM: EmployeeForm = {
   email: "", password: "", full_name: "", nip: "", phone: "",
   department: "", position: "", leave_quota: "12", is_active: true,
+  location_id: "1",
 };
 
 const AVATAR_COLORS = [
@@ -63,6 +75,7 @@ export function AdminEmployeePage() {
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -86,11 +99,17 @@ export function AdminEmployeePage() {
       const params = new URLSearchParams({ per_page: "20", page: String(page) });
       if (search) params.set("search", search);
       if (deptFilter) params.set("department", deptFilter);
-      const res = await request<{ employees: Employee[]; departments: string[]; pagination: Pagination }>(
+      const res = await request<{
+        employees: Employee[];
+        departments: string[];
+        locations?: Location[];
+        pagination: Pagination;
+      }>(
         `/admin/employees?${params.toString()}`
       );
       setEmployees(res.employees);
       setDepartments(res.departments);
+      if (res.locations) setLocations(res.locations);
       setPagination(res.pagination);
     } catch {
       setError(t("emp_load_failed", "Gagal memuat data karyawan."));
@@ -102,7 +121,10 @@ export function AdminEmployeePage() {
   useEffect(() => { void fetchData(); }, [fetchData]);
 
   function openCreate() {
-    setForm(EMPTY_FORM);
+    setForm({
+      ...EMPTY_FORM,
+      location_id: locations.length > 0 ? String(locations[0].id) : "1",
+    });
     setFormError("");
     setModalMode("create");
   }
@@ -119,6 +141,7 @@ export function AdminEmployeePage() {
       position: emp.profile?.position ?? "",
       leave_quota: String(emp.profile?.leave_quota ?? 12),
       is_active: emp.is_active,
+      location_id: String(emp.profile?.location_id ?? (locations.length > 0 ? locations[0].id : "1")),
     });
     setFormError("");
     setModalMode("edit");
@@ -156,6 +179,7 @@ export function AdminEmployeePage() {
           position: form.position || undefined,
           leave_quota: Number(form.leave_quota) || 12,
           is_active: form.is_active,
+          location_id: Number(form.location_id) || 1,
         }),
       });
       closeModal();
@@ -181,6 +205,7 @@ export function AdminEmployeePage() {
         position: form.position || undefined,
         leave_quota: Number(form.leave_quota) || 12,
         is_active: form.is_active,
+        location_id: Number(form.location_id) || 1,
       };
       if (form.password) payload["password"] = form.password;
 
@@ -337,6 +362,12 @@ export function AdminEmployeePage() {
                       {emp.profile?.position && (
                         <span className="text-[10px] text-muted-foreground">· {emp.profile.position}</span>
                       )}
+                    </div>
+                    <div className="mt-1 flex items-center gap-1 text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+                      <svg className="size-3 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                      </svg>
+                      <span className="truncate">{emp.profile?.location?.name ?? "Kantor Pusat (Default)"}</span>
                     </div>
                   </div>
                 </div>
@@ -512,6 +543,26 @@ export function AdminEmployeePage() {
                   <input type="number" min={0} max={365} value={form.leave_quota}
                     onChange={(e) => setField("leave_quota", e.target.value)}
                     className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+                </FormField>
+                <FormField label={t("office_location", "Lokasi Kantor / Penempatan")} required className="sm:col-span-2">
+                  <select
+                    value={form.location_id}
+                    onChange={(e) => setField("location_id", e.target.value)}
+                    className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {locations.length > 0 ? (
+                      locations.map((loc) => (
+                        <option key={loc.id} value={String(loc.id)}>
+                          {loc.name} {loc.id === 1 ? `(${t("default", "Default")})` : ""} — Radius {loc.radius}m
+                        </option>
+                      ))
+                    ) : (
+                      <option value="1">Kantor Pusat (Default)</option>
+                    )}
+                  </select>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {t("location_hint", "Lokasi presensi GPS wajib untuk karyawan ini (Default: Lokasi 1 / Kantor Pusat).")}
+                  </p>
                 </FormField>
               </div>
 

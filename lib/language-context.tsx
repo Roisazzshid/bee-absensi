@@ -353,6 +353,9 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
     delete_employee_confirm: "akan dihapus dari sistem.",
     delete_warning: "Data yang dihapus tidak dapat dikembalikan.",
     emp_load_failed: "Gagal memuat data karyawan.",
+    office_location: "Lokasi Kantor / Penempatan",
+    location_hint: "Lokasi presensi GPS wajib untuk karyawan ini (Default: Lokasi 1 / Kantor Pusat).",
+    default: "Default",
     emp_create_failed: "Gagal membuat karyawan.",
     emp_update_failed: "Gagal memperbarui karyawan.",
     emp_delete_failed: "Gagal menghapus karyawan.",
@@ -828,6 +831,9 @@ export const DICTIONARY: Record<Language, Record<string, string>> = {
     emp_create_failed: "Failed to create employee.",
     emp_update_failed: "Failed to update employee.",
     emp_delete_failed: "Failed to delete employee.",
+    office_location: "Office Location / Placement",
+    location_hint: "Required GPS office location for this employee (Default: Location 1 / Headquarters).",
+    default: "Default",
 
     // ── Admin Report ──
     report_page_title: "Attendance Reports & Export",
